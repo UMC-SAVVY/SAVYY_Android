@@ -2,4 +2,12 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="main">#FF5487</color>
+    <color name="kakao">#FEE500</color>
+    <color name="kakao_text">#D9000000</color>
+    <color name="button_line">#D3D4D5</color>
+    <color name="basic_gray">#AAAAAA</color>
+    <color name="icon">#5F5F5F</color>
+    <color name="red">#FF6D6D</color>
+    <color name="green">#73CF7C</color>
 </resources>

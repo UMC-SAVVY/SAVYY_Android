@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">SAVVY_Android</string>
+    <string name="app_name">SAVVY</string>
+    <string name="savvy">SAVVY</string>
+    <string name="savvy_descript">SAVVY한 당신을 위한 여행앱</string>
+    <string name="kakao_login">Kakao로 계속하기</string>
+    <string name="signUp">회원가입</string>
+    <string name="nick_name">닉네임</string>
+    <string name="nick_name_hint">닉네임을 입력해주세요 (최대 6자)</string>
+    <string name="introduce">소개글</string>
+    <string name="introduce_initial_count">0/100</string>
+    <string name="check_duplicate">중복확인</string>
 </resources>
