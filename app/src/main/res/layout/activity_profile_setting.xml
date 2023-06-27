@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ProfileSettingActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profile_img_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        app:layout_constraintBottom_toTopOf="@id/profile_name_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profile_img_cv"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_margin="7dp"
+            app:cardCornerRadius="120dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/profile_img_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:importantForAccessibility="no"
+                android:scaleType="centerCrop" />
+
+        </androidx.cardview.widget.CardView>
+
+        <ImageView
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@android:color/transparent"
+            android:elevation="10dp"
+            android:importantForAccessibility="no"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_plus_button"
+            android:translationX="-5dp"
+            android:translationY="-5dp"
+            app:layout_constraintBottom_toBottomOf="@+id/profile_img_cv"
+            app:layout_constraintEnd_toEndOf="@+id/profile_img_cv" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profile_name_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintBottom_toTopOf="@id/signup_intro_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_img_layout">
+
+        <TextView
+            android:id="@+id/profile_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="@string/nick_name"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/profile_name_edit"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/border_gray"
+            android:fontFamily="@font/pretendard_regular"
+            android:hint="@string/nick_name_hint"
+            android:importantForAutofill="no"
+            android:inputType="textNoSuggestions"
+            android:maxLength="6"
+            android:paddingHorizontal="10dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/icon"
+            android:textCursorDrawable="@null"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/profile_name_tv" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/profile_name_duplicate_btn"
+            android:layout_width="59dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/btn_radius6"
+            android:backgroundTint="@color/button_line"
+            android:enabled="false"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:gravity="center"
+            android:outlineProvider="none"
+            android:text="@string/check_duplicate"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@id/profile_name_edit"
+            app:layout_constraintEnd_toEndOf="@id/profile_name_edit"
+            app:layout_constraintTop_toTopOf="@id/profile_name_edit" />
+
+        <TextView
+            android:id="@+id/profile_name_duplicate_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/pretendard_medium"
+            android:text=""
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/profile_name_tv"
+            app:layout_constraintTop_toBottomOf="@id/profile_name_edit" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/signup_intro_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintBottom_toTopOf="@id/profile_signup_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/profile_name_layout">
+
+        <TextView
+            android:id="@+id/profile_intro_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="@string/introduce"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@id/profile_intro_edit"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/profile_intro_edit"
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/border_gray"
+            android:fontFamily="@font/pretendard_regular"
+            android:gravity="top"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:maxLength="100"
+            android:padding="10dp"
+            android:paddingHorizontal="10dp"
+            android:scrollHorizontally="false"
+            android:textColor="@color/black"
+            android:textCursorDrawable="@null"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/profile_intro_count_tv"
+            app:layout_constraintTop_toBottomOf="@id/profile_intro_tv" />
+
+        <TextView
+            android:id="@+id/profile_intro_count_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="@string/introduce_initial_count"
+            android:textColor="@color/basic_gray"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/profile_intro_edit"
+            app:layout_constraintTop_toBottomOf="@+id/profile_intro_edit" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/profile_signup_btn"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/btn_radius6"
+        android:backgroundTint="@color/button_line"
+        android:enabled="false"
+        android:fontFamily="@font/pretendard_bold"
+        android:gravity="center"
+        android:outlineProvider="none"
+        android:text="@string/signUp"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

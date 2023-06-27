@@ -1,9 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.SAVVY_Android" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.SAVVY_Android" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:background">@color/white</item>
     </style>
 
-    <style name="Theme.SAVVY_Android" parent="Base.Theme.SAVVY_Android" />
+    <style name="Theme.SAVVY_Android.Splash" parent="Theme.SplashScreen">
+        <!-- Splash Screen 의 Background 색상.-->
+        <item name="windowSplashScreenBackground">@android:color/transparent</item>
+        <!-- Splash Screen 에서 사용 될 아이콘. 설정 하지 않으면 앱 아이콘 사용. -->
+        <item name="windowSplashScreenAnimatedIcon" tools:targetApi="S">@android:color/transparent</item>
+        <!-- Splash Screen 이 끝난 후 보일 화면의 테마-->
+        <item name="postSplashScreenTheme">@style/Theme.SAVVY_Android</item>
+
+        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>
