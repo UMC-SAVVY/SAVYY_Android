@@ -1,7 +1,6 @@
 package com.example.savvy_android
 
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +10,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.savvy_android.databinding.ActivityPlaceAddBinding
-import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
 class PlaceAddActivity : AppCompatActivity() {
@@ -44,24 +42,24 @@ class PlaceAddActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-}
+    
+    private val NUM_TABS = 2
 
-private const val NUM_TABS = 2
+    inner class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
+        FragmentStateAdapter(fragmentManager, lifecycle) {
 
-class ViewPagerAdapter(fragmentManager: FragmentManager, lifecycle: Lifecycle) :
-    FragmentStateAdapter(fragmentManager, lifecycle) {
+        // 전체 탭 개수 반환
+        override fun getItemCount(): Int {
+            return NUM_TABS
+        }
 
-    // 전체 탭 개수 반환
-    override fun getItemCount(): Int {
-        return NUM_TABS
-    }
-
-    // 해당 탭에 대한 프래그먼트 생성
-    override fun createFragment(position: Int): Fragment {
-        return when (position) {
-            0 -> SearchNewPlaceFragment()
-            1 -> PlaceStorageFragment()
-            else -> PlaceStorageFragment()
+        // 해당 탭에 대한 프래그먼트 생성
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> SearchNewPlaceFragment()
+                1 -> PlaceStorageFragment()
+                else -> PlaceStorageFragment()
+            }
         }
     }
 }

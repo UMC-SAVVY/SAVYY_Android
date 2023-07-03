@@ -6,7 +6,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.savvy_android.databinding.DateAddItemBinding
+import com.example.savvy_android.databinding.ItemDateAddBinding
 import java.util.Calendar
 
 class DateAddAdapter(private val data: MutableList<String>) :
@@ -16,7 +16,7 @@ class DateAddAdapter(private val data: MutableList<String>) :
     // 새로운 뷰 홀더 생성
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateAddAdapter.ViewHolder {
         val binding =
-            DateAddItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            ItemDateAddBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
@@ -31,7 +31,7 @@ class DateAddAdapter(private val data: MutableList<String>) :
         return data.size
     }
 
-    inner class ViewHolder(private val binding: DateAddItemBinding) :
+    inner class ViewHolder(private val binding: ItemDateAddBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         // 뷰 홀더에 데이터를 바인딩하는 함수

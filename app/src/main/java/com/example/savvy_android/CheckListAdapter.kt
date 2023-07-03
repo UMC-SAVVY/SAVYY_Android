@@ -3,12 +3,12 @@ package com.example.savvy_android
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.savvy_android.databinding.ChecklistItemBinding
+import com.example.savvy_android.databinding.ItemChecklistBinding
 
 class CheckListAdapter(private val items: MutableList<String>) :
     RecyclerView.Adapter<CheckListAdapter.CheckListViewHolder>() {
 
-    inner class CheckListViewHolder(private val binding: ChecklistItemBinding) :
+    inner class CheckListViewHolder(private val binding: ItemChecklistBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
@@ -29,7 +29,7 @@ class CheckListAdapter(private val items: MutableList<String>) :
     // 새로운 뷰 홀더 생성
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CheckListViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = ChecklistItemBinding.inflate(inflater, parent, false)
+        val binding = ItemChecklistBinding.inflate(inflater, parent, false)
         return CheckListViewHolder(binding)
     }
 
