@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/travel_plan_time_place"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/border_travel_plan_write2">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/travel_plan_place"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp">
+
+            <TextView
+                android:id="@+id/travel_plan_time_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_medium"
+                android:text="00:00"
+                android:textColor="@android:color/black"
+                android:textSize="13sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginStart="13dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+            <TextView
+                android:id="@+id/travel_plan_time_tv2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_medium"
+                android:text=" ~ "
+                android:textColor="@android:color/black"
+                android:textSize="13sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintStart_toEndOf="@+id/travel_plan_time_tv"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                android:id="@+id/travel_plan_time_tv3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_medium"
+                android:text="00:00"
+                android:textColor="@android:color/black"
+                android:textSize="13sp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/travel_plan_time_tv2"/>
+
+            <EditText
+                android:id="@+id/place_name_edit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/pretendard_semi_bold"
+                android:hint="장소 이름을 입력해주세요"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/basic_gray"
+                android:background="@null"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toEndOf="@id/travel_plan_time_tv3"
+                app:layout_constraintEnd_toStartOf="@+id/ic_add_place"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <ImageView
+                android:id="@+id/ic_add_place"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_add_place"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintEnd_toStartOf="@+id/ic_x"/>
+
+            <ImageView
+                android:id="@+id/ic_x"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_x"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginEnd="10dp"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/line"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/basic_gray"
+            app:layout_constraintTop_toBottomOf="@id/travel_plan_place"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"/>
+
+
+        <!-- CheckList RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_checklist"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_marginStart="9dp"
+            android:layout_marginEnd="9dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/travel_plan_place"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/add_checklist_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="9dp"
+            android:layout_marginEnd="9dp"
+            android:layout_marginBottom="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recyclerview_checklist">
+
+            <ImageView
+                android:id="@+id/ic_add_checklist"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="7dp"
+                android:layout_marginBottom="7dp"
+                android:src="@drawable/ic_add_circle_outline"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/add_checklist_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="@font/pretendard_medium"
+                android:text="체크리스트 추가하기"
+                android:textColor="@android:color/black"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ic_add_checklist"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/travel_plan_backspace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="2dp"
+            app:layout_constraintTop_toBottomOf="@+id/add_checklist_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

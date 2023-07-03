@@ -128,6 +128,10 @@ class ProfileSettingActivity : AppCompatActivity() {
         // 회원 가입 버튼 클릭 이벤트
         binding.profileSignupBtn.setOnClickListener {
             Toast.makeText(this, "회원 가입 클릭 성공", Toast.LENGTH_SHORT).show()
+
+            // 임시 연결
+            val intent = Intent(this, TravelPlanMakeActivity::class.java)
+            startActivity(intent)
         }
     }
 
