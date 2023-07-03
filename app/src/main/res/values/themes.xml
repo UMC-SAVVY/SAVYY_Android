@@ -2,7 +2,6 @@
     <!-- Base application theme. -->
     <style name="Theme.SAVVY_Android" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="android:background">@color/white</item>
     </style>
 
     <style name="Theme.SAVVY_Android.Splash" parent="Theme.SplashScreen">

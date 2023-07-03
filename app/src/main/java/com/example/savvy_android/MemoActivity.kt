@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.savvy_android.databinding.ActivityMemoBinding
 
@@ -18,6 +19,8 @@ class MemoActivity : AppCompatActivity() {
         binding = ActivityMemoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 배경 색 지정
+        window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         //메모 입력 변화 이벤트 처리
         binding.memoEdit.addTextChangedListener(object : TextWatcher {
