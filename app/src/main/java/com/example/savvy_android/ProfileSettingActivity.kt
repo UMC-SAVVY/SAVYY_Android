@@ -32,6 +32,9 @@ class ProfileSettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        // 배경 색 지정
+        window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+
         // 프로필 사진 layout 클릭 시 이벤트 처리
         binding.profileImgLayout.setOnClickListener {
             // 갤러리 호출

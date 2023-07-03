@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.savvy_android.databinding.ActivitySplashBinding
 
@@ -15,6 +16,9 @@ class SplashActivity : AppCompatActivity() {
         binding = ActivitySplashBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+
+        // 배경 색 지정
+        window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // splash 화면을 정해진 시간동안 보여주고 다음 화면으로 넘어가는 code
         Handler().postDelayed({

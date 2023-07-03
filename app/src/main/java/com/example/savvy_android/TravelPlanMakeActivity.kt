@@ -3,6 +3,7 @@ package com.example.savvy_android
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.databinding.ActivityTravelPlanMakeBinding
@@ -16,6 +17,9 @@ class TravelPlanMakeActivity : AppCompatActivity() {
         installSplashScreen() // splash screen 설정, 관리 API 함수
         binding = ActivityTravelPlanMakeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 배경 색 지정
+        window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // add_date_btn 클릭 시 새로운 날짜 추가
         binding.addDateBtn.setOnClickListener {
