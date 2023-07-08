@@ -8,15 +8,15 @@ import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.savvy_android.databinding.ActivityMemoBinding
+import com.example.savvy_android.databinding.ActivityMemoModifyBinding
 
-class MemoActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMemoBinding
+class MemoModifyActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMemoModifyBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen() // splash screen 설정, 관리 API 함수
-        binding = ActivityMemoBinding.inflate(layoutInflater)
+        binding = ActivityMemoModifyBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // 배경 색 지정
@@ -47,7 +47,7 @@ class MemoActivity : AppCompatActivity() {
         })
 
 
-        // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 페이지로 돌아가기
+        // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 보기 페이지로 돌아가기
         binding.arrowLeftBtn.setOnClickListener {
             finish()
         }
@@ -56,7 +56,7 @@ class MemoActivity : AppCompatActivity() {
         binding.memoRegistrationBtn.setOnClickListener {
             val memoText = binding.memoEdit.text.toString().trim()
             if (memoText.isNotEmpty()) {
-                val intent = Intent(this, TravelPlanMakeActivity::class.java)
+                val intent = Intent(this, TravelPlanModifyActivity::class.java)
                 startActivity(intent)
             }
         }

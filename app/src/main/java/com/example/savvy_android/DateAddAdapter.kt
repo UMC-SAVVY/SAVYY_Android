@@ -10,19 +10,18 @@ import java.util.Calendar
 
 class DateAddAdapter(private val data: MutableList<String>) :
     RecyclerView.Adapter<DateAddAdapter.ViewHolder>() {
-    private lateinit var placeAddAdapter: PlaceAddAdapter
+    private val placeAddMap: MutableMap<Int, PlaceAddAdapter> = mutableMapOf()
 
     // 새로운 뷰 홀더 생성
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateAddAdapter.ViewHolder {
-        val binding =
-            ItemDateAddBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemDateAddBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     // 뷰 홀더에 데이터를 바인딩
-    override fun onBindViewHolder(holder: DateAddAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = data[position]
-        holder.bind(item)
+        holder.bind(item, position)
     }
 
     // 데이터 아이템 개수 반환
@@ -33,11 +32,14 @@ class DateAddAdapter(private val data: MutableList<String>) :
     inner class ViewHolder(private val binding: ItemDateAddBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        private lateinit var placeAddAdapter: PlaceAddAdapter
+
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String) {
+        fun bind(item: String, position: Int) {
 
             // placeAdd RecyclerView 설정
             placeAddAdapter = PlaceAddAdapter(mutableListOf(""))
+            placeAddMap[position] = placeAddAdapter
             binding.recyclerviewPlaceAdd.adapter = placeAddAdapter
             binding.recyclerviewPlaceAdd.layoutManager = LinearLayoutManager(itemView.context)
 
@@ -79,7 +81,7 @@ class DateAddAdapter(private val data: MutableList<String>) :
         }
     }
 
-    // CheckList 추가
+    // DateAdd 추가
     fun addItem(item: String) {
         data.add(item)
         notifyItemInserted(data.size - 1)
