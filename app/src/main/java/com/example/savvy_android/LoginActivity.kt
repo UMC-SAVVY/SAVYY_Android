@@ -24,10 +24,17 @@ class LoginActivity : AppCompatActivity() {
         binding.kakaoLoginBtn.setOnClickListener {
 
             // 카카오 API 연결 필요
+            var hasRegistered = true
 
-            // 임시 연결
-            val intent = Intent(this, ProfileSettingActivity::class.java)
-            startActivity(intent)
+            if(hasRegistered){
+                // 홈 화면으로 연결
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+            }else{
+                // 회원가입 화면으로 연결
+                val intent = Intent(this, ProfileSettingActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 }

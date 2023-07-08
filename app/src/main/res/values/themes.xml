@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.SAVVY_Android" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.SAVVY_Android" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your light theme here. -->
     </style>
 
