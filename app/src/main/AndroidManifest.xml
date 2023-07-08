@@ -16,18 +16,18 @@
         android:theme="@style/Theme.SAVVY_Android.Splash"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ProfileSettingActivity"
+            android:name=".activity.ProfileSettingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activity.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".activity.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,22 +36,22 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TravelPlanMakeActivity"
+            android:name=".activity.TravelPlanMakeActivity"
             android:exported="false" />
         <activity
-            android:name=".MemoActivity"
+            android:name=".activity.MemoActivity"
             android:exported="false" />
         <activity
-            android:name=".PlaceAddActivity"
+            android:name=".activity.PlaceAddActivity"
             android:exported="false" />
         <activity
-            android:name=".TravelPlanViewActivity"
+            android:name=".activity.TravelPlanViewActivity"
             android:exported="false" />
         <activity
-            android:name=".TravelPlanModifyActivity"
+            android:name=".activity.TravelPlanModifyActivity"
             android:exported="false" />
         <activity
-            android:name=".MemoModifyActivity"
+            android:name=".activity.MemoModifyActivity"
             android:exported="false" />
 
     </application>

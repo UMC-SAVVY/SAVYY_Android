@@ -7,9 +7,7 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-
             <value value="$USER_HOME$/.android/avd/Galaxy_S23_API_32.avd" />
-
           </Key>
         </deviceKey>
       </Target>

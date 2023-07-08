@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_sheet_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/background_bottom_sheet"
-    app:behavior_hideable="true"
     app:behavior_draggable="true"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -16,10 +14,10 @@
         android:layout_width="35dp"
         android:layout_height="4dp"
         android:layout_marginStart="13dp"
+        android:layout_marginTop="13dp"
         android:background="@drawable/btn_radius10"
         android:backgroundTint="@color/icon"
         android:text=""
-        android:layout_marginTop="13dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,20 +26,19 @@
         android:id="@+id/edit_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/icon"
         android:layout_marginTop="13dp"
-        >
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/icon">
 
         <ImageView
             android:id="@+id/ic_edit"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_edit"
+            android:layout_marginStart="26dp"
             android:layout_marginTop="13dp"
             android:layout_marginBottom="13dp"
-            android:layout_marginStart="26dp"
+            android:src="@drawable/ic_edit"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -64,18 +61,18 @@
         android:id="@+id/delete_bin_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_btn">
 
         <ImageView
             android:id="@+id/ic_delete_bin"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_delete_bin"
+            android:layout_marginStart="26dp"
             android:layout_marginTop="13dp"
             android:layout_marginBottom="13dp"
-            android:layout_marginStart="26dp"
+            android:src="@drawable/ic_delete_bin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
