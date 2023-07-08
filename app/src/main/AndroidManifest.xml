@@ -44,6 +44,16 @@
         <activity
             android:name=".PlaceAddActivity"
             android:exported="false" />
+        <activity
+            android:name=".TravelPlanViewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TravelPlanModifyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MemoModifyActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

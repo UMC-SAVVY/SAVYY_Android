@@ -133,7 +133,7 @@ class ProfileSettingActivity : AppCompatActivity() {
             Toast.makeText(this, "회원 가입 클릭 성공", Toast.LENGTH_SHORT).show()
 
             // 임시 연결
-            val intent = Intent(this, TravelPlanMakeActivity::class.java)
+            val intent = Intent(this, TravelPlanViewActivity::class.java)
             startActivity(intent)
         }
     }

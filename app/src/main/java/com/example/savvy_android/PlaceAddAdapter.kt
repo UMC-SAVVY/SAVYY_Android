@@ -11,20 +11,19 @@ import java.util.Calendar
 
 class PlaceAddAdapter(private val data: MutableList<String>) :
     RecyclerView.Adapter<PlaceAddAdapter.ViewHolder>() {
-    private lateinit var checkListAdapter: CheckListAdapter
+    private val checkListMap: MutableMap<Int, CheckListAdapter> = mutableMapOf()
 
 
     // 새로운 뷰 홀더 생성
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaceAddAdapter.ViewHolder {
-        val binding =
-            ItemPlaceAddBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding = ItemPlaceAddBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return ViewHolder(binding)
     }
 
     // 뷰 홀더에 데이터를 바인딩
-    override fun onBindViewHolder(holder: PlaceAddAdapter.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = data[position]
-        holder.bind(item)
+        holder.bind(item, position)
     }
 
     // 데이터 아이템 개수 반환
@@ -35,12 +34,26 @@ class PlaceAddAdapter(private val data: MutableList<String>) :
     inner class ViewHolder(private val binding: ItemPlaceAddBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
+        private lateinit var checkListAdapter: CheckListAdapter
+
+
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String) {
+        fun bind(item: String, position: Int) {
             // checkList RecyclerView 설정
             checkListAdapter = CheckListAdapter(mutableListOf("", ""))
+            checkListMap[position] = checkListAdapter
             binding.recyclerviewChecklist.adapter = checkListAdapter
             binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
+
+
+            // 아이템 삭제 버튼 클릭 시 해당 위치의 아이템을 제거하고 새로고침
+            binding.icX.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    data.removeAt(position)
+                    notifyItemRemoved(position)
+                }
+            }
 
             // addChecklistBtn 클릭 시 새로운 체크 리스트 추가
             binding.addChecklistBtn.setOnClickListener {
