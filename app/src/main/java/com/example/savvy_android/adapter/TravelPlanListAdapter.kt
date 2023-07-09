@@ -1,17 +1,20 @@
 package com.example.savvy_android.adapter
 
+import android.animation.ObjectAnimator
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.savvy_android.data.TravelPlanItemData
 import com.example.savvy_android.activity.TravelPlanViewActivity
+import com.example.savvy_android.data.TravelPlanItemData
 import com.example.savvy_android.databinding.ItemPlanBinding
 import com.example.savvy_android.dialog.TravelPlanDeleteDialogFragment
 
 
 class TravelPlanListAdapter(
+    private val recyclerView: RecyclerView,
     private var planList: ArrayList<TravelPlanItemData>,
     private val myName: String,
     private val fragmentManager: FragmentManager,
@@ -42,7 +45,7 @@ class TravelPlanListAdapter(
     // View 바인드 될 때 호출되는 method
     // View에 내용이 작성되는 method, 스크롤을 올리거나 내릴 때마다 호출
     override fun onBindViewHolder(holder: PlanViewHolder, position: Int) {
-        val data = planList[position]
+        val data = planList[holder.adapterPosition]
         holder.title.text = data.title
         holder.date.text = data.date
         holder.user.text = if (data.user == myName) "" else data.user
@@ -51,24 +54,27 @@ class TravelPlanListAdapter(
         holder.hideO.setOnClickListener {
             val dialog = TravelPlanDeleteDialogFragment()
 
-            // 버튼 클릭 이벤트 설정
+            // 다이얼로그 버튼 클릭 이벤트 설정
             dialog.setButtonClickListener(object :
                 TravelPlanDeleteDialogFragment.OnButtonClickListener {
                 override fun onDialogPlanBtnOClicked() {
-                    removePlan(position)
+                    removePlan(holder.adapterPosition)
                 }
-
                 override fun onDialogPlanBtnXClicked() {
-                    resetHideX(holder, position)
+                    resetHideX(holder.adapterPosition, recyclerView)
                 }
             })
             dialog.show(fragmentManager, "PlanDeleteDialog")
         }
 
-        // 아이템(계획서) 보기 클릭 이벤트
-        holder.item.setOnClickListener {
-            val mIntent = Intent(holder.itemView.context, TravelPlanViewActivity::class.java)
-            holder.itemView.context.startActivity(mIntent)
+        // 아이템 클릭 이벤트 (여행 계획서 보기)
+        holder.itemView.setOnClickListener {
+            if (hasSwipe) {
+                resetHideX(hasSwipePosition, recyclerView)
+            } else {
+                val mIntent = Intent(holder.itemView.context, TravelPlanViewActivity::class.java)
+                holder.itemView.context.startActivity(mIntent)
+            }
         }
 
         holder.hideO.isClickable = false // 초기 클릭 가능 상태 설정
@@ -78,8 +84,8 @@ class TravelPlanListAdapter(
     override fun getItemCount(): Int = planList.size
 
     // 데이터 추가
-    fun addPlan(storyData: TravelPlanItemData) {
-        planList.add(storyData)
+    fun addPlan(insertData: TravelPlanItemData) {
+        planList.add(insertData)
         notifyItemInserted(planList.size)
     }
 
@@ -91,9 +97,30 @@ class TravelPlanListAdapter(
         }
     }
 
-    // 삭제 버튼 안 보이고, 작동 안 하도록
-    private fun resetHideX(holder: PlanViewHolder, position: Int) {
-        holder.hideO.isClickable = false
-        holder.hideX.translationX = 0f
+
+    // swipe 상태인 아이템 존재 유무
+    companion object {
+        var hasSwipe: Boolean = false
+        var hasSwipePosition: Int = 0
+
+        // 삭제 버튼 안 보이고, 작동 안 하도록
+        fun resetHideX(position: Int, recyclerView: RecyclerView) {
+            // 움직일 아이템의 holder
+            val changeHolder =
+                recyclerView.findViewHolderForAdapterPosition(position) as? TravelPlanListAdapter.PlanViewHolder
+            if (changeHolder != null) {
+                changeHolder.hideO.isClickable = false // 클릭 불가능
+                // 애니메이션 추가
+                val animator = ObjectAnimator.ofFloat(
+                    changeHolder.hideX,
+                    "translationX",
+                    changeHolder.hideX.translationX,    // changeHolder.hideX의 현재 translationX 값
+                    0f  // 애니메이션의 종료 값
+                )
+                animator.duration = 200 // 애니메이션 지속 시간 (밀리초)
+                animator.start()
+                hasSwipe = false    // swipe된 아이템 없음
+            }
+        }
     }
 }

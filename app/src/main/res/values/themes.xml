@@ -2,13 +2,16 @@
     <!-- Base application theme. -->
     <style name="Theme.SAVVY_Android" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your light theme here. -->
+        <item name="android:statusBarColor">#999999</item>  <!--상태바 색상-->
+        <item name="android:windowLightStatusBar">false</item>  <!--아이콘(true: 검정 / false: 흰색)-->
     </style>
 
     <style name="Theme.SAVVY_Android.Splash" parent="Theme.SplashScreen">
         <!-- Splash Screen 의 Background 색상.-->
         <item name="windowSplashScreenBackground">@android:color/transparent</item>
         <!-- Splash Screen 에서 사용 될 아이콘. 설정 하지 않으면 앱 아이콘 사용. -->
-        <item name="windowSplashScreenAnimatedIcon" tools:targetApi="S">@android:color/transparent</item>
+        <item name="windowSplashScreenAnimatedIcon" tools:targetApi="S">@android:color/transparent
+        </item>
         <!-- Splash Screen 이 끝난 후 보일 화면의 테마-->
         <item name="postSplashScreenTheme">@style/Theme.SAVVY_Android</item>
 

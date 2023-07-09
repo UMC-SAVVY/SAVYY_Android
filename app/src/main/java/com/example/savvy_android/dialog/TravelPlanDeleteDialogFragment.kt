@@ -46,7 +46,7 @@ class TravelPlanDeleteDialogFragment : DialogFragment() {
             toast.duration = Toast.LENGTH_SHORT
             toast.view = toastBinding.root
 
-            toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
+            toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
 
             toast.show()
         }

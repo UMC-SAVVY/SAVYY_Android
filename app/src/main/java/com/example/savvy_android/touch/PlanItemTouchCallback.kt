@@ -30,6 +30,19 @@ class PlanItemTouchCallback : ItemTouchHelper.SimpleCallback(
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+            // swipe 액션일 때, 만약 이미 swipe된 것이 존재할 때
+            if (TravelPlanListAdapter.hasSwipe) {
+                viewHolder?.let { vh ->
+                    val recyclerView = vh.itemView.parent as? RecyclerView
+                    recyclerView?.let {
+                        TravelPlanListAdapter.resetHideX(
+                            TravelPlanListAdapter.hasSwipePosition,
+                            recyclerView
+                        )
+                    }
+                }
+            }
+
             viewHolder?.let {
                 // 삭제 버튼 width 획득
                 clamp = getViewWidth(viewHolder)
@@ -70,7 +83,10 @@ class PlanItemTouchCallback : ItemTouchHelper.SimpleCallback(
         val view = (viewHolder as TravelPlanListAdapter.PlanViewHolder).hideO
 
         view.isClickable = currentDx == -clamp
-        Log.e("TEST","${view.isClickable}")
+        if (view.isClickable) {
+            TravelPlanListAdapter.hasSwipe = true   // swipe 가능한 아이템 존재
+            TravelPlanListAdapter.hasSwipePosition = viewHolder.adapterPosition // 해당 아이템 위치
+        }
     }
 
 
