@@ -1,14 +1,15 @@
 package com.example.savvy_android.adapter
 
-import android.app.DatePickerDialog
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.databinding.ItemDateAddBinding
+import com.example.savvy_android.dialog.DateDialogFragment
 import java.util.Calendar
 
-class DateAddAdapter(private val data: MutableList<String>) :
+class DateAddAdapter(private val data: MutableList<String>, private val fragmentManager: FragmentManager) :
     RecyclerView.Adapter<DateAddAdapter.ViewHolder>() {
     private val placeAddMap: MutableMap<Int, PlaceAddAdapter> = mutableMapOf()
 
@@ -38,7 +39,7 @@ class DateAddAdapter(private val data: MutableList<String>) :
         fun bind(item: String, position: Int) {
 
             // placeAdd RecyclerView 설정
-            placeAddAdapter = PlaceAddAdapter(mutableListOf(""))
+            placeAddAdapter = PlaceAddAdapter(mutableListOf(""), fragmentManager)
             placeAddMap[position] = placeAddAdapter
             binding.recyclerviewPlaceAdd.adapter = placeAddAdapter
             binding.recyclerviewPlaceAdd.layoutManager = LinearLayoutManager(itemView.context)
@@ -49,35 +50,34 @@ class DateAddAdapter(private val data: MutableList<String>) :
                 placeAddAdapter.addItem(newItem)
             }
 
-            // 날짜 입력 DatePickerDialog 사용
+            //오늘 날짜와 추가된 item의 날짜 표시
             val cal = Calendar.getInstance()
             val year = cal.get(Calendar.YEAR)
             val month = cal.get(Calendar.MONTH) + 1 // 현재 월 가져오기 (월은 0부터 시작하므로 +1)
             val day = cal.get(Calendar.DAY_OF_MONTH)
 
-            binding.travelDateTv.text = "$year.$month.$day" // 텍스트뷰에 날짜 표시
+            val currentDate = cal.clone() as Calendar // 현재 날짜 복사
+            currentDate.set(year, month - 1, day) // 복사된 날짜를 현재 날짜로 설정
 
+            val newDate = currentDate.clone() as Calendar // 새로운 날짜 생성
+            newDate.add(Calendar.DAY_OF_MONTH, position) // 새로운 날짜를 기존 날짜의 하루 뒤로 설정
+
+            val newYear = newDate.get(Calendar.YEAR)
+            val newMonth = newDate.get(Calendar.MONTH) + 1
+            val newDay = newDate.get(Calendar.DAY_OF_MONTH)
+
+            binding.travelDateTv.text = "$newYear.$newMonth.$newDay" // 텍스트뷰에 날짜 표시
+
+            // 날짜 설정 버튼 클릭 시 DateDialogFragment 띄우기
             binding.dateSettingBtn.setOnClickListener {
-                val cal = Calendar.getInstance()
-                val year = cal.get(Calendar.YEAR)
-                val month = cal.get(Calendar.MONTH)
-                val day = cal.get(Calendar.DAY_OF_MONTH)
-
-                val data = DatePickerDialog.OnDateSetListener { _, year, month, day ->
+                val dateDialogFragment = DateDialogFragment()
+                dateDialogFragment.setOnDateSelectedListener { year, month, day ->
                     val formattedMonth = month + 1 // 선택된 월 값 보정 (월은 0부터 시작하므로 +1)
-                    binding.travelDateTv.text =
-                        "${year}. ${formattedMonth}. ${day}"  // 선택된 날짜 텍스트뷰에 표시
+                    val selectedDate = "${year}.$formattedMonth.$day"
+                    binding.travelDateTv.text = selectedDate
                 }
-
-                DatePickerDialog(
-                    itemView.context,
-                    data,
-                    year,
-                    month,
-                    day
-                ).show()  // DatePickerDialog를 열어 날짜 선택 가능하도록 함
+                dateDialogFragment.show(fragmentManager, "DateDialog")
             }
-
         }
     }
 
@@ -87,4 +87,5 @@ class DateAddAdapter(private val data: MutableList<String>) :
         notifyItemInserted(data.size - 1)
     }
 }
+
 

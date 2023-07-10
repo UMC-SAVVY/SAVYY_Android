@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.savvy_android.R
+import com.example.savvy_android.activity.TravelPlanViewActivity
 import com.example.savvy_android.databinding.ItemViewDateBinding
 
 class ViewDateAdapter(private val data: MutableList<String>) :
@@ -41,13 +43,18 @@ class ViewDateAdapter(private val data: MutableList<String>) :
             binding.recyclerviewViewPlace.adapter = viewplaceAdapter
             binding.recyclerviewViewPlace.layoutManager = LinearLayoutManager(itemView.context)
 
+// arrowDownBtn 클릭 이벤트 처리
+            binding.arrowUpBtn.setOnClickListener {
+                val newView = LayoutInflater.from(binding.root.context).inflate(
+                    R.layout.item_view_date_only,
+                    binding.root,
+                    false
+                )
+                binding.root.removeAllViews()
+                binding.root.addView(newView)
+            }
         }
 
-        // DateAdd 추가
-        fun addItem(item: String) {
-            data.add(item)
-            notifyItemInserted(data.size - 1)
-        }
     }
 }
 
