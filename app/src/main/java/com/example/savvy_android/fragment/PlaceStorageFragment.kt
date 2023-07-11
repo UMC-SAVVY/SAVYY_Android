@@ -12,11 +12,14 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.savvy_android.R
+import com.example.savvy_android.adapter.PlaceStorageAdapter
+import com.example.savvy_android.data.PlaceStorageItemData
 import com.example.savvy_android.databinding.FragmentPlaceStorageBinding
 
 class PlaceStorageFragment : Fragment() {
-
     private lateinit var binding: FragmentPlaceStorageBinding
+    private lateinit var placeStorageAdapter: PlaceStorageAdapter
+    private var planStorageData = arrayListOf<PlaceStorageItemData>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,6 +46,10 @@ class PlaceStorageFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        // SearchNewPlace Data & Adapter
+        placeStorageAdapter = PlaceStorageAdapter(planStorageData)
+        binding.storageSearchRecycle.adapter = placeStorageAdapter
     }
 
 

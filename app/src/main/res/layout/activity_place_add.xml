@@ -59,6 +59,7 @@
         app:tabIndicatorHeight="2dp"
         app:tabRippleColor="@android:color/transparent"
         app:tabSelectedTextColor="@color/black"
+        app:tabTextAppearance="@style/tablayout_place_add"
         app:tabTextColor="@color/black" />
 
     <View

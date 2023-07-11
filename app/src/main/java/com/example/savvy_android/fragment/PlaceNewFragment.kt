@@ -10,20 +10,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.savvy_android.R
-import com.example.savvy_android.databinding.FragmentSearchNewPlaceBinding
+import com.example.savvy_android.adapter.PlaceNewAdapter
+import com.example.savvy_android.data.PlaceNewItemData
+import com.example.savvy_android.databinding.FragmentPlaceNewBinding
 
-class SearchNewPlaceFragment : Fragment() {
-
-    private lateinit var binding: FragmentSearchNewPlaceBinding
+class PlaceNewFragment : Fragment() {
+    private lateinit var binding: FragmentPlaceNewBinding
+    private lateinit var placeNewAdapter: PlaceNewAdapter
+    private var planStorageData = arrayListOf<PlaceNewItemData>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
-        binding = FragmentSearchNewPlaceBinding.inflate(inflater, container, false)
+        binding = FragmentPlaceNewBinding.inflate(inflater, container, false)
         return binding.root
 
     }
@@ -43,6 +47,17 @@ class SearchNewPlaceFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        // 검색 버튼 클릭 이벤트
+        binding.newPlaceSearchBtn.setOnClickListener {
+            // 안내 문구가 보이고 이는 경우, 안 보이도록 설정
+            if (binding.searchPlaceNotice.isVisible)
+                binding.searchPlaceNotice.isVisible = false
+        }
+
+        // SearchNewPlace Data & Adapter
+        placeNewAdapter = PlaceNewAdapter(planStorageData)
+        binding.searchNewRecycle.adapter = placeNewAdapter
     }
 
     // 클릭 가능 여부에 따른 button 배경 변경 함수
