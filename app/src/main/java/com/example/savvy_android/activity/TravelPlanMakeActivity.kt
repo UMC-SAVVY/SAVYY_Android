@@ -41,6 +41,11 @@ class TravelPlanMakeActivity : AppCompatActivity() {
             val intent = Intent(this, MemoActivity::class.java)
             startActivity(intent)
         }
+
+        // 뒤로가기 버튼 클릭 이벤트
+        binding.icArrowLeft.setOnClickListener {
+            finish()
+        }
     }
 
 }

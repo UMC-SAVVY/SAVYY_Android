@@ -1,6 +1,5 @@
 package com.example.savvy_android.activity
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -12,7 +11,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.savvy_android.R
 import com.example.savvy_android.fragment.PlaceStorageFragment
-import com.example.savvy_android.fragment.SearchNewPlaceFragment
+import com.example.savvy_android.fragment.PlaceNewFragment
 
 class PlaceAddActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlaceAddBinding
@@ -42,8 +41,7 @@ class PlaceAddActivity : AppCompatActivity() {
 
         // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 페이지로 돌아가기
         binding.arrowLeft.setOnClickListener {
-            val intent = Intent(this, TravelPlanMakeActivity::class.java)
-            startActivity(intent)
+            finish()
         }
     }
 
@@ -51,7 +49,7 @@ class PlaceAddActivity : AppCompatActivity() {
     inner class ViewPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment){
 
         private val fragmentList: Array<Fragment> = arrayOf(
-            SearchNewPlaceFragment(),
+            PlaceNewFragment(),
             PlaceStorageFragment(),
         )
 
