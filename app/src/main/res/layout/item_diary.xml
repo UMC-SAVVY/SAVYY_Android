@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?><!--그림자-->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="74dp"
+    android:background="@android:color/transparent"
+    android:backgroundTint="@android:color/transparent"
+    app:cardCornerRadius="10dp"
+    app:cardElevation="2dp"
+    app:cardUseCompatPadding="true">
+
+    <!--카드뷰 내부-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_diary_in"
+        android:layout_width="match_parent"
+        android:layout_height="62dp"
+        android:background="@color/white">
+
+        <!--이중 레이어-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_diary_double"
+            android:layout_width="124dp"
+            android:layout_height="62dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!--숨겨진 레이어-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/item_diary_hide_o"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- 숨겨진 레이어 비공개 결정 부분-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/item_diary_hide_o_show"
+                    android:layout_width="62dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/green"
+                    android:clickable="false"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:id="@+id/item_diary_show_iv"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:background="@drawable/ic_eye_on"
+                            android:backgroundTint="@color/white"
+                            android:importantForAccessibility="no"
+                            android:scaleType="centerCrop"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/item_diary_show_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/pretendard_bold"
+                            android:text="공개"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
+                            app:layout_constraintEnd_toEndOf="@id/item_diary_show_iv"
+                            app:layout_constraintStart_toStartOf="@id/item_diary_show_iv"
+                            app:layout_constraintTop_toBottomOf="@id/item_diary_show_iv" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- 숨겨진 레이어 삭제 부분-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/item_diary_hide_o_delete"
+                    android:layout_width="62dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/red"
+                    android:clickable="false"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:id="@+id/item_diary_delete_iv"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:background="@drawable/ic_delete"
+                            android:backgroundTint="@color/white"
+                            android:importantForAccessibility="no"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/pretendard_bold"
+                            android:text="삭제"
+                            android:textColor="@color/white"
+                            android:textSize="13sp"
+                            app:layout_constraintEnd_toEndOf="@id/item_diary_delete_iv"
+                            app:layout_constraintStart_toStartOf="@id/item_diary_delete_iv"
+                            app:layout_constraintTop_toBottomOf="@id/item_diary_delete_iv" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- 보이는 레이어 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/item_diary_hide_x"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/item_diary_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="2dp"
+                    android:background="@drawable/ic_swipe_arrow"
+                    android:importantForAccessibility="no"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/item_diary_photo_cv"
+                    android:layout_width="62dp"
+                    android:layout_height="match_parent"
+                    android:elevation="0dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="10dp"
+                    app:cardUseCompatPadding="true"
+                    app:layout_constraintEnd_toStartOf="@id/item_diary_arrow">
+
+                    <ImageView
+                        android:id="@+id/item_diary_photo_iv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_heart" />
+
+                    <TextView
+                        android:id="@+id/item_diary_photo_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/gray50"
+                        android:fontFamily="@font/pretendard_semi_bold"
+                        android:gravity="center"
+                        android:text="+1"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!--항상 보이는 데이터-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/item_diary_always_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/item_diary_double"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/item_diary_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="26dp"
+                    android:layout_marginStart="11dp"
+                    android:layout_marginTop="7dp"
+                    android:fontFamily="@font/pretendard_medium"
+                    android:text="Diary title"
+                    android:textColor="@color/black"
+                    android:textSize="17sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/item_diary_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="9dp"
+                    android:fontFamily="@font/pretendard_medium"
+                    android:minWidth="70dp"
+                    android:text="Diary date"
+                    android:textColor="@color/icon"
+                    android:textSize="13sp"
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_title"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_title"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_title" />
+
+                <ImageView
+                    android:id="@+id/item_diary_like_iv"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginTop="4dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_heart"
+                    app:layout_constraintStart_toStartOf="@id/item_diary_title"
+                    app:layout_constraintTop_toBottomOf="@id/item_diary_title" />
+
+                <TextView
+                    android:id="@+id/item_diary_like_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:fontFamily="@font/pretendard_medium"
+                    android:text="100"
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_iv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+
+                <ImageView
+                    android:id="@+id/item_diary_comment_iv"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginStart="30dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_message"
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_iv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+
+                <TextView
+                    android:id="@+id/item_diary_comment_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="3dp"
+                    android:fontFamily="@font/pretendard_medium"
+                    android:text="100"
+                    android:textColor="@color/black"
+                    android:textSize="13sp"
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_comment_iv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

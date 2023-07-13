@@ -10,4 +10,5 @@
     <color name="icon">#5F5F5F</color>
     <color name="red">#FF6D6D</color>
     <color name="green">#73CF7C</color>
+    <color name="gray50">#5F5F5F80</color>
 </resources>
