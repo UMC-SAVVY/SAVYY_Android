@@ -213,6 +213,7 @@
                     android:text="Diary title"
                     android:textColor="@color/black"
                     android:textSize="17sp"
+                    android:maxLines="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

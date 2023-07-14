@@ -1,10 +1,13 @@
 package com.example.savvy_android.adapter
 
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Intent
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.activity.TravelPlanViewActivity
@@ -78,6 +81,23 @@ class TravelPlanListAdapter(
         }
 
         holder.hideO.isClickable = false // 초기 클릭 가능 상태 설정
+
+        // 계획서 title scroll
+        holder.title.viewTreeObserver.addOnPreDrawListener(object :
+            ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                holder.title.viewTreeObserver.removeOnPreDrawListener(this)
+
+                holder.title.apply {
+                    setSingleLine()
+                    marqueeRepeatLimit = -1
+                    ellipsize = TextUtils.TruncateAt.MARQUEE
+                    isSelected = true
+                }
+                return true
+            }
+        })
+
     }
 
     // 리스트의 수 count

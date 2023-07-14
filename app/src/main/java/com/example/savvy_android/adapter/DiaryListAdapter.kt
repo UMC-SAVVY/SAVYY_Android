@@ -1,15 +1,20 @@
 package com.example.savvy_android.adapter
 
 import android.animation.ObjectAnimator
+import android.content.Intent
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
+import com.example.savvy_android.activity.DiaryViewActivity
 import com.example.savvy_android.data.DiaryItemData
 import com.example.savvy_android.databinding.ItemDiaryBinding
+import com.example.savvy_android.dialog.DiaryDeleteDialogFragment
 import com.example.savvy_android.dialog.TravelPlanDeleteDialogFragment
 
 
@@ -31,7 +36,6 @@ class DiaryListAdapter(
         var photoCard = binding.itemDiaryPhotoCv
         var photoImg = binding.itemDiaryPhotoIv
         var photoCount = binding.itemDiaryPhotoTv
-        var hideO = binding.itemDiaryHideO
         var hideODelete = binding.itemDiaryHideODelete
         var hideOShow = binding.itemDiaryHideOShow
         var showImg = binding.itemDiaryShowIv
@@ -77,11 +81,11 @@ class DiaryListAdapter(
 
         // 숨겨진 삭제 버튼 클릭 이벤트
         holder.hideODelete.setOnClickListener {
-            val dialog = TravelPlanDeleteDialogFragment()
+            val dialog = DiaryDeleteDialogFragment()
 
             // 다이얼로그 버튼 클릭 이벤트 설정
             dialog.setButtonClickListener(object :
-                TravelPlanDeleteDialogFragment.OnButtonClickListener {
+                DiaryDeleteDialogFragment.OnButtonClickListener {
                 override fun onDialogPlanBtnOClicked() {
                     removePlan(holder.adapterPosition)
                 }
@@ -93,18 +97,35 @@ class DiaryListAdapter(
             dialog.show(fragmentManager, "PlanDeleteDialog")
         }
 
-        // 아이템 클릭 이벤트 (다이어리 보기)
+        // 아이템 클릭 이벤트 (다이어리 상세보기)
         holder.itemView.setOnClickListener {
             if (hasSwipe) {
                 resetHideX(hasSwipePosition, recyclerView)
             } else {
-//                val mIntent = Intent(holder.itemView.context, DiaryViewActivity::class.java)
-//                holder.itemView.context.startActivity(mIntent)
+                val mIntent = Intent(holder.itemView.context, DiaryViewActivity::class.java)
+                holder.itemView.context.startActivity(mIntent)
             }
         }
 
         holder.hideODelete.isClickable = false // 초기 클릭 가능 상태 설정
         holder.hideOShow.isClickable = false // 초기 클릭 가능 상태 설정
+
+
+        // 계획서 title scroll
+        holder.title.viewTreeObserver.addOnPreDrawListener(object :
+            ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                holder.title.viewTreeObserver.removeOnPreDrawListener(this)
+
+                holder.title.apply {
+                    setSingleLine()
+                    marqueeRepeatLimit = -1
+                    ellipsize = TextUtils.TruncateAt.MARQUEE
+                    isSelected = true
+                }
+                return true
+            }
+        })
     }
 
     // 리스트의 수 count
