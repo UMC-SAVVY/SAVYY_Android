@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.DiaryFragment">
+    tools:context=".diary.fragment.DiaryFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/diary_title_layout"

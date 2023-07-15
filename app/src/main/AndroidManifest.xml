@@ -19,18 +19,18 @@
         android:theme="@style/Theme.SAVVY_Android.Splash"
         tools:targetApi="31">
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".init.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".activity.ProfileSettingActivity"
+            android:name=".myPage.activity.ProfileSettingActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".activity.LoginActivity"
+            android:name=".init.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.SplashActivity"
+            android:name=".init.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,37 +39,37 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.TravelPlanMakeActivity"
+            android:name=".plan.activity.PlanMakeActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.MemoActivity"
+            android:name=".utils.memo.MemoActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.PlaceAddActivity"
+            android:name=".utils.place.PlaceAddActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.TravelPlanViewActivity"
+            android:name=".plan.activity.PlanDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.TravelPlanModifyActivity"
+            android:name=".plan.activity.PlanModifyActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.MemoModifyActivity"
+            android:name=".utils.memo.MemoModifyActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.DiaryViewActivity"
+            android:name=".diary.activity.DiaryDetailActivity"
             android:exported="false" />
         <activity
-            android:name=".activity.DiaryStep1Activity"
+            android:name=".diary.activity.DiaryMake1Activity"
             android:exported="false" />
         <activity
-            android:name=".activity.DiaryStep2Activity"
+            android:name=".diary.activity.DiaryMake2Activity"
             android:exported="false" />
         <activity
-            android:name=".activity.DiaryStep3Activity"
+            android:name=".diary.activity.DiaryMake3Activity"
             android:exported="false" />
         <activity
-            android:name=".activity.DiaryStep4Activity"
+            android:name=".diary.activity.DiaryMake4Activity"
             android:exported="false" />
 
     </application>
