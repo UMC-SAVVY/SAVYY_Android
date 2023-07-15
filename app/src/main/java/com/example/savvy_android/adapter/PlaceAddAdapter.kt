@@ -1,16 +1,16 @@
 package com.example.savvy_android.adapter
 
-import android.app.TimePickerDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.activity.PlaceAddActivity
 import com.example.savvy_android.databinding.ItemPlaceAddBinding
-import java.util.Calendar
+import com.example.savvy_android.dialog.TimeDialogFragment
 
-class PlaceAddAdapter(private val data: MutableList<String>) :
+class PlaceAddAdapter(private val data: MutableList<String>, private val fragmentManager: FragmentManager) :
     RecyclerView.Adapter<PlaceAddAdapter.ViewHolder>() {
     private val checkListMap: MutableMap<Int, CheckListAdapter> = mutableMapOf()
 
@@ -69,41 +69,19 @@ class PlaceAddAdapter(private val data: MutableList<String>) :
             }
 
 
-            // 시간 입력 TimePickerDialog 사용
-            binding.travelPlanTimeTv.setOnClickListener {
-                val cal = Calendar.getInstance()
-                val hour = cal.get(Calendar.HOUR_OF_DAY)
-                val minute = cal.get(Calendar.MINUTE)
+            binding.travelPlanTime.setOnClickListener {
+                val timeDialogFragment = TimeDialogFragment()
 
-                val timePickerDialog = TimePickerDialog(
-                    itemView.context,
-                    { _, hourOfDay, minute ->
-                        val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                        binding.travelPlanTimeTv.text = selectedTime
-                    },
-                    hour,
-                    minute,
-                    true
-                )
-                timePickerDialog.show()
-            }
+                timeDialogFragment.setOnTimeSelectedListener { hour1, minute1, hour2, minute2 ->
+                    val formattedTime1 = String.format("%02d:%02d", hour1, minute1)
+                    val formattedTime2 = String.format("%02d:%02d", hour2, minute2)
 
-            binding.travelPlanTimeTv3.setOnClickListener {
-                val cal = Calendar.getInstance()
-                val hour = cal.get(Calendar.HOUR_OF_DAY)
-                val minute = cal.get(Calendar.MINUTE)
+                    binding.travelPlanTimeTv.text = formattedTime1
+                    binding.travelPlanTimeTv3.text = formattedTime2
+                }
 
-                val timePickerDialog = TimePickerDialog(
-                    itemView.context,
-                    { _, hourOfDay, minute ->
-                        val selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                        binding.travelPlanTimeTv3.text = selectedTime
-                    },
-                    hour,
-                    minute,
-                    true
-                )
-                timePickerDialog.show()
+
+                timeDialogFragment.show(fragmentManager, "TimeDialog")
             }
 
         }

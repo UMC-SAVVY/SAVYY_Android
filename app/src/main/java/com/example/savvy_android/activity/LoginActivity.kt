@@ -29,7 +29,8 @@ class LoginActivity : AppCompatActivity() {
 
             if(hasRegistered){
                 // 홈 화면으로 연결
-                val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this, DiaryStep1Activity::class.java)
+                //val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
             }else{
                 // 회원가입 화면으로 연결

@@ -30,7 +30,7 @@ class TravelPlanModifyActivity : AppCompatActivity() {
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // RecyclerView에 PlanMakeAdapter 설정
-        dateAddAdapter = DateAddAdapter(mutableListOf(""))
+        dateAddAdapter = DateAddAdapter(mutableListOf(""), supportFragmentManager)
         binding.recyclerviewDateAdd.adapter = dateAddAdapter
         binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
 
@@ -60,6 +60,7 @@ class TravelPlanModifyActivity : AppCompatActivity() {
                 }
             }
         })
+
 
         val planName = intent.getStringExtra("planName")
         if (planName != null) {

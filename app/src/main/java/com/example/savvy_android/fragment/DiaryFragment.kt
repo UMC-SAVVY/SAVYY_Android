@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
+<<<<<<<< HEAD:app/src/main/java/com/example/savvy_android/fragment/DiaryFragment.kt
 import com.example.savvy_android.R
 import com.example.savvy_android.activity.TravelPlanMakeActivity
 import com.example.savvy_android.adapter.DiaryListAdapter
@@ -27,6 +28,22 @@ class DiaryFragment : Fragment() {
     private var diaryListData = arrayListOf<DiaryItemData>()
     private val diaryTouchSimpleCallback = DiaryItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(diaryTouchSimpleCallback)
+========
+import com.example.savvy_android.touch.PlanItemTouchCallback
+import com.example.savvy_android.R
+import com.example.savvy_android.activity.TravelPlanMakeActivity
+import com.example.savvy_android.adapter.TravelPlanListAdapter
+import com.example.savvy_android.data.TravelPlanItemData
+import com.example.savvy_android.databinding.FragmentTravelPlanBinding
+
+
+class TravelPlanFragment : Fragment() {
+    private lateinit var binding: FragmentTravelPlanBinding
+    private lateinit var travelPlanListAdapter: TravelPlanListAdapter
+    private var planListData = arrayListOf<TravelPlanItemData>()
+    private val itemTouchSimpleCallback = PlanItemTouchCallback()
+    private val itemTouchHelper = ItemTouchHelper(itemTouchSimpleCallback)
+>>>>>>>> ari:app/src/main/java/com/example/savvy_android/fragment/TravelPlanFragment.kt
 
     // 임시 데이터
     private var tmpPhotoList = arrayListOf(
@@ -46,6 +63,7 @@ class DiaryFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
+<<<<<<<< HEAD:app/src/main/java/com/example/savvy_android/fragment/DiaryFragment.kt
         binding = FragmentDiaryBinding.inflate(inflater, container, false)
 
         // 알람 버튼 클릭시 알람 페이지 연결
@@ -91,6 +109,9 @@ class DiaryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+========
+        binding = FragmentTravelPlanBinding.inflate(inflater, container, false)
+>>>>>>>> ari:app/src/main/java/com/example/savvy_android/fragment/TravelPlanFragment.kt
 
         // 알람 존재 여부에 따른 알람 버튼 형태
         val hasAlarm = true
@@ -100,6 +121,7 @@ class DiaryFragment : Fragment() {
             R.drawable.ic_alarm_x
         )
 
+<<<<<<<< HEAD:app/src/main/java/com/example/savvy_android/fragment/DiaryFragment.kt
         // 임시 데이터 목록
         for (i: Int in 0 until tmpDateList.size) {
             diaryListAdapter.addPlan(
@@ -112,14 +134,75 @@ class DiaryFragment : Fragment() {
                     tmpPhotoList[i],
                     R.drawable.ic_launcher_background,
                     true
+========
+        // 알람 버튼 클릭시 알람 페이지 연결
+        binding.planAlarm.setOnClickListener {
+//            val intent = Intent(context, 알람 페이지 kotlin 파일)
+//            startActivity(intent)
+        }
+
+        // 검색 EditText 입력 변화 이벤트 처리 (한글자라도 입력 시)
+        binding.newPlaceSearchEdit.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val isEnableState = binding.newPlaceSearchEdit.length() != 0
+                binding.newPlaceSearchBtn.isEnabled = isEnableState
+                btnStateBackground(isEnableState, binding.newPlaceSearchBtn)
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        // Plan Data & Adapter
+        travelPlanListAdapter =
+            TravelPlanListAdapter(planListData, "나", requireActivity().supportFragmentManager)
+        binding.planRecycle.adapter = travelPlanListAdapter
+
+        // 임시 데이터 목록
+        for (i: Int in 0 until tmpDateList.size) {
+            travelPlanListAdapter.run {
+                addPlan(
+                    TravelPlanItemData(
+                        i,
+                        "하와이 여행 ${i + 1}",
+                        tmpDateList[i],
+                        tmpNameList[i],
+                    )
+>>>>>>>> ari:app/src/main/java/com/example/savvy_android/fragment/TravelPlanFragment.kt
                 )
             )
         }
 
+<<<<<<<< HEAD:app/src/main/java/com/example/savvy_android/fragment/DiaryFragment.kt
         // 검색 기능
         binding.diarySearchBtn.setOnClickListener {
             Log.e("TEST", "검색 버튼 눌림")
             searchDiaryList(binding.diarySearchEdit.text.toString())
+========
+        // 전체보기 클릭 이벤트
+        binding.planFilterBtn1.setOnClickListener {
+            binding.planFilterBtn1.background
+        }
+
+        // 나의 계획서 클릭 이벤트
+        binding.planFilterBtn1.setOnClickListener {
+
+        }
+
+        // 스크랩 클릭 이벤트
+        binding.planFilterBtn1.setOnClickListener {
+
+        }
+
+        // itemTouchHelper와 recyclerview 연결
+        itemTouchHelper.attachToRecyclerView(binding.planRecycle)
+
+        // Floating Button 클릭 시 계획서 작성 페이지로 연결
+        binding.planAddFbtn.setOnClickListener {
+            val intent = Intent(context, TravelPlanMakeActivity::class.java)
+            startActivity(intent)
+>>>>>>>> ari:app/src/main/java/com/example/savvy_android/fragment/TravelPlanFragment.kt
         }
     }
 

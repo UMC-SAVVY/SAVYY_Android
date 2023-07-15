@@ -24,7 +24,7 @@ class TravelPlanViewActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
-        viewDateAdapter = ViewDateAdapter(mutableListOf(""))
+        viewDateAdapter = ViewDateAdapter(mutableListOf("", "", ""))
         binding.recyclerviewViewDate.adapter = viewDateAdapter
         binding.recyclerviewViewDate.layoutManager = LinearLayoutManager(this)
 
