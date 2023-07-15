@@ -42,8 +42,7 @@ class PlaceAddActivity : AppCompatActivity() {
 
         // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 페이지로 돌아가기
         binding.arrowLeft.setOnClickListener {
-            val intent = Intent(this, TravelPlanMakeActivity::class.java)
-            startActivity(intent)
+            finish()
         }
     }
 

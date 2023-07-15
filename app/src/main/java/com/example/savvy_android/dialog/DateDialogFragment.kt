@@ -15,15 +15,18 @@ class DateDialogFragment : DialogFragment() {
     private var _binding: DialogDatePickerBinding? = null
     private val binding get() = _binding!!
 
-    private var selectedYear: Int = 0
-    private var selectedMonth: Int = 0
-    private var selectedDay: Int = 0
-
+    private var currentDate: Calendar? = null // 현재 설정된 날짜
 
     private var onDateSelectedListener: ((year: Int, month: Int, day: Int) -> Unit)? = null
 
+    //날짜 선택 리스너를 저장 변수
     fun setOnDateSelectedListener(listener: (year: Int, month: Int, day: Int) -> Unit) {
         onDateSelectedListener = listener
+    }
+
+    //현재 설정된 날짜를 저장하는 변수
+    fun setCurrentDate(date: Calendar?) {
+        currentDate = date?.clone() as Calendar? //date를 통해 전달받은 Calendar 객체를 currentDate에 복사
     }
 
     override fun onCreateView(
@@ -43,26 +46,27 @@ class DateDialogFragment : DialogFragment() {
         )
         dialog?.setCancelable(true)
 
-
-        // 기존에 선택된 날짜 가져와서 설정
-        val cal = Calendar.getInstance()
-        if (selectedYear == 0 && selectedMonth == 0 && selectedDay == 0) {
-            // 선택된 날짜가 없으면 오늘 날짜로 초기화
-            selectedYear = cal.get(Calendar.YEAR)
-            selectedMonth = cal.get(Calendar.MONTH)
-            selectedDay = cal.get(Calendar.DAY_OF_MONTH)
+        if (currentDate == null) {
+            // 현재 설정된 날짜가 없는 경우
+            currentDate = Calendar.getInstance()  // 오늘 날짜로 초기화
         }
-        binding.CalenderView.date = cal.timeInMillis
 
+        // CalendarView의 날짜를 현재 설정된 날짜로 설정
+        binding.CalenderView.date = currentDate!!.timeInMillis
+
+        // CalendarView의 날짜 변경 리스너 설정
+        // 날짜가 변경될 때마다 currentDate를 업데이트
         binding.CalenderView.setOnDateChangeListener { _, year, month, day ->
-            selectedYear = year
-            selectedMonth = month
-            selectedDay = day
-
+            currentDate!!.set(year, month, day)
         }
 
+        // 저장 버튼 클릭 시 선택된 날짜를 리스너를 통해 전달
         binding.btnSave.setOnClickListener {
-            onDateSelectedListener?.invoke(selectedYear, selectedMonth, selectedDay)
+            onDateSelectedListener?.invoke(
+                currentDate!!.get(Calendar.YEAR),
+                currentDate!!.get(Calendar.MONTH),
+                currentDate!!.get(Calendar.DAY_OF_MONTH)
+            )
             dismiss()
         }
 
@@ -71,7 +75,6 @@ class DateDialogFragment : DialogFragment() {
         }
         return view
     }
-
 
     override fun onStart() {
         super.onStart()
