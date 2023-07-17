@@ -112,45 +112,45 @@ class DiaryDetailActivity : AppCompatActivity() {
 
 
         // 더미 데이터 나중에 삭제할 것!!!
-        diaryViewAdapter.addPlan(
+        diaryViewAdapter.addDiary(
             DiaryDetailItemData(
                 0,
                 true,
                 "첫번째",
-                R.drawable.ic_launcher_background,
+                (R.drawable.ic_launcher_background).toString(),
                 true,
                 "와이키키 비치",
                 "~~~"
             )
         )
-        diaryViewAdapter.addPlan(
+        diaryViewAdapter.addDiary(
             DiaryDetailItemData(
                 1,
                 false,
                 "두번째",
-                R.drawable.ic_launcher_background,
+                (R.drawable.ic_launcher_background).toString(),
                 false,
                 "하남돼지집",
                 "~~~"
             )
         )
-        diaryViewAdapter.addPlan(
+        diaryViewAdapter.addDiary(
             DiaryDetailItemData(
                 2,
                 false,
                 "3번째",
-                R.drawable.ic_launcher_background,
+                (R.drawable.ic_launcher_background).toString(),
                 true,
                 "와이키키",
                 "~~~"
             )
         )
-        diaryViewAdapter.addPlan(
+        diaryViewAdapter.addDiary(
             DiaryDetailItemData(
                 3,
                 true,
                 "4번째",
-                R.drawable.ic_launcher_background,
+                (R.drawable.ic_launcher_background).toString(),
                 true,
                 "와이키키",
                 "~~~"

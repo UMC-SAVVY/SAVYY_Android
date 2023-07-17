@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     tools:context=".utils.memo.MemoActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/diary_top"
         android:layout_width="match_parent"
         android:layout_height="46dp"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/arrow_left_btn"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_marginStart="7dp"
             android:src="@drawable/ic_arrow_left"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="7dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/diary_top_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="다이어리 작성"
             android:fontFamily="@font/pretendard_semi_bold"
+            android:text="다이어리 작성"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
             android:textFontWeight="500"
-            app:layout_constraintStart_toEndOf="@id/arrow_left_btn"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/diary_next_btn"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/arrow_left_btn"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/diary_next_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="다음"
+            android:layout_marginEnd="7dp"
             android:fontFamily="@font/pretendard_semi_bold"
-            android:textSize="16sp"
+            android:text="다음"
             android:textColor="@color/main"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginEnd="7dp" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -58,47 +57,42 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/diary_top"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/diary_top">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="4dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:thumb="@android:color/transparent"
-                android:progressDrawable="@drawable/seekbar_diary"
                 android:layout_marginTop="5dp"
                 android:progress="25"
-                />
+                android:progressDrawable="@drawable/seekbar_diary"
+                android:thumb="@android:color/transparent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/step2_notice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/seekBar"
-                android:layout_marginTop="10dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                >
+                app:layout_constraintTop_toBottomOf="@+id/seekBar">
 
                 <ImageView
                     android:id="@+id/circle_main"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_circle_main"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/circle_number"
@@ -109,24 +103,24 @@
                     android:textColor="@android:color/white"
                     android:textSize="13sp"
                     app:layout_constraintBottom_toBottomOf="@id/circle_main"
-                    app:layout_constraintTop_toTopOf="@id/circle_main"
-                    app:layout_constraintStart_toStartOf="@id/circle_main"
                     app:layout_constraintEnd_toEndOf="@id/circle_main"
-                    />
+                    app:layout_constraintStart_toStartOf="@id/circle_main"
+                    app:layout_constraintTop_toTopOf="@id/circle_main" />
 
                 <TextView
                     android:id="@+id/diary_step2_tv"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:breakStrategy="simple"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="여행 중 계획한 내용과 달라진 부분이 있다면 여행 계획서에서\n해당 내용을 추가 또는 수정해주세요\n만약 수정할 내용이 없다면 “다음”을 눌러주세요"
+                    android:lineSpacingExtra="4sp"
+                    android:text="여행 중 계획한 내용과 달라진 부분이 있다면 여행 계획서에서 해당 내용을 추가 또는 수정해주세요\n만약 수정할 내용이 없다면 “다음”을 눌러주세요"
                     android:textColor="@android:color/black"
                     android:textSize="14sp"
-                    android:lineSpacingExtra="3dp"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/circle_main"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:layout_marginStart="7dp"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -134,13 +128,13 @@
                 android:id="@+id/line"
                 android:layout_width="0dp"
                 android:layout_height="1dp"
-                android:background="@color/button_line"
-                app:layout_constraintTop_toBottomOf="@id/step2_notice"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginTop="10dp"/>
+                android:background="@color/button_line"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/step2_notice" />
 
             <EditText
                 android:id="@+id/title_edit"
@@ -149,16 +143,15 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
+                android:backgroundTint="@color/basic_gray"
                 android:fontFamily="@font/pretendard_bold"
                 android:hint="제목을 입력하세요"
                 android:textColor="@color/black"
                 android:textColorHint="@color/basic_gray"
                 android:textSize="18sp"
-                android:backgroundTint="@color/basic_gray"
-                app:layout_constraintTop_toBottomOf="@+id/line"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/line" />
 
 
             <!-- RecyclerView 추가 -->
@@ -166,41 +159,41 @@
                 android:id="@+id/recyclerview_travel_plan"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintTop_toBottomOf="@id/title_edit"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"/>
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@id/title_edit" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/add_date_btn"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:layout_marginTop="10dp"
+                android:layout_centerInParent="true"
                 android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="16dp"
-                app:layout_constraintTop_toBottomOf="@+id/recyclerview_travel_plan"
+                android:background="@drawable/btn_radius10"
                 android:elevation="4dp"
                 android:outlineAmbientShadowColor="@color/icon"
                 android:outlineSpotShadowColor="@color/icon"
-                android:background="@drawable/btn_radius10"
-                android:layout_centerInParent="true">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/recyclerview_travel_plan">
 
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/add_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     android:layout_marginStart="7dp"
-                    android:layout_marginEnd="10dp"
                     android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp">
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="2dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/plus"
@@ -220,9 +213,9 @@
                         android:textColor="@android:color/black"
                         android:textFontWeight="500"
                         android:textSize="15sp"
-                        app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/plus"/>
+                        app:layout_constraintStart_toEndOf="@+id/plus"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -234,17 +227,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="10dp"
-                app:layout_constraintTop_toBottomOf="@+id/add_date_btn"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                />
+                app:layout_constraintTop_toBottomOf="@+id/add_date_btn" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
