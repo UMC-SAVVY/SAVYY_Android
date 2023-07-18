@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_radius10">
+
+    <TextView
+        android:id="@+id/dialog_withdrawal_tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:fontFamily="@font/pretendard_semi_bold"
+        android:text="“SAVVY”를 탈퇴하시겠어요?"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/dialog_withdrawal_tv2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:text="(작성했던 게시물 및 댓글들은 모두 삭제됩니다)"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialog_withdrawal_tv1" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dialog_withdrawal_btn_o"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="45dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/btn_radius10"
+        android:backgroundTint="@color/main"
+        android:fontFamily="@font/pretendard_bold"
+        android:paddingHorizontal="45dp"
+        android:paddingVertical="14dp"
+        android:text="탈퇴하기"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/dialog_withdrawal_btn_x"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dialog_withdrawal_tv2" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/dialog_withdrawal_btn_x"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_radius10"
+        android:backgroundTint="@color/button_line"
+        android:fontFamily="@font/pretendard_bold"
+        android:paddingHorizontal="45dp"
+        android:paddingVertical="14dp"
+        android:text="취소하기"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/dialog_withdrawal_btn_o"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/dialog_withdrawal_btn_o" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

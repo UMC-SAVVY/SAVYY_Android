@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.content.Intent
 import android.text.TextUtils
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.core.view.isVisible
@@ -21,6 +22,7 @@ class DiaryListAdapter(
     private val recyclerView: RecyclerView,
     private var diaryList: ArrayList<DiaryItemData>,
     private val fragmentManager: FragmentManager,
+    private val isDiary: Boolean,
 ) :
     RecyclerView.Adapter<DiaryListAdapter.DiaryViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -39,6 +41,7 @@ class DiaryListAdapter(
         var hideOShow = binding.itemDiaryHideOShow
         var showImg = binding.itemDiaryShowIv
         var showText = binding.itemDiaryShowTv
+        var scrollHolder = binding.itemDiaryArrow
     }
 
     // View 생성될 때 호출되는 method
@@ -55,6 +58,12 @@ class DiaryListAdapter(
     // View 바인드 될 때 호출되는 method
     // View에 내용이 작성되는 method, 스크롤을 올리거나 내릴 때마다 호출
     override fun onBindViewHolder(holder: DiaryViewHolder, position: Int) {
+        // 다이어리 페이지 or 마이페이지 구분에 따라 스크롤 레이아웃 시각화 설정
+        if (isDiary)
+            holder.scrollHolder.visibility = View.VISIBLE
+        else
+            holder.scrollHolder.visibility = View.GONE
+
         val data = diaryList[holder.adapterPosition]
         holder.title.text = data.title
         holder.date.text = data.date

@@ -81,7 +81,8 @@ class PlanFragment : Fragment() {
                 binding.planRecycle,
                 planListData,
                 userName,
-                requireActivity().supportFragmentManager
+                requireActivity().supportFragmentManager,
+                true
             )
         binding.planRecycle.adapter = planListAdapter
 

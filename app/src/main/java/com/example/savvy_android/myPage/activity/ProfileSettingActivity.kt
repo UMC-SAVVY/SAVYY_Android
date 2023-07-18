@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -36,6 +37,21 @@ class ProfileSettingActivity : AppCompatActivity() {
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+
+        // 처음 회원가입으로 연결인지, 마이페이지 연결인지 구분
+        val isMypage = intent.getBooleanExtra("isMyPage", true)
+        if (isMypage) { // 마이페이지에서 연결 경우 (프로필 편집 경우)
+            binding.profileEditMode.visibility = View.VISIBLE
+            binding.profileSignupBtn.text = "저장하기"
+        } else { // 로그인페이지에서 연결 경우 (회원가입의 경우)
+            binding.profileEditMode.visibility = View.GONE
+            binding.profileSignupBtn.text = "회원가입"
+        }
+
+        // 뒤로 가기 버튼 클릭 이벤트
+        binding.profileArrowIv.setOnClickListener {
+            finish()
+        }
 
         // 프로필 사진 layout 클릭 시 이벤트 처리
         binding.profileImgLayout.setOnClickListener {

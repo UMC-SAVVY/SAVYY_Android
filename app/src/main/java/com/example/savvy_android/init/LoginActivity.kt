@@ -31,11 +31,13 @@ class LoginActivity : AppCompatActivity() {
             if(hasRegistered){
                 // 홈 화면으로 연결
                 val intent = Intent(this, MainActivity::class.java)
-                //val intent = Intent(this, MainActivity::class.java)
+                // 홈 화면으로 연결되면 이전에 존재하던 splash, login acitivty 종료
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
             }else{
                 // 회원가입 화면으로 연결
                 val intent = Intent(this, ProfileSettingActivity::class.java)
+                intent.putExtra("isMyPage",false)
                 startActivity(intent)
             }
         }
