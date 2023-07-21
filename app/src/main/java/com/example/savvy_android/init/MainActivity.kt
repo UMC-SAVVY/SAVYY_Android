@@ -24,11 +24,22 @@ class MainActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
+        // DiaryFragment를 보여줄 것인지 확인하고 보여주기
+        if (intent.getBooleanExtra("SHOW_DIARY_FRAGMENT", false)) {
+            setFragment(DiaryFragment())
+            binding.mainBottomNavi.selectedItemId = R.id.diary // Bottom Navigation에서 DiaryFragment 선택 상태로 변경
+        } else {
+            setFragment(HomeFragment()) // 일반적인 경우는 HomeFragment를 보여줌
+        }
+
         // 모든 FragmentActivity, 그리고 그것의 subclass (AppCompatActivity 와 같은) 는
         // 'getSupportFragmentManager' 로 FragmentManager 에 접근 가능
         // .commitAllowingStateLoss() 는 활동 상태를 저장 후에 실행 되도록 설정
-        supportFragmentManager.beginTransaction().replace(R.id.main_frm, HomeFragment())
-            .commitAllowingStateLoss()
+
+        //원래 코드 - merge 하면서 말 하기
+        //Fragment를 초기화 할 때마다 기본으로 HomeFragment 표시
+//        supportFragmentManager.beginTransaction().replace(R.id.main_frm, HomeFragment())
+//            .commitAllowingStateLoss()
         setBottomNavi()
     }
 

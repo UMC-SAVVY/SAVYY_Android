@@ -1,6 +1,5 @@
-package com.example.savvy_android.diary.dialog
+package com.example.savvy_android.plan.dialog
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -11,12 +10,11 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.example.savvy_android.init.MainActivity
-import com.example.savvy_android.databinding.DialogDiarySaveBinding
+import com.example.savvy_android.databinding.DialogPlanScrapBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
 
-class DiarySaveDialogFragment : DialogFragment() {
-    private var _binding: DialogDiarySaveBinding? = null
+class PlanScrapDialogFragment : DialogFragment() {
+    private var _binding: DialogPlanScrapBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -24,7 +22,7 @@ class DiarySaveDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View? {
-        _binding = DialogDiarySaveBinding.inflate(inflater, container, false)
+        _binding = DialogPlanScrapBinding.inflate(inflater, container, false)
         val view = binding.root
 
         // 레이아웃 배경을 투명하게 해줌, 필수 아님
@@ -37,12 +35,12 @@ class DiarySaveDialogFragment : DialogFragment() {
         dialog?.setCancelable(true)
 
 
-        binding.btnSave.setOnClickListener {
+        binding.scrapBtn.setOnClickListener {
             dismiss()
 
             // 커스텀 Toast 메시지 생성
             val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "작성 중인 다이어리가 임시저장되었습니다"
+            toastBinding.toastMessage.text = "계획서를 성공적으로 저장했습니다"
 
             val toast = Toast(requireContext())
             toast.duration = Toast.LENGTH_SHORT
@@ -51,18 +49,6 @@ class DiarySaveDialogFragment : DialogFragment() {
             toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
 
             toast.show()
-
-
-//            //임시 연결
-//            val intent = Intent(activity, MainActivity::class.java)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//            startActivity(intent)
-
-            //DiaryFragment로 이동
-            // MainActivity로 이동하면서 DiaryFragment를 띄우기
-            val intent = Intent(activity, MainActivity::class.java)
-            intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
-            startActivity(intent)
 
         }
 

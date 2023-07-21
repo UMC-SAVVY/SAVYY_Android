@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/report_top"
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/arrow_left_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="7dp"
+            android:src="@drawable/ic_arrow_left"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/report_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="신고하기"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/report_completion_btn"
+            app:layout_constraintStart_toEndOf="@id/arrow_left_btn"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/report_completion_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="7dp"
+            android:fontFamily="@font/pretendard_bold"
+            android:text="완료"
+            android:textColor="@color/icon"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/report_notice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/report_top">
+
+        <ImageView
+            android:id="@+id/ic_content"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:src="@drawable/ic_content_1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="20dp"
+            />
+
+        <TextView
+            android:id="@+id/report_notice_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="신고를 위해 해당하는 내용을 한 개 이상 선택해 주세요"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ic_content"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nickname"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/report_notice"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+
+        <TextView
+            android:id="@+id/nickname_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="부적절한 닉네임"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="6dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/nickname_check_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="7dp"
+            >
+
+            <ImageView
+                android:id="@+id/nickname_circle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/border_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/nickname_checkmark"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_checkmark_gray"
+                app:layout_constraintBottom_toBottomOf="@+id/nickname_circle"
+                app:layout_constraintEnd_toEndOf="@+id/nickname_circle"
+                app:layout_constraintStart_toStartOf="@+id/nickname_circle"
+                app:layout_constraintTop_toTopOf="@+id/nickname_circle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/line1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/button_line"
+        app:layout_constraintTop_toBottomOf="@id/nickname"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/line1"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+
+        <TextView
+            android:id="@+id/content_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="부적절한 내용 포함"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="6dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content_check_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="7dp"
+            >
+
+            <ImageView
+                android:id="@+id/content_circle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/border_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/content_checkmark"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_checkmark_gray"
+                app:layout_constraintBottom_toBottomOf="@+id/content_circle"
+                app:layout_constraintEnd_toEndOf="@+id/content_circle"
+                app:layout_constraintStart_toStartOf="@+id/content_circle"
+                app:layout_constraintTop_toTopOf="@+id/content_circle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/line2"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/button_line"
+        app:layout_constraintTop_toBottomOf="@id/content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/abuse"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/line2"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+
+        <TextView
+            android:id="@+id/abuse_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="욕설"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="6dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/abuse_check_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="7dp"
+            >
+
+            <ImageView
+                android:id="@+id/abuse_circle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/border_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/abuse_checkmark"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_checkmark_gray"
+                app:layout_constraintBottom_toBottomOf="@+id/abuse_circle"
+                app:layout_constraintEnd_toEndOf="@+id/abuse_circle"
+                app:layout_constraintStart_toStartOf="@+id/abuse_circle"
+                app:layout_constraintTop_toTopOf="@+id/abuse_circle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/line3"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/button_line"
+        app:layout_constraintTop_toBottomOf="@id/abuse"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/besides"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/line3"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+
+        <TextView
+            android:id="@+id/besides_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="기타"
+            android:textColor="@color/black"
+            android:textSize="15sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="6dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/besides_check_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="7dp"
+            >
+
+            <ImageView
+                android:id="@+id/besides_circle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/border_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/besides_checkmark"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_checkmark_gray"
+                app:layout_constraintBottom_toBottomOf="@+id/besides_circle"
+                app:layout_constraintEnd_toEndOf="@+id/besides_circle"
+                app:layout_constraintStart_toStartOf="@+id/besides_circle"
+                app:layout_constraintTop_toTopOf="@+id/besides_circle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/line4"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/button_line"
+        app:layout_constraintTop_toBottomOf="@id/besides"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <!-- 기타를 체크했을 때 나타남 -->
+    <EditText
+        android:id="@+id/besides_edit"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:fontFamily="@font/pretendard_medium"
+        android:hint="(필수) 신고 사유를 입력해주세요"
+        android:textColor="@color/black"
+        android:textColorHint="@color/basic_gray"
+        android:textSize="15sp"
+        android:background="@null"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/line4"
+        app:layout_constraintStart_toStartOf="parent"
+        android:gravity="start"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="21dp"
+        android:layout_marginEnd="21dp"
+        />
+
+    <View
+        android:id="@+id/line5"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/button_line"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/besides_edit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="9dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+
+    <!-- 하나라도 체크하면 나타남 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/line5"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="11dp"
+        android:visibility="gone"
+        >
+
+
+        <TextView
+            android:id="@+id/block_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_semi_bold"
+            android:text="해당 사용자를 차단하시겠어요?"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/block_check_btn"
+            android:layout_marginTop="7dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/pretendard_medium"
+            android:text="사용자를 차단하면 해당 사용자의 게시글 및 댓글을 볼 수 없어요"
+            android:textColor="@color/icon"
+            android:textSize="13sp"
+            app:layout_constraintTop_toBottomOf="@+id/block_tv"
+            app:layout_constraintStart_toEndOf="@+id/block_check_btn"
+            />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/block_check_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:padding="7dp"
+            >
+
+            <ImageView
+                android:id="@+id/block_circle"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:background="@drawable/border_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/block_checkmark"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_checkmark_gray"
+                app:layout_constraintBottom_toBottomOf="@+id/block_circle"
+                app:layout_constraintEnd_toEndOf="@+id/block_circle"
+                app:layout_constraintStart_toStartOf="@+id/block_circle"
+                app:layout_constraintTop_toTopOf="@+id/block_circle" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
