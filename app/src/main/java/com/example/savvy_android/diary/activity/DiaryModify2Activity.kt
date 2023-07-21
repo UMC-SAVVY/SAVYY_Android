@@ -14,15 +14,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
-import com.example.savvy_android.plan.activity.PlanDetailActivity
-import com.example.savvy_android.diary.adapter.Make4Adapter
-import com.example.savvy_android.databinding.ActivityDiaryStep4Binding
+import com.example.savvy_android.databinding.ActivityDiaryModify2Binding
 import com.example.savvy_android.databinding.LayoutToastBinding
+import com.example.savvy_android.diary.adapter.Make4Adapter
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
-import com.example.savvy_android.init.MainActivity
+import com.example.savvy_android.plan.activity.PlanDetailActivity
 
-class DiaryMake4Activity : AppCompatActivity() {
-    private lateinit var binding: ActivityDiaryStep4Binding
+class DiaryModify2Activity : AppCompatActivity() {
+    private lateinit var binding: ActivityDiaryModify2Binding
     private lateinit var valueAnimator: ValueAnimator
     private lateinit var diaryHashtagAdapter: Make4Adapter
 
@@ -30,7 +29,7 @@ class DiaryMake4Activity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen() // splash screen 설정, 관리 API 함수
-        binding = ActivityDiaryStep4Binding.inflate(layoutInflater)
+        binding = ActivityDiaryModify2Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // 배경 색 지정
@@ -66,7 +65,7 @@ class DiaryMake4Activity : AppCompatActivity() {
 
             // 커스텀 Toast 메시지 생성
             val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "성공적으로 다이어리 작성이 완료되었습니다"
+            toastBinding.toastMessage.text = "성공적으로 수정이 완료되었습니다"
 
             val toast = Toast(this)
             toast.duration = Toast.LENGTH_SHORT
@@ -76,18 +75,8 @@ class DiaryMake4Activity : AppCompatActivity() {
 
             toast.show()
 
-            //임시 연결
-            //다이어리 fragment로 이동해야 함
-//            val intent = Intent(this, PlanDetailActivity::class.java)
-//            startActivity(intent)
-
-            //DiaryFragment로 이동
-            // MainActivity로 이동하면서 DiaryFragment를 띄우기
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
+            val intent = Intent(this, DiaryDetailActivity::class.java)
             startActivity(intent)
-
-            finish()
         }
 
 
@@ -99,19 +88,13 @@ class DiaryMake4Activity : AppCompatActivity() {
 
 
         // 하나의 text에서 특정 글자 색 바꾸기
-        val spannableString = SpannableString(binding.diaryStep4Tv.text.toString())
+        val spannableString = SpannableString(binding.diaryModify2Tv.text.toString())
 
         val colorSpan = ForegroundColorSpan(ContextCompat.getColor(this, R.color.main))
         spannableString.setSpan(colorSpan, 75, 77, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-        binding.diaryStep4Tv.text = spannableString
+        binding.diaryModify2Tv.text = spannableString
 
-    }
-
-    //뒤로가기 누르면 Dialog 띄우기
-    override fun onBackPressed() {
-        val dialog = DiarySaveDialogFragment()
-        dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 
 }

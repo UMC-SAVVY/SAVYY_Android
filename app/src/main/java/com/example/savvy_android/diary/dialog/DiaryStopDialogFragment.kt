@@ -37,9 +37,16 @@ class DiaryStopDialogFragment : DialogFragment() {
         binding.btnStop.setOnClickListener {
             dismiss()
 
+//            val intent = Intent(activity, MainActivity::class.java)
+//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+//            startActivity(intent)
+
+            //DiaryFragment로 이동
+            // MainActivity로 이동하면서 DiaryFragment를 띄우기
             val intent = Intent(activity, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
             startActivity(intent)
+
         }
 
 

@@ -92,6 +92,24 @@
         <activity
             android:name=".diary.activity.DiaryMake4Activity"
             android:exported="false" />
+        <activity
+            android:name=".diary.activity.DiaryModify1Activity"
+            android:exported="false" />
+        <activity
+            android:name=".diary.activity.DiaryModify2Activity"
+            android:exported="false" />
+        <activity
+            android:name=".utils.report.ReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".plan.activity.PlanDetailVisitActivity"
+            android:exported="false" />
+        <activity
+            android:name=".diary.activity.DiaryCommentActivity"
+            android:exported="false" />
+
+
+
     </application>
 
 </manifest>
