@@ -48,7 +48,7 @@ class PlaceStorageFragment : Fragment() {
         })
 
         // SearchNewPlace Data & Adapter
-        placeStorageAdapter = PlaceStorageAdapter(planStorageData)
+        placeStorageAdapter = PlaceStorageAdapter(planStorageData, false)
         binding.storageSearchRecycle.adapter = placeStorageAdapter
     }
 

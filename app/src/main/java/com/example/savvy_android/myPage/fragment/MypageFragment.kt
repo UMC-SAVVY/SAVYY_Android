@@ -11,6 +11,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypageBinding
+import com.example.savvy_android.myPage.activity.MypageConditionActivity
+import com.example.savvy_android.myPage.activity.MypagePlaceActivity
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
 import com.example.savvy_android.myPage.dialog.MypageLogoutDialogFragment
 import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
@@ -46,18 +48,20 @@ class MypageFragment : Fragment() {
         // 프로필 편집 클릭 이벤트
         binding.mypageSetting1.setOnClickListener {
             val intent = Intent(context, ProfileSettingActivity::class.java)
-            intent.putExtra("isMyPage",true)
+            intent.putExtra("isMyPage", true)
             startActivity(intent)
         }
 
         // 장소 저장함 편집 클릭 이벤트
         binding.mypageSetting2.setOnClickListener {
-
+            val intent = Intent(context, MypagePlaceActivity::class.java)
+            startActivity(intent)
         }
 
         // 이용약관 클릭 이벤트
         binding.mypageSetting3.setOnClickListener {
-
+            val intent = Intent(context, MypageConditionActivity::class.java)
+            startActivity(intent)
         }
 
         // 회원탈퇴 클릭 이벤트
