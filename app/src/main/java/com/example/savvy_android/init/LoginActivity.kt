@@ -169,6 +169,7 @@ class LoginActivity : AppCompatActivity() {
 
                                         val profileIntent = Intent(this@LoginActivity, ProfileSettingActivity::class.java)
                                         profileIntent.putExtra("accessToken", accessToken)
+                                        profileIntent.putExtra("isMyPage",false)
                                         startActivity(profileIntent)
                                     }
                                 } else {
