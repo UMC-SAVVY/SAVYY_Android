@@ -176,7 +176,7 @@ class ReportActivity : AppCompatActivity() {
     }
 
     private fun updateBlockVisibility() {
-        if (nicknameChecked || contentChecked || abuseChecked || besidesText.isNotEmpty()) {
+        if (nicknameChecked || contentChecked || abuseChecked || besidesChecked) {
             binding.block.visibility = View.VISIBLE
         } else {
             binding.block.visibility = View.GONE

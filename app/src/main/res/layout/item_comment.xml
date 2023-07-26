@@ -100,7 +100,7 @@
             android:layout_marginEnd="14dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/profile"
-            android:visibility="gone"
+            android:visibility="invisible"
             />
 
 
@@ -112,10 +112,10 @@
             android:text="date"
             android:textColor="@color/icon"
             android:textSize="12sp"
-            app:layout_constraintTop_toBottomOf="@+id/profile"
+            app:layout_constraintTop_toBottomOf="@+id/comment_modify_edit"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="14dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="5dp"
             />
 
         <ImageView
@@ -124,9 +124,9 @@
             android:layout_height="15dp"
             android:src="@drawable/ic_message"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile"
+            app:layout_constraintTop_toBottomOf="@+id/comment_modify_edit"
             android:padding="1dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="7dp"
             android:layout_marginEnd="20dp"
             />
 
@@ -138,9 +138,9 @@
             android:text="0"
             android:textColor="@color/black"
             android:textSize="14sp"
-            app:layout_constraintTop_toBottomOf="@+id/profile"
+            app:layout_constraintTop_toBottomOf="@+id/comment_modify_edit"
             app:layout_constraintStart_toEndOf="@+id/message"
-            android:layout_marginTop="29dp"
+            android:layout_marginTop="3dp"
             android:layout_marginStart="4dp"
             />
 

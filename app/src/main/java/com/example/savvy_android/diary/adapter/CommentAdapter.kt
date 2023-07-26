@@ -102,7 +102,7 @@ class CommentAdapter(
 
         fun showEditText() {
             // TextView를 숨기고 EditText를 보여줌
-            binding.commentContentTv.visibility = View.GONE
+            binding.commentContentTv.visibility = View.INVISIBLE
             binding.commentModifyEdit.visibility = View.VISIBLE
             binding.commentModifyEdit.setText(binding.commentContentTv.text)
             binding.commentModifyEdit.requestFocus() // EditText에 포커스를 주어 키보드가 나타나도록 함
@@ -112,7 +112,7 @@ class CommentAdapter(
             // EditText의 내용을 TextView에 적용하고 TextView를 보여주고 EditText를 숨김
             val editedText = binding.commentModifyEdit.text.toString()
             binding.commentContentTv.text = editedText
-            binding.commentModifyEdit.visibility = View.GONE
+            binding.commentModifyEdit.visibility = View.INVISIBLE
             binding.commentContentTv.visibility = View.VISIBLE
         }
     }

@@ -32,7 +32,7 @@ class NestedCommentAdapter(
 
         fun showEditText() {
             // TextView를 숨기고 EditText를 보여줌
-            binding.nestedCommentContentTv.visibility = View.GONE
+            binding.nestedCommentContentTv.visibility = View.INVISIBLE
             binding.nestedCommentModifyEdit.visibility = View.VISIBLE
             binding.nestedCommentModifyEdit.setText(binding.nestedCommentContentTv.text)
             binding.nestedCommentModifyEdit.requestFocus() // EditText에 포커스를 주어 키보드가 나타나도록 함
@@ -42,7 +42,7 @@ class NestedCommentAdapter(
             // EditText의 내용을 TextView에 적용하고 TextView를 보여주고 EditText를 숨김
             val editedText = binding.nestedCommentModifyEdit.text.toString()
             binding.nestedCommentContentTv.text = editedText
-            binding.nestedCommentModifyEdit.visibility = View.GONE
+            binding.nestedCommentModifyEdit.visibility = View.INVISIBLE
             binding.nestedCommentContentTv.visibility = View.VISIBLE
         }
 
