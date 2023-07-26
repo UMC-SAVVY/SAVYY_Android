@@ -183,15 +183,22 @@ class ReportActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateReportCompletionButton() {
-        if ((nicknameChecked || contentChecked || abuseChecked) && (!besidesChecked || besidesText.isNotEmpty())) {
-            binding.reportCompletionBtn.setTextColor(ContextCompat.getColor(this, R.color.main))
-        } else {
-            binding.reportCompletionBtn.setTextColor(ContextCompat.getColor(this, R.color.icon))
+    private fun isReportCompletionButtonEnabled(): Boolean {
+        val besidesEditText = binding.besidesEdit.text.toString().trim()
+
+        // besidesCheckedBtn이 클릭된 상태이고, besidesEdit에 글자가 입력되었을 경우 true
+        if (besidesChecked && besidesEditText.isNotEmpty()) {
+            return true
         }
+
+        // 다른 버튼들이 클릭된 상태인지 검사
+        val otherButtonsChecked = nicknameChecked || contentChecked || abuseChecked
+
+        return otherButtonsChecked && (!besidesChecked || besidesEditText.isNotEmpty())
     }
 
-    private fun isReportCompletionButtonEnabled(): Boolean {
-        return (nicknameChecked || contentChecked || abuseChecked || (besidesChecked && besidesText.isNotEmpty()))
+    private fun updateReportCompletionButton() {
+        val textColorResId = if (isReportCompletionButtonEnabled()) R.color.main else R.color.icon
+        binding.reportCompletionBtn.setTextColor(ContextCompat.getColor(this, textColorResId))
     }
 }
