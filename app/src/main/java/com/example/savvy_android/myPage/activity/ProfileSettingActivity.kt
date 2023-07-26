@@ -1,11 +1,14 @@
 package com.example.savvy_android.myPage.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
@@ -19,7 +22,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityProfileSettingBinding
+import com.example.savvy_android.init.MainActivity
+import com.example.savvy_android.init.data.SignupRequest
+import com.example.savvy_android.init.data.SignupResponse
+import com.example.savvy_android.init.service.SignupService
 import com.example.savvy_android.plan.activity.PlanDetailActivity
+import retrofit2.Callback
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.util.regex.Pattern
 
 
@@ -28,6 +38,8 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var duplicateState = false  // 중복 여부
     private var introState = true   // 소개글 가능 여부
     private var signupState = false // 회원 가입 가능 여부
+    private lateinit var sharedPreferences: SharedPreferences
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -146,15 +158,68 @@ class ProfileSettingActivity : AppCompatActivity() {
             override fun afterTextChanged(p0: Editable?) {}
         })
 
+        //서버 주소
+        val serverAdress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAdress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val signupService = retrofit.create(SignupService::class.java)
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
+
         // 회원 가입 버튼 클릭 이벤트
         binding.profileSignupBtn.setOnClickListener {
-            Toast.makeText(this, "회원 가입 클릭 성공", Toast.LENGTH_SHORT).show()
 
-            // 임시 연결
-            val intent = Intent(this, PlanDetailActivity::class.java)
-            startActivity(intent)
+            val accessToken = intent.getStringExtra("accessToken")
+
+            if (accessToken != null) {
+                val nickname = binding.profileNameEdit.text.toString()
+                val picUrl = ""
+                val intro = binding.profileIntroEdit.text.toString()
+
+                val signupRequest = SignupRequest(accessToken, picUrl, nickname, intro)
+
+                // 회원가입 API 호출
+                signupService.signup(signupRequest).enqueue(object : Callback<SignupResponse> {
+                    override fun onResponse(
+                        call: retrofit2.Call<SignupResponse>,
+                        response: retrofit2.Response<SignupResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            val signupResponse = response.body()
+                            if (signupResponse != null && signupResponse.isSuccess) {
+
+                                val serverToken = signupResponse.result.token
+                                Log.d("SIGNUP", "회원가입 성공 - 서버에서 받은 토큰: $serverToken")
+
+                                saveServerToken(serverToken) // 서버에서 받은 토큰 값
+
+                                val intent = Intent(this@ProfileSettingActivity, MainActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                val errorMessage = signupResponse?.message
+                                Log.e("SIGNUP", "회원가입 실패 - 서버 메시지: $errorMessage")
+                            }
+                        } else {
+                            Log.e("SIGNUP", "API 호출 실패 - 응답 코드: ${response.code()}")
+                        }
+                    }
+
+                    override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
+                        Log.e("SIGNUP", "API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    }
+                })
+            } else {
+                Log.e("SIGNUP", "API 호출 실패 - AccessToken이 없습니다.")
+            }
         }
     }
+
+
+
 
     // 갤러리에서 선택한 이미지 결과 가져오기
     private val activityResult: ActivityResultLauncher<Intent> = registerForActivityResult(
@@ -210,5 +275,13 @@ class ProfileSettingActivity : AppCompatActivity() {
             )
         }
     }
+
+    private fun saveServerToken(serverToken: String) {
+        // 서버 토큰을 SharedPreferences에 저장
+        val editor = sharedPreferences.edit()
+        editor.putString("SERVER_TOKEN_KEY", serverToken)
+        editor.apply()
+    }
+
 
 }
