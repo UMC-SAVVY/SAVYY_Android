@@ -25,6 +25,7 @@ class DiaryMake4Activity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryStep4Binding
     private lateinit var valueAnimator: ValueAnimator
     private lateinit var diaryHashtagAdapter: Make4Adapter
+    private var isDiary: Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +33,9 @@ class DiaryMake4Activity : AppCompatActivity() {
         installSplashScreen() // splash screen 설정, 관리 API 함수
         binding = ActivityDiaryStep4Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 시작된 fragment 정보 받기
+        isDiary = intent.getBooleanExtra("isDiary", true)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -76,20 +80,17 @@ class DiaryMake4Activity : AppCompatActivity() {
 
             toast.show()
 
-            //임시 연결
-            //다이어리 fragment로 이동해야 함
-//            val intent = Intent(this, PlanDetailActivity::class.java)
-//            startActivity(intent)
-
-            //DiaryFragment로 이동
-            // MainActivity로 이동하면서 DiaryFragment를 띄우기
+            // MainActivity로 이동하면서 실행된 Fragment로 이동
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            if (isDiary)
+                intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
+            else
+                intent.putExtra("SHOW_HOME_FRAGMENT", true) // HomeFragment를 보여주도록 추가 데이터 전달
             startActivity(intent)
 
             finish()
         }
-
 
 
         // < 클릭 이벤트
@@ -110,7 +111,7 @@ class DiaryMake4Activity : AppCompatActivity() {
 
     //뒤로가기 누르면 Dialog 띄우기
     override fun onBackPressed() {
-        val dialog = DiarySaveDialogFragment()
+        val dialog = DiarySaveDialogFragment(isDiary)
         dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 

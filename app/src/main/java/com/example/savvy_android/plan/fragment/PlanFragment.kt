@@ -21,6 +21,7 @@ import com.example.savvy_android.plan.adapter.PlanListAdapter
 import com.example.savvy_android.databinding.FragmentPlanBinding
 import com.example.savvy_android.plan.PlanItemData
 import com.example.savvy_android.plan.PlanItemTouchCallback
+import com.example.savvy_android.utils.alarm.AlarmActivity
 
 
 class PlanFragment : Fragment() {
@@ -58,8 +59,8 @@ class PlanFragment : Fragment() {
 
         // 알람 버튼 클릭시 알람 페이지 연결
         binding.planAlarm.setOnClickListener {
-//            val intent = Intent(context, 알람 페이지 kotlin 파일)
-//            startActivity(intent)
+            val intent = Intent(context, AlarmActivity::class.java)
+            startActivity(intent)
         }
 
         // 검색 EditText 입력 변화 이벤트 처리 (한글자라도 입력 시)
@@ -102,13 +103,12 @@ class PlanFragment : Fragment() {
     override fun onResume() {
         super.onResume()
 
-        // 알람 존재 여부에 따른 알람 버튼 형태
         val hasAlarm = true
         if (hasAlarm)
-            binding.planAlarm.setBackgroundResource(R.drawable.ic_alarm_o)
-        else binding.planAlarm.setBackgroundResource(
-            R.drawable.ic_alarm_x
-        )
+            binding.planAlarm.setImageResource(R.drawable.ic_alarm_o)
+        else
+            binding.planAlarm.setImageResource(R.drawable.ic_alarm_x)
+
 
         // 임시 데이터 목록
         for (i: Int in 0 until tmpDateList.size) {

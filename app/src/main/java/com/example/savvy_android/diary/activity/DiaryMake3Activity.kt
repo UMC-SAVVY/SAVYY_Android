@@ -25,6 +25,7 @@ class DiaryMake3Activity : AppCompatActivity() {
     private lateinit var valueAnimator: ValueAnimator
     private lateinit var make3Adapter: Make3Adapter
     private var diaryDetailData = arrayListOf<DiaryDetailItemData>()
+    private var isDiary: Boolean = true
 
     private val SELECT_PLACE_REQUEST_CODE = 100
 
@@ -33,6 +34,9 @@ class DiaryMake3Activity : AppCompatActivity() {
         installSplashScreen() // splash screen 설정, 관리 API 함수
         binding = ActivityDiaryStep3Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 시작된 fragment 정보 받기
+        isDiary = intent.getBooleanExtra("isDiary",true)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -53,6 +57,7 @@ class DiaryMake3Activity : AppCompatActivity() {
 
         binding.diaryNextBtn.setOnClickListener {
             val intent = Intent(this, DiaryMake4Activity::class.java)
+            intent.putExtra("isDiary",isDiary)
             startActivity(intent)
         }
 
@@ -136,7 +141,7 @@ class DiaryMake3Activity : AppCompatActivity() {
 
     //뒤로가기 누르면 Dialog 띄우기
     override fun onBackPressed() {
-        val dialog = DiarySaveDialogFragment()
+        val dialog = DiarySaveDialogFragment(isDiary)
         dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 

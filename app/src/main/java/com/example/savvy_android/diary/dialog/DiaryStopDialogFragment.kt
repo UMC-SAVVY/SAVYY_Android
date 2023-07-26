@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.databinding.DialogDiaryStopBinding
 
-class DiaryStopDialogFragment : DialogFragment() {
+class DiaryStopDialogFragment(private val isDiary: Boolean) : DialogFragment() {
     private var _binding: DialogDiaryStopBinding? = null
     private val binding get() = _binding!!
 
@@ -37,14 +37,13 @@ class DiaryStopDialogFragment : DialogFragment() {
         binding.btnStop.setOnClickListener {
             dismiss()
 
-//            val intent = Intent(activity, MainActivity::class.java)
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-//            startActivity(intent)
-
-            //DiaryFragment로 이동
-            // MainActivity로 이동하면서 DiaryFragment를 띄우기
+            // MainActivity로 이동하면서 실행된 Fragment로 이동
             val intent = Intent(activity, MainActivity::class.java)
-            intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            if(isDiary)
+                intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
+            else
+                intent.putExtra("SHOW_HOME_FRAGMENT", true) // HomeFragment를 보여주도록 추가 데이터 전달
             startActivity(intent)
 
         }

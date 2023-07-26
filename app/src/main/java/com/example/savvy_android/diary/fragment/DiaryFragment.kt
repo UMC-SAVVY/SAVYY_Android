@@ -20,6 +20,7 @@ import com.example.savvy_android.diary.adapter.DiaryListAdapter
 import com.example.savvy_android.diary.data.DiaryItemData
 import com.example.savvy_android.databinding.FragmentDiaryBinding
 import com.example.savvy_android.diary.DiaryItemTouchCallback
+import com.example.savvy_android.utils.alarm.AlarmActivity
 
 class DiaryFragment : Fragment() {
     private lateinit var binding: FragmentDiaryBinding
@@ -49,9 +50,9 @@ class DiaryFragment : Fragment() {
         binding = FragmentDiaryBinding.inflate(inflater, container, false)
 
         // 알람 버튼 클릭시 알람 페이지 연결
-        binding.planAlarm.setOnClickListener {
-//            val intent = Intent(context, 알람 페이지 kotlin 파일)
-//            startActivity(intent)
+        binding.diaryAlarm.setOnClickListener {
+            val intent = Intent(context, AlarmActivity::class.java)
+            startActivity(intent)
         }
 
         // 검색 EditText 입력 변화 이벤트 처리 (한글자라도 입력 시)
@@ -84,6 +85,7 @@ class DiaryFragment : Fragment() {
         // Floating Button 클릭 시 계획서 작성 페이지로 연결
         binding.diaryAddFbtn.setOnClickListener {
             val intent = Intent(context, DiaryMake1Activity::class.java)
+            intent.putExtra("isDiary",true)
             startActivity(intent)
         }
 
@@ -96,10 +98,9 @@ class DiaryFragment : Fragment() {
         // 알람 존재 여부에 따른 알람 버튼 형태
         val hasAlarm = true
         if (hasAlarm)
-            binding.planAlarm.setBackgroundResource(R.drawable.ic_alarm_o)
-        else binding.planAlarm.setBackgroundResource(
-            R.drawable.ic_alarm_x
-        )
+            binding.diaryAlarm.setImageResource(R.drawable.ic_alarm_o)
+        else
+            binding.diaryAlarm.setImageResource(R.drawable.ic_alarm_x)
 
         // 임시 데이터 목록
         for (i: Int in 0 until tmpDateList.size) {

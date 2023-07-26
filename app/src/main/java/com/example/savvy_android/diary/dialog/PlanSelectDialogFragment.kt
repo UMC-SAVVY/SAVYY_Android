@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.savvy_android.diary.activity.DiaryMake2Activity
 import com.example.savvy_android.databinding.DialogPlanSelectBinding
 
-class PlanSelectDialogFragment : DialogFragment() {
+class PlanSelectDialogFragment(private val isDiary : Boolean) : DialogFragment() {
     private var _binding: DialogPlanSelectBinding? = null
     private val binding get() = _binding!!
 
@@ -39,6 +39,7 @@ class PlanSelectDialogFragment : DialogFragment() {
 
             val intent = Intent(activity, DiaryMake2Activity::class.java)
             intent.putExtra("showDateAddItem", true)
+            intent.putExtra("isDiary",isDiary)
             startActivity(intent)
         }
 

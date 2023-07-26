@@ -12,7 +12,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.savvy_android.diary.activity.DiaryMake2Activity
 import com.example.savvy_android.databinding.DialogNextStepBinding
 
-class NextStepDialogFragment : DialogFragment() {
+class NextStepDialogFragment(private val isDiary: Boolean) : DialogFragment() {
     private var _binding: DialogNextStepBinding? = null
     private val binding get() = _binding!!
 
@@ -38,6 +38,7 @@ class NextStepDialogFragment : DialogFragment() {
             dismiss()
 
             val intent = Intent(activity, DiaryMake2Activity::class.java)
+            intent.putExtra("isDiary", isDiary)
             startActivity(intent)
         }
 

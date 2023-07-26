@@ -14,9 +14,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_main"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_main_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SAVVY_Android.Splash"
         tools:targetApi="31">
@@ -25,14 +25,25 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
-                <data android:host="oauth"
+                <data
+                    android:host="oauth"
                     android:scheme="@string/kakao_redirection_scheme" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".myPage.activity.MypageBlockActivity"
+            android:exported="false" />
+        <activity
+            android:name=".utils.search.SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".utils.alarm.AlarmActivity"
+            android:exported="false" />
         <activity
             android:name=".myPage.activity.MypagePlaceActivity"
             android:exported="false" />
@@ -107,7 +118,6 @@
         <activity
             android:name=".diary.activity.DiaryCommentActivity"
             android:exported="false" />
-
 
 
     </application>

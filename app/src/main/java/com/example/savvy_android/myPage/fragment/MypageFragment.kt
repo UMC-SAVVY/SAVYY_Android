@@ -11,6 +11,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypageBinding
+import com.example.savvy_android.myPage.activity.MypageBlockActivity
 import com.example.savvy_android.myPage.activity.MypageConditionActivity
 import com.example.savvy_android.myPage.activity.MypagePlaceActivity
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
@@ -30,19 +31,26 @@ class MypageFragment : Fragment() {
     ): View? {
         binding = FragmentMypageBinding.inflate(inflater, container, false)
 
+        // 뒤로 가기 버튼 클릭 이벤트
+        binding.mypageArrowIc.setOnClickListener {
+            // 설정 화면 -> 초기 화면
+            binding.mypageArrowIc.visibility = View.INVISIBLE
+            binding.mypageSettingIc.visibility = View.VISIBLE
+            binding.mypageDataLayout.visibility = View.VISIBLE
+            binding.mypageSettingLayout.visibility = View.INVISIBLE
+            isSetting = false
+
+        }
+
         // 설정 버튼 클릭 이벤트
         binding.mypageSettingIc.setOnClickListener {
-            if (isSetting) {    // 설정 화면 -> 초기화면으로 변경
-                binding.mypageSettingIc.setImageResource(R.drawable.ic_setting)
-                binding.mypageDataLayout.visibility = View.VISIBLE
-                binding.mypageSettingLayout.visibility = View.INVISIBLE
-                isSetting = false
-            } else {    // 마이페이지 초기 화면 -> 설정화면으로 변경
-                binding.mypageSettingIc.setImageResource(R.drawable.ic_reset)
-                binding.mypageDataLayout.visibility = View.INVISIBLE
-                binding.mypageSettingLayout.visibility = View.VISIBLE
-                isSetting = true
-            }
+            // 마이페이지 초기 화면 -> 설정 화면
+            binding.mypageArrowIc.visibility = View.VISIBLE
+            binding.mypageSettingIc.visibility = View.INVISIBLE
+            binding.mypageDataLayout.visibility = View.INVISIBLE
+            binding.mypageSettingLayout.visibility = View.VISIBLE
+            isSetting = true
+
         }
 
         // 프로필 편집 클릭 이벤트
@@ -58,20 +66,26 @@ class MypageFragment : Fragment() {
             startActivity(intent)
         }
 
-        // 이용약관 클릭 이벤트
+        // 차단 목록 관리 클릭 이벤트
         binding.mypageSetting3.setOnClickListener {
+            val intent = Intent(context, MypageBlockActivity::class.java)
+            startActivity(intent)
+        }
+
+        // 이용약관 클릭 이벤트
+        binding.mypageSetting4.setOnClickListener {
             val intent = Intent(context, MypageConditionActivity::class.java)
             startActivity(intent)
         }
 
         // 회원탈퇴 클릭 이벤트
-        binding.mypageSetting4.setOnClickListener {
+        binding.mypageSetting5.setOnClickListener {
             val dialog = MypageWithdrawalDialogFragment()
             dialog.show(requireFragmentManager(), "withdrawalDialog")
         }
 
         // 로그아웃 클릭 이벤트
-        binding.mypageSetting5.setOnClickListener {
+        binding.mypageSetting6.setOnClickListener {
             val dialog = MypageLogoutDialogFragment()
             dialog.show(requireFragmentManager(), "logoutDialog")
         }
@@ -98,11 +112,10 @@ class MypageFragment : Fragment() {
         val nameData = "닉네임"
         val introData = "소개글입니다요"
 
-        // 프로필 사진 클릭 이벤트
+        // 프로필 사진
         Glide.with(this)
             .load(profileData)
             .into(binding.mypageProfileIv)
-
 
         // 프로필 닉네임
         binding.mypageNicknameTv.text = nameData

@@ -25,6 +25,7 @@ class DiaryMake1Activity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryStep1Binding
     private lateinit var diaryPlanListAdapter: Make1Adapter
     private lateinit var valueAnimator: ValueAnimator
+    private var isDiary: Boolean = true
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +33,9 @@ class DiaryMake1Activity : AppCompatActivity() {
         installSplashScreen() // splash screen 설정, 관리 API 함수
         binding = ActivityDiaryStep1Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // 시작된 fragment 정보 받기
+        isDiary = intent.getBooleanExtra("isDiary",true)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -57,10 +61,10 @@ class DiaryMake1Activity : AppCompatActivity() {
 
         binding.diaryNextBtn.setOnClickListener {
             if (diaryPlanListAdapter.clickedPositions.isNotEmpty()) {
-                val planSelectDialog = PlanSelectDialogFragment()
+                val planSelectDialog = PlanSelectDialogFragment(isDiary)
                 planSelectDialog.show(supportFragmentManager, "planSelectDialog")
             } else {
-                val nextStepDialog = NextStepDialogFragment()
+                val nextStepDialog = NextStepDialogFragment(isDiary)
                 nextStepDialog.show(supportFragmentManager, "nextStepDialog")
             }
         }
@@ -110,7 +114,7 @@ class DiaryMake1Activity : AppCompatActivity() {
 
     //뒤로가기 누르면 Dialog 띄우기
     override fun onBackPressed() {
-        val dialog = DiaryStopDialogFragment()
+        val dialog = DiaryStopDialogFragment(isDiary)
         dialog.show(supportFragmentManager, "diaryStopDialog")
     }
 
