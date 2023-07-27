@@ -2,6 +2,7 @@ package com.example.savvy_android.plan.fragment
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
@@ -19,36 +20,27 @@ import com.example.savvy_android.R
 import com.example.savvy_android.plan.activity.PlanMakeActivity
 import com.example.savvy_android.plan.adapter.PlanListAdapter
 import com.example.savvy_android.databinding.FragmentPlanBinding
-import com.example.savvy_android.plan.PlanItemData
+import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.plan.PlanItemTouchCallback
+import com.example.savvy_android.plan.data.list.PlanListResponse
+import com.example.savvy_android.plan.data.list.PlanListResult
+import com.example.savvy_android.plan.service.PlanListService
 import com.example.savvy_android.utils.alarm.AlarmActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class PlanFragment : Fragment() {
     private lateinit var binding: FragmentPlanBinding
     private lateinit var planListAdapter: PlanListAdapter
-    private var planListData = arrayListOf<PlanItemData>()
+    private var planListData = arrayListOf<PlanListResult>()
     private val planTouchSimpleCallback = PlanItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(planTouchSimpleCallback)
-    private var userName = "나"
-
-    // 임시 데이터
-    private var tmpDateList = arrayListOf(
-        "2023.06.01",
-        "2023.06.02",
-        "2023.06.03",
-        "2023.06.04",
-        "2023.06.05",
-        "2023.06.06",
-        "2023.06.07",
-        "2023.06.08",
-        "2023.06.09",
-        "2023.06.10",
-    )
-    private var tmpNameList = arrayListOf(
-        "나", "셰이나", "루나", "나", "루나", "루나", "셰이나", "나", "셰이나", "루나"
-    )
-    // 여기 사이 dummy 데이터 삭제해야함.
+    private lateinit var sharedPreferences: SharedPreferences
+    private var nickname = "이프"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -56,6 +48,9 @@ class PlanFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentPlanBinding.inflate(inflater, container, false)
+
+        sharedPreferences =
+            activity?.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
 
         // 알람 버튼 클릭시 알람 페이지 연결
         binding.planAlarm.setOnClickListener {
@@ -81,7 +76,7 @@ class PlanFragment : Fragment() {
             PlanListAdapter(
                 binding.planRecycle,
                 planListData,
-                userName,
+                nickname,
                 requireActivity().supportFragmentManager,
                 true
             )
@@ -102,6 +97,7 @@ class PlanFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        //
 
         val hasAlarm = true
         if (hasAlarm)
@@ -110,22 +106,10 @@ class PlanFragment : Fragment() {
             binding.planAlarm.setImageResource(R.drawable.ic_alarm_x)
 
 
-        // 임시 데이터 목록
-        for (i: Int in 0 until tmpDateList.size) {
-            planListAdapter.addPlan(
-                PlanItemData(
-                    i,
-                    "하와이 여행 ${i + 1}",
-                    tmpDateList[i],
-                    tmpNameList[i],
-                )
-            )
-        }
-
         // 검색 기능
         binding.planSearchBtn.setOnClickListener {
-            Log.e("TEST", "검색 버튼 눌림")
-            searchPlanList(binding.planSearchEdit.text.toString())
+            planListAdapter.clearList() // 리스트 정보 초기화
+            planListAPI(4, binding.planSearchEdit.text.toString())
         }
 
         // 전체보기 클릭 이벤트
@@ -133,7 +117,8 @@ class PlanFragment : Fragment() {
             btnClickColors(true, binding.planFilterBtn1)
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
-            filterPlanList(1)
+            planListAdapter.clearList() // 리스트 정보 초기화
+            planListAPI(1, null)
         }
 
         // 나의 계획서 클릭 이벤트
@@ -141,7 +126,8 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn1)
             btnClickColors(true, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
-            filterPlanList(2)
+            planListAdapter.clearList() // 리스트 정보 초기화
+            planListAPI(2, null)
         }
 
         // 스크랩 클릭 이벤트
@@ -149,7 +135,8 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn1)
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(true, binding.planFilterBtn3)
-            filterPlanList(3)
+            planListAdapter.clearList() // 리스트 정보 초기화
+            planListAPI(3, null)
         }
 
     }
@@ -186,36 +173,212 @@ class PlanFragment : Fragment() {
         }
     }
 
-    // 목록 검색 API
-    private fun searchPlanList(searchText: String) {
-        Log.e("TEST", "$searchText")
-        Log.e("TEST", "$planListData")
-        // 검색 단어를 포함하는지 확인
-        // 검색 API
-    }
+    // 필터 & 검색으로 인한 목록 변경 API
+    private fun planListAPI(
+        type: Int,
+        searchWord: String?,
+    ) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-    // 필터로 인한 목록 변경 API
-    private fun filterPlanList(filterType: Int) {
-        when (filterType) {
+        // API interface instance 생성
+        val planListService = retrofit.create(PlanListService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // GET 요청
+        when (type) {
+            // 목록 (전체보기)
             1 -> {
-                Log.e("TEST", "1")
-                Log.e("TEST", "$planListData")
-            }
+                planListService.planListAll(token = accessToken)
+                    .enqueue(object : Callback<PlanListResponse> {
+                        override fun onResponse(
+                            call: Call<PlanListResponse>,
+                            response: Response<PlanListResponse>,
+                        ) {
+                            if (response.isSuccessful) {
+                                val planResponse = response.body()
+                                // 서버 응답 처리 로직 작성
+                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                    for (result in planResponse.result) {
+                                        planListAdapter.addPlan(
+                                            PlanListResult(
+                                                id = result.id,
+                                                title = result.title,
+                                                updated_at = result.updated_at,
+                                                nickname = result.nickname
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // 응답 에러 코드 분류
+                                    planResponse?.let {
+                                        MainActivity.errorCodeList(
+                                            it.code,
+                                            it.message,
+                                            "PLAN",
+                                            "ALL"
+                                        )
+                                    }
+                                }
+                            } else {
+                                Log.e(
+                                    "PLAN",
+                                    "[PLAN ALL] API 호출 실패 - 응답 코드: ${response.code()}"
+                                )
+                            }
+                        }
 
+                        override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
+                            // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                            Log.e("PLAN", "[PLAN ALL] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                        }
+                    })
+            }
+            // 목록 (나의 계획서)
             2 -> {
-                Log.e("TEST", "2")
-                Log.e("TEST", "$planListData")
-            }
+                planListService.planListMine(token = accessToken)
+                    .enqueue(object : Callback<PlanListResponse> {
+                        override fun onResponse(
+                            call: Call<PlanListResponse>,
+                            response: Response<PlanListResponse>,
+                        ) {
+                            if (response.isSuccessful) {
+                                val planResponse = response.body()
+                                // 서버 응답 처리 로직 작성
+                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                    for (result in planResponse.result) {
+                                        planListAdapter.addPlan(
+                                            PlanListResult(
+                                                id = result.id,
+                                                title = result.title,
+                                                updated_at = result.updated_at,
+                                                nickname = null
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // 응답 에러 코드 분류
+                                    planResponse?.let {
+                                        MainActivity.errorCodeList(
+                                            it.code,
+                                            it.message,
+                                            "PLAN",
+                                            "MINE"
+                                        )
+                                    }
+                                }
+                            } else {
+                                Log.e(
+                                    "PLAN",
+                                    "[PLAN MINE] API 호출 실패 - 응답 코드: ${response.code()}"
+                                )
+                            }
+                        }
 
+                        override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
+                            // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                            Log.e("PLAN", "[PLAN MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                        }
+                    })
+            }
+            // 목록 (스크랩)
             3 -> {
-                Log.e("TEST", "3")
-                Log.e("TEST", "$planListData")
-            }
+                planListService.planListScrap(token = accessToken)
+                    .enqueue(object : Callback<PlanListResponse> {
+                        override fun onResponse(
+                            call: Call<PlanListResponse>,
+                            response: Response<PlanListResponse>,
+                        ) {
+                            if (response.isSuccessful) {
+                                val planResponse = response.body()
+                                // 서버 응답 처리 로직 작성
+                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                    for (result in planResponse.result) {
+                                        planListAdapter.addPlan(
+                                            PlanListResult(
+                                                id = result.id,
+                                                title = result.title,
+                                                updated_at = result.updated_at,
+                                                nickname = result.nickname
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // 응답 에러 코드 분류
+                                    planResponse?.let {
+                                        MainActivity.errorCodeList(
+                                            it.code,
+                                            it.message,
+                                            "PLAN",
+                                            "SCRAP"
+                                        )
+                                    }
+                                }
+                            } else {
+                                Log.e(
+                                    "PLAN",
+                                    "[PLAN SCRAP] API 호출 실패 - 응답 코드: ${response.code()}"
+                                )
+                            }
+                        }
 
-            else -> {
-                Log.e("TEST", "오류")
+                        override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
+                            // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                            Log.e("PLAN", "[PLAN SCRAP] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                        }
+                    })
+            }
+            // 검색
+            4 -> {
+                planListService.planListSearch(token = accessToken, word = searchWord!!)
+                    .enqueue(object : Callback<PlanListResponse> {
+                        override fun onResponse(
+                            call: Call<PlanListResponse>,
+                            response: Response<PlanListResponse>,
+                        ) {
+                            if (response.isSuccessful) {
+                                val planResponse = response.body()
+                                // 서버 응답 처리 로직 작성
+                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                    for (result in planResponse.result) {
+                                        planListAdapter.addPlan(
+                                            PlanListResult(
+                                                id = result.id,
+                                                title = result.title,
+                                                updated_at = result.updated_at,
+                                                nickname = result.nickname
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    // 응답 에러 코드 분류
+                                    planResponse?.let {
+                                        MainActivity.errorCodeList(
+                                            it.code,
+                                            it.message,
+                                            "PLAN",
+                                            "SEARCH"
+                                        )
+                                    }
+                                }
+                            } else {
+                                Log.e(
+                                    "PLAN",
+                                    "[PLAN SEARCH] API 호출 실패 - 응답 코드: ${response.code()}"
+                                )
+                            }
+                        }
+
+                        override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
+                            // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                            Log.e("PLAN", "[PLAN SEARCH] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                        }
+                    })
             }
         }
     }
-
 }

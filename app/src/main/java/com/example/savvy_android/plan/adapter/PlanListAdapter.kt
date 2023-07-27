@@ -10,14 +10,14 @@ import android.view.ViewTreeObserver
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.plan.activity.PlanDetailActivity
-import com.example.savvy_android.plan.PlanItemData
 import com.example.savvy_android.databinding.ItemPlanBinding
+import com.example.savvy_android.plan.data.list.PlanListResult
 import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
 
 
 class PlanListAdapter(
     private val recyclerView: RecyclerView,
-    private var planList: ArrayList<PlanItemData>,
+    private var planList: ArrayList<PlanListResult>,
     private val myName: String,
     private val fragmentManager: FragmentManager,
     private val isPlan: Boolean,
@@ -57,8 +57,8 @@ class PlanListAdapter(
 
         val data = planList[holder.adapterPosition]
         holder.title.text = data.title
-        holder.date.text = data.date
-        holder.user.text = if (data.user == myName) "" else data.user
+        holder.date.text = data.updated_at
+        holder.user.text = if (data.nickname == myName) "" else data.nickname
 
         // 숨겨진 삭제 버튼 클릭 이벤트
         holder.hideO.setOnClickListener {
@@ -111,7 +111,7 @@ class PlanListAdapter(
     override fun getItemCount(): Int = planList.size
 
     // 데이터 추가
-    fun addPlan(insertData: PlanItemData) {
+    fun addPlan(insertData: PlanListResult) {
         planList.add(insertData)
         notifyItemInserted(planList.size)
     }
@@ -122,6 +122,11 @@ class PlanListAdapter(
             planList.removeAt(position)
             notifyItemRemoved(position)
         }
+    }
+
+    fun clearList(){
+        planList.clear() // 데이터 리스트를 비움
+        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
 
 

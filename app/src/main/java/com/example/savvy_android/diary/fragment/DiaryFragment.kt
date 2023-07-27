@@ -29,19 +29,6 @@ class DiaryFragment : Fragment() {
     private val diaryTouchSimpleCallback = DiaryItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(diaryTouchSimpleCallback)
 
-    // 임시 데이터
-    private var tmpPhotoList = arrayListOf(
-        1, 2, 3, 4, 5
-    )
-    private var tmpDateList = arrayListOf(
-        "2023.06.01",
-        "2023.06.02",
-        "2023.06.03",
-        "2023.06.04",
-        "2023.06.05",
-    )
-    // 여기 사이 dummy 데이터 삭제해야함.
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -101,22 +88,6 @@ class DiaryFragment : Fragment() {
             binding.diaryAlarm.setImageResource(R.drawable.ic_alarm_o)
         else
             binding.diaryAlarm.setImageResource(R.drawable.ic_alarm_x)
-
-        // 임시 데이터 목록
-        for (i: Int in 0 until tmpDateList.size) {
-            diaryListAdapter.addPlan(
-                DiaryItemData(
-                    i,
-                    "파리 여행",
-                    tmpDateList[i],
-                    100,
-                    100,
-                    tmpPhotoList[i],
-                    R.drawable.ic_launcher_background,
-                    true
-                )
-            )
-        }
 
         // 검색 기능
         binding.diarySearchBtn.setOnClickListener {

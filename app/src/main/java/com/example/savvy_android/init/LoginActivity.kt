@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityLoginBinding
-import com.example.savvy_android.init.data.LoginRequest
 import com.example.savvy_android.init.data.LoginResponse
 import com.example.savvy_android.init.service.LoginService
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
@@ -74,14 +73,12 @@ class LoginActivity : AppCompatActivity() {
 
                     val loginService = retrofit.create(LoginService::class.java)
 
-                    val accessToken = token.accessToken
-
-                    // 로그인 요청을 위한 데이터 객체 생성
-                    val loginRequest = LoginRequest(accessToken)
-
                     // 로그인 API 호출
-                    loginService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
-                        override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                    loginService.login(token.accessToken).enqueue(object : Callback<LoginResponse> {
+                        override fun onResponse(
+                            call: Call<LoginResponse>,
+                            response: Response<LoginResponse>,
+                        ) {
                             if (response.isSuccessful) {
                                 val loginResponse = response.body()
                                 // 서버 응답 처리 로직 작성
@@ -98,8 +95,11 @@ class LoginActivity : AppCompatActivity() {
                                     val errorMessage = loginResponse?.message ?: "로그인 실패"
                                     Log.e("LOGIN", "로그인 실패 - 서버 메시지: $errorMessage")
 
-                                    val profileIntent = Intent(this@LoginActivity, ProfileSettingActivity::class.java)
-                                    profileIntent.putExtra("accessToken", accessToken)
+                                    val profileIntent = Intent(
+                                        this@LoginActivity,
+                                        ProfileSettingActivity::class.java
+                                    )
+                                    profileIntent.putExtra("kakaoToken", token.accessToken)
                                     startActivity(profileIntent)
                                 }
                             } else {
@@ -143,45 +143,47 @@ class LoginActivity : AppCompatActivity() {
 
                         val loginService = retrofit.create(LoginService::class.java)
 
-                        val accessToken = token.accessToken
-
-                        // 로그인 요청을 위한 데이터 객체 생성
-                        val loginRequest = LoginRequest(accessToken)
-
                         // 로그인 API 호출
-                        loginService.login(loginRequest).enqueue(object : Callback<LoginResponse> {
-                            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                                if (response.isSuccessful) {
-                                    val loginResponse = response.body()
-                                    // 서버 응답 처리 로직 작성
-                                    if (loginResponse?.isSuccess == true) {
-                                        val serverToken = loginResponse.result.token
-                                        Log.d("LOGIN", "로그인 성공 - 서버에서 받은 토큰: $serverToken")
+                        loginService.login(token.accessToken)
+                            .enqueue(object : Callback<LoginResponse> {
+                                override fun onResponse(
+                                    call: Call<LoginResponse>,
+                                    response: Response<LoginResponse>,
+                                ) {
+                                    if (response.isSuccessful) {
+                                        val loginResponse = response.body()
+                                        // 서버 응답 처리 로직 작성
+                                        if (loginResponse?.isSuccess == true) {
+                                            val serverToken = loginResponse.result.token
+                                            Log.d("LOGIN", "로그인 성공 - 서버에서 받은 토큰: $serverToken")
 
-                                        // 서버 토큰을 SharedPreferences에 저장
-                                        saveServerToken(serverToken)
+                                            // 서버 토큰을 SharedPreferences에 저장
+                                            saveServerToken(serverToken)
 
-                                        // 홈 화면으로 연결
-                                        moveToMainActivity()
+                                            // 홈 화면으로 연결
+                                            moveToMainActivity()
+                                        } else {
+                                            val errorMessage = loginResponse?.message ?: "로그인 실패"
+                                            Log.e("LOGIN", "로그인 실패 - 서버 메시지: $errorMessage")
+
+                                            val profileIntent = Intent(
+                                                this@LoginActivity,
+                                                ProfileSettingActivity::class.java
+                                            )
+                                            profileIntent.putExtra("accessToken", token.accessToken)
+                                            profileIntent.putExtra("isMyPage", false)
+                                            startActivity(profileIntent)
+                                        }
                                     } else {
-                                        val errorMessage = loginResponse?.message ?: "로그인 실패"
-                                        Log.e("LOGIN", "로그인 실패 - 서버 메시지: $errorMessage")
-
-                                        val profileIntent = Intent(this@LoginActivity, ProfileSettingActivity::class.java)
-                                        profileIntent.putExtra("accessToken", accessToken)
-                                        profileIntent.putExtra("isMyPage",false)
-                                        startActivity(profileIntent)
+                                        Log.e("LOGIN", "API 호출 실패 - 응답 코드: ${response.code()}")
                                     }
-                                } else {
-                                    Log.e("LOGIN", "API 호출 실패 - 응답 코드: ${response.code()}")
                                 }
-                            }
 
-                            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                                // 네트워크 연결 실패 등 호출 실패 시 처리 로직
-                                Log.e("LOGIN", "API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-                            }
-                        })
+                                override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                                    Log.e("LOGIN", "API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                                }
+                            })
                     }
                 }
             } else {
@@ -196,6 +198,7 @@ class LoginActivity : AppCompatActivity() {
         editor.putString("SERVER_TOKEN_KEY", serverToken)
         editor.apply()
     }
+
     private fun moveToMainActivity() {
         val intent = Intent(this, MainActivity::class.java)
         // 홈 화면으로 연결되면 이전에 존재하던 splash, login activity 종료
