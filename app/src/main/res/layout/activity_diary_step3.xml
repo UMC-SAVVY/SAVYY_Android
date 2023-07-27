@@ -180,6 +180,7 @@
                 android:layout_marginVertical="10dp"
                 android:background="@drawable/border_rectangle_gray"
                 android:clipToPadding="true"
+                android:minHeight="400dp"
                 android:nestedScrollingEnabled="false"
                 android:padding="11dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"

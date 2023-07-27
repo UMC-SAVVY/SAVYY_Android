@@ -385,6 +385,7 @@
             android:id="@+id/mypage_setting2"
             android:layout_width="match_parent"
             android:layout_height="45dp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/mypage_setting1">
 
             <TextView

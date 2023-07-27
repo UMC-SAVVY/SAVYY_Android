@@ -63,28 +63,28 @@ class DetailAdapter(
                 .into(holder.image)
 
             // 장소가 장소 저장함에 있을 때
-            if (hasPlace!!) {
-                holder.placeIcon.setColorFilter(
-                    ContextCompat.getColor(
-                        holder.itemView.context,
-                        R.color.main
-                    )
-                )
-            } else {
-                holder.placeIcon.setColorFilter(
-                    ContextCompat.getColor(
-                        holder.itemView.context,
-                        R.color.basic_gray
-                    )
-                )
-            }
+//            if (hasPlace!!) {
+//                holder.placeIcon.setColorFilter(
+//                    ContextCompat.getColor(
+//                        holder.itemView.context,
+//                        R.color.main
+//                    )
+//                )
+//            } else {
+//                holder.placeIcon.setColorFilter(
+//                    ContextCompat.getColor(
+//                        holder.itemView.context,
+//                        R.color.basic_gray
+//                    )
+//                )
+//            }
 
             // 장소 이름
             holder.placeName.text = placeName
 
             // 장소 cardView 클릭 이벤트
             holder.placeCard.setOnClickListener {
-                // 구글맵과 연결
+                // 구글맵과 연결 (기능 연기)
             }
         }
     }

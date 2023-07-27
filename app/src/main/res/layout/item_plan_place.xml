@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/travel_plan_view_place"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="12dp"
-        >
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/circle_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/ic_circle_main"
@@ -40,10 +39,10 @@
                 android:text="1"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="@id/ic_circle_main"
+                app:layout_constraintBottom_toBottomOf="@id/ic_circle_main"
                 app:layout_constraintEnd_toEndOf="@id/ic_circle_main"
-                app:layout_constraintTop_toTopOf="@id/ic_circle_main"
-                app:layout_constraintBottom_toBottomOf="@id/ic_circle_main" />
+                app:layout_constraintStart_toStartOf="@id/ic_circle_main"
+                app:layout_constraintTop_toTopOf="@id/ic_circle_main" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -52,29 +51,27 @@
             android:id="@+id/travel_plan_view_time_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:fontFamily="@font/pretendard_medium"
             android:text="11:00 ~ 15:00"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@+id/circle_number"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="10dp"
-            />
+            app:layout_constraintStart_toEndOf="@+id/circle_number"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/travel_plan_view_place_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:fontFamily="@font/pretendard_semi_bold"
             android:text="루브르 박물관"
             android:textColor="@android:color/black"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@+id/travel_plan_view_time_tv"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="10dp"
-            />
+            app:layout_constraintStart_toEndOf="@+id/travel_plan_view_time_tv"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <ImageView
@@ -82,10 +79,10 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:src="@drawable/ic_map"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -94,20 +91,20 @@
         android:id="@+id/recyclerview_view_checklist"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/travel_plan_view_place"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constrainedHeight="true"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        app:layout_constraintTop_toBottomOf="@id/travel_plan_view_place" />
 
     <View
         android:id="@+id/line"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/basic_gray"
-        app:layout_constraintTop_toBottomOf="@id/recyclerview_view_checklist"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="9dp"
+        android:layout_marginTop="11dp"
         android:layout_marginEnd="9dp"
-        android:layout_marginTop="11dp"/>
+        android:background="@color/basic_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recyclerview_view_checklist" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

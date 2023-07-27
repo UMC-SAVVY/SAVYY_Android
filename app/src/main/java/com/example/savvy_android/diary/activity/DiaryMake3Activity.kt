@@ -27,8 +27,6 @@ class DiaryMake3Activity : AppCompatActivity() {
     private var diaryDetailData = arrayListOf<DiaryDetailItemData>()
     private var isDiary: Boolean = true
 
-    private val SELECT_PLACE_REQUEST_CODE = 100
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -36,7 +34,7 @@ class DiaryMake3Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         // 시작된 fragment 정보 받기
-        isDiary = intent.getBooleanExtra("isDiary",true)
+        isDiary = intent.getBooleanExtra("isDiary", true)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -57,7 +55,7 @@ class DiaryMake3Activity : AppCompatActivity() {
 
         binding.diaryNextBtn.setOnClickListener {
             val intent = Intent(this, DiaryMake4Activity::class.java)
-            intent.putExtra("isDiary",isDiary)
+            intent.putExtra("isDiary", isDiary)
             startActivity(intent)
         }
 
@@ -85,7 +83,7 @@ class DiaryMake3Activity : AppCompatActivity() {
         binding.diaryStep3Tv.text = spannableString
 
         //다이어리 내용 리사이클뷰 리스트
-        make3Adapter = Make3Adapter(diaryDetailData)
+        make3Adapter = Make3Adapter(this, diaryDetailData)
         binding.diaryDetailRecycle.adapter = make3Adapter
         binding.diaryDetailRecycle.layoutManager = LinearLayoutManager(this)
 

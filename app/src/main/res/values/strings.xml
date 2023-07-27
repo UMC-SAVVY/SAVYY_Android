@@ -11,4 +11,5 @@
     <string name="check_duplicate">중복확인</string>
     <string name="plz_enter_search">검색어를 입력해주세요</string>
     <string name="plz_enter_title">제목을 입력해주세요</string>
+    <string name="plz_enter_place_name">장소 정보 입력하기</string>
 </resources>

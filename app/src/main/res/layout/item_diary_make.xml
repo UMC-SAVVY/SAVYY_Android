@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:background="@null"
         android:fontFamily="@font/pretendard_medium"
-        android:lineSpacingExtra="5sp"
         android:hint="내용을 작성해주세요"
+        android:lineSpacingExtra="5sp"
         android:textColor="@color/black"
         android:textSize="15sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,33 +65,39 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/item_diary_place_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
+                android:paddingHorizontal="15dp"
                 android:paddingVertical="3dp">
 
                 <ImageView
                     android:id="@+id/item_diary_place_icon"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
+                    android:layout_marginEnd="6dp"
                     android:importantForAccessibility="no"
                     android:padding="10dp"
                     android:scaleType="center"
                     android:src="@drawable/ic_plus_round"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/item_diary_place_name"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
+                <EditText
                     android:id="@+id/item_diary_place_name"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="6dp"
+                    android:background="@null"
+                    android:enabled="false"
                     android:fontFamily="@font/pretendard_medium"
-                    android:gravity="center"
-                    android:text="장소 추가하기"
+                    android:hint="@string/plz_enter_place_name"
+                    android:singleLine="true"
+                    android:text="@string/plz_enter_place_name"
                     android:textColor="@color/black"
                     app:layout_constraintBottom_toBottomOf="@id/item_diary_place_icon"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/item_diary_place_icon"
                     app:layout_constraintTop_toTopOf="@id/item_diary_place_icon" />
 
