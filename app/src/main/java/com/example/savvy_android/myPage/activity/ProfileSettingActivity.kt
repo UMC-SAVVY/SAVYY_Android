@@ -25,6 +25,7 @@ import com.example.savvy_android.databinding.ActivityProfileSettingBinding
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.init.data.SignupRequest
 import com.example.savvy_android.init.data.SignupResponse
+import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.init.service.SignupService
 import com.example.savvy_android.plan.activity.PlanDetailActivity
 import retrofit2.Callback
@@ -171,54 +172,67 @@ class ProfileSettingActivity : AppCompatActivity() {
 
         // 회원 가입 버튼 클릭 이벤트
         binding.profileSignupBtn.setOnClickListener {
-
-            val accessToken = intent.getStringExtra("accessToken")
-
-            if (accessToken != null) {
+            val kakaoToken = intent.getStringExtra("kakaoToken")
+            if (kakaoToken != null) {
                 val nickname = binding.profileNameEdit.text.toString()
                 val picUrl = ""
                 val intro = binding.profileIntroEdit.text.toString()
 
-                val signupRequest = SignupRequest(accessToken, picUrl, nickname, intro)
+                val signupRequest = SignupRequest(kakaoToken, picUrl, nickname, intro)
 
                 // 회원가입 API 호출
                 signupService.signup(signupRequest).enqueue(object : Callback<SignupResponse> {
                     override fun onResponse(
                         call: retrofit2.Call<SignupResponse>,
-                        response: retrofit2.Response<SignupResponse>
+                        response: retrofit2.Response<SignupResponse>,
                     ) {
                         if (response.isSuccessful) {
                             val signupResponse = response.body()
-                            if (signupResponse != null && signupResponse.isSuccess) {
-
+                            if (signupResponse?.isSuccess == true) {
                                 val serverToken = signupResponse.result.token
-                                Log.d("SIGNUP", "회원가입 성공 - 서버에서 받은 토큰: $serverToken")
+                                Log.d(
+                                    "SIGNUP",
+                                    "[SIGNUP] 회원가입 성공 - 서버에서 받은 토큰: $serverToken"
+                                )
 
                                 saveServerToken(serverToken) // 서버에서 받은 토큰 값
 
-                                val intent = Intent(this@ProfileSettingActivity, MainActivity::class.java)
+                                val intent =
+                                    Intent(this@ProfileSettingActivity, MainActivity::class.java)
+                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 startActivity(intent)
                                 finish()
                             } else {
-                                val errorMessage = signupResponse?.message
-                                Log.e("SIGNUP", "회원가입 실패 - 서버 메시지: $errorMessage")
+                                signupResponse?.let {
+                                    errorCodeList(
+                                        errorCode = it.code,
+                                        message = it.message,
+                                        type = "SIGNUP",
+                                        detailType = null,
+                                        intentData = null
+                                    )
+                                }
                             }
                         } else {
-                            Log.e("SIGNUP", "API 호출 실패 - 응답 코드: ${response.code()}")
+                            Log.e(
+                                "SIGNUP",
+                                "[SIGNUP] API 호출 실패 - 응답 코드: ${response.code()}"
+                            )
                         }
                     }
 
                     override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
-                        Log.e("SIGNUP", "API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                        Log.e(
+                            "SIGNUP",
+                            "[SIGNUP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                        )
                     }
                 })
             } else {
-                Log.e("SIGNUP", "API 호출 실패 - AccessToken이 없습니다.")
+                Log.e("SIGNUP", "[SIGNUP] API 호출 실패 - AccessToken이 없습니다.")
             }
         }
     }
-
-
 
 
     // 갤러리에서 선택한 이미지 결과 가져오기

@@ -61,4 +61,9 @@ dependencies {
 
     // 당겨서 새로고침
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+
+    //네트워크 통신 및 json파싱 라이브러리
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
 }

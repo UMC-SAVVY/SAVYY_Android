@@ -41,6 +41,7 @@ class PlanFragment : Fragment() {
     private val itemTouchHelper = ItemTouchHelper(planTouchSimpleCallback)
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var nickname: String
+    private var currentType = 1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -94,15 +95,15 @@ class PlanFragment : Fragment() {
             startActivity(intent)
         }
 
-        // 초기 처음 생성될 때 목록(전체 보기) 불러오기
-        planListAdapter.clearList() // 리스트 정보 초기화
-        planListAPI(1, null)
-
         return binding.root
     }
 
     override fun onResume() {
         super.onResume()
+
+        // 생성될 때 목록 불러오기
+        planListAdapter.clearList() // 리스트 정보 초기화
+        planListAPI(currentType, null)
 
         val hasAlarm = true
         if (hasAlarm)
@@ -123,7 +124,8 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
             planListAdapter.clearList() // 리스트 정보 초기화
-            planListAPI(1, null)
+            currentType = 1
+            planListAPI(currentType, null)
         }
 
         // 나의 계획서 클릭 이벤트
@@ -132,7 +134,8 @@ class PlanFragment : Fragment() {
             btnClickColors(true, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
             planListAdapter.clearList() // 리스트 정보 초기화
-            planListAPI(2, null)
+            currentType = 2
+            planListAPI(currentType, null)
         }
 
         // 스크랩 클릭 이벤트
@@ -141,7 +144,8 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(true, binding.planFilterBtn3)
             planListAdapter.clearList() // 리스트 정보 초기화
-            planListAPI(3, null)
+            currentType = 3
+            planListAPI(currentType, null)
         }
 
     }

@@ -1,7 +1,7 @@
 package com.example.savvy_android.init.data
 
 data class SignupRequest(
-    val accessToken : String,
+    val kakaoToken : String,
     val pic_url: String,
     val nickname: String,
     val intro: String
