@@ -7,8 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemPlanDateBinding
+import com.example.savvy_android.plan.data.Timetable
 
-class DetailDateAdapter(private val items: MutableList<String>) :
+class DetailDateAdapter(private val items: MutableList<Timetable>) :
     RecyclerView.Adapter<DetailDateAdapter.ViewDateViewHolder>() {
     private val placeMap: MutableMap<Int, DetailPlaceAdapter> = mutableMapOf()
     private var expandedPosition = 0 // 첫 번째 아이템의 인덱스
@@ -25,11 +26,14 @@ class DetailDateAdapter(private val items: MutableList<String>) :
         }
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String) {
+        fun bind(item: Timetable) {
             // 아이템 데이터 바인딩 처리
 
+            binding.travelPlanViewDateTv.text = item.date
+
+
             // placeAdd RecyclerView 설정
-            viewplaceAdapter = DetailPlaceAdapter(mutableListOf("", ""))
+            viewplaceAdapter = DetailPlaceAdapter(item.schedule)
             placeMap[adapterPosition] = viewplaceAdapter // adapterPosition 사용
             binding.recyclerviewViewPlace.adapter = viewplaceAdapter
             binding.recyclerviewViewPlace.layoutManager = LinearLayoutManager(itemView.context)
@@ -86,5 +90,10 @@ class DetailDateAdapter(private val items: MutableList<String>) :
     // 데이터 아이템 개수 반환
     override fun getItemCount(): Int {
         return items.size
+    }
+
+    fun addAllItems(item: MutableList<Timetable>) {
+        items.addAll(item)
+        this.notifyDataSetChanged()
     }
 }

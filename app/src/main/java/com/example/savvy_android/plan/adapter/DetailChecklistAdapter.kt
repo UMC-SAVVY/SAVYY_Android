@@ -5,20 +5,23 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemPlanDetailChecklistBinding
+import com.example.savvy_android.plan.data.Checklist
 
-class DetailChecklistAdapter(private val items: MutableList<String>) :
+class DetailChecklistAdapter(private val items: MutableList<Checklist>) :
     RecyclerView.Adapter<DetailChecklistAdapter.ViewCheckListViewHolder>() {
 
     inner class ViewCheckListViewHolder(private val binding: ItemPlanDetailChecklistBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        private var isClicked = false
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String) {
+        fun bind(item: Checklist) {
+
+            binding.travelPlanViewChecklistTv.text = item.contents
+
             binding.check.setOnClickListener {
                 // 클릭 시 Drawable 변경
-                isClicked = !isClicked
-                if (isClicked) {
+                item.is_checked = if (item.is_checked == 1) 0 else 1
+                if (item.is_checked == 1) {
                     // 클릭 시 Drawable 변경
                     binding.borderCircleGray.background = itemView.context.getDrawable(R.drawable.border_circle_main)
                     binding.checkmarkGray.setImageDrawable(itemView.context.getDrawable(R.drawable.ic_checkmark_main))
@@ -49,9 +52,4 @@ class DetailChecklistAdapter(private val items: MutableList<String>) :
         return items.size
     }
 
-    // CheckList 추가
-    fun addItem(item: String) {
-        items.add(item)
-        notifyItemInserted(items.size - 1)
-    }
 }

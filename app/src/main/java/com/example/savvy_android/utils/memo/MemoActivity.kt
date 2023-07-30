@@ -1,10 +1,13 @@
 package com.example.savvy_android.utils.memo
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -24,6 +27,19 @@ class MemoActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
+        // 메모 추가하기 인지, 메모 확인하기 인지 구분
+        val isMemoAdd = intent.getBooleanExtra("isMemoAdd", true)
+        if (isMemoAdd) { // 여행계획서 작성에서 연결 경우 (메모 추가하기)
+            binding.memoRegistrationBtn.visibility = View.VISIBLE
+        } else { // 여행계획서 보기에서 연결 경우 (메모 확인하기)
+            binding.memoRegistrationBtn.visibility = View.GONE
+        }
+
+        val memoText = intent.getStringExtra("memoText")
+
+        // 메모 데이터를 띄워주기
+        binding.memoEdit.setText(memoText)
+
         //메모 입력 변화 이벤트 처리
         binding.memoEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -32,21 +48,27 @@ class MemoActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // 텍스트 변경 중 동작
-            }
-
-            override fun afterTextChanged(s: Editable?) {
                 val textLength = s?.length ?: 0
 
                 //한글자라도 입력하면 '등록'버튼의 색이 바뀜
                 if (textLength > 0) {
-                    binding.memoEdit.setTextColor(Color.BLACK)
                     binding.memoRegistrationBtn.setTextColor(Color.parseColor("#FF5487"))
                 } else {
-                    binding.memoEdit.setTextColor(Color.parseColor("#5F5F5F"))
-                    binding.memoRegistrationBtn.setTextColor(Color.BLACK)
+                    binding.memoRegistrationBtn.setTextColor(Color.parseColor("#5F5F5F"))
                 }
             }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
         })
+
+        // 등록 버튼의 색 설정
+        if (memoText != null && memoText.isNotEmpty()) {
+            binding.memoRegistrationBtn.setTextColor(Color.parseColor("#FF5487"))
+        } else {
+            binding.memoRegistrationBtn.setTextColor(Color.parseColor("#5F5F5F"))
+        }
 
 
         // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 페이지로 돌아가기
@@ -58,8 +80,11 @@ class MemoActivity : AppCompatActivity() {
         binding.memoRegistrationBtn.setOnClickListener {
             val memoText = binding.memoEdit.text.toString().trim()
             if (memoText.isNotEmpty()) {
-                val intent = Intent(this, PlanMakeActivity::class.java)
-                startActivity(intent)
+
+                val resultIntent = Intent()
+                resultIntent.putExtra("memoText", memoText)
+                setResult(RESULT_OK, resultIntent)
+                finish()
             }
         }
     }

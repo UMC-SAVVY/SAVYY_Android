@@ -1,15 +1,20 @@
 package com.example.savvy_android.plan.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.databinding.ItemPlanMakeDateAddBinding
+import com.example.savvy_android.plan.data.Checklist
+import com.example.savvy_android.plan.data.Schedule
+import com.example.savvy_android.plan.data.Timetable
 import com.example.savvy_android.plan.dialog.DateDialogFragment
 import java.util.Calendar
 
-class MakeDateAddAdapter(private val data: MutableList<String>, private val fragmentManager: FragmentManager) :
+class MakeDateAddAdapter(private val data: MutableList<Timetable>,
+                         private val fragmentManager: FragmentManager) :
     RecyclerView.Adapter<MakeDateAddAdapter.ViewHolder>() {
     private val placeAddMap: MutableMap<Int, MakePlaceAddAdapter> = mutableMapOf()
     private var firstItemDate: Calendar? = null // 첫 번째 아이템의 날짜 저장
@@ -37,26 +42,36 @@ class MakeDateAddAdapter(private val data: MutableList<String>, private val frag
         private lateinit var placeAddAdapter: MakePlaceAddAdapter
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String, position: Int) {
+        fun bind(item: Timetable, position: Int) {
 
             // placeAdd RecyclerView 설정
-            placeAddAdapter = MakePlaceAddAdapter(mutableListOf(""), fragmentManager)
+            placeAddAdapter = MakePlaceAddAdapter(item.schedule, fragmentManager)
             placeAddMap[position] = placeAddAdapter
             binding.recyclerviewPlaceAdd.adapter = placeAddAdapter
             binding.recyclerviewPlaceAdd.layoutManager = LinearLayoutManager(itemView.context)
 
+            binding.travelDateTv.text = item.date
+
             // add_place_btn 클릭 시 새로운 장소 추가
             binding.addPlaceBtn.setOnClickListener {
-                val newItem = ""
-                placeAddAdapter.addItem(newItem)
+                val newSchedule = Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")
+                placeAddAdapter.addItem(newSchedule)
             }
 
-            // 아이템 삭제 버튼 클릭 시 해당 위치의 아이템을 제거하고 새로고침
-            binding.icX.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    data.removeAt(position)
-                    notifyItemRemoved(position)
+            if (position == 0) {
+                // 첫 번째 아이템인 경우에는 icX를 GONE으로 설정
+                binding.icX.visibility = View.GONE
+            } else {
+                // 첫 번째 아이템이 아닌 경우에는 icX를 보이도록 설정
+                binding.icX.visibility = View.VISIBLE
+
+                // 아이템 삭제 버튼 클릭 시 해당 위치의 아이템을 제거하고 새로고침
+                binding.icX.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        data.removeAt(position)
+                        notifyItemRemoved(position)
+                    }
                 }
             }
 
@@ -89,6 +104,13 @@ class MakeDateAddAdapter(private val data: MutableList<String>, private val frag
                 newDate.add(Calendar.DAY_OF_MONTH, position)  // position일 수 만큼 더한 날짜를 계산
                 binding.travelDateTv.text = formatDate(newDate)
             }
+
+            val updatedTimetable = Timetable(
+                date = binding.travelDateTv.text.toString(),
+                schedule = placeAddAdapter.getDataList() // MakePlaceAddAdapter의 데이터를 가져옴
+            )
+            data[position] = updatedTimetable
+
         }
 
         // 첫 번째 아이템이 아닌 경우, 새로운 날짜를 계산하여 travelDateTv에 표시
@@ -98,11 +120,16 @@ class MakeDateAddAdapter(private val data: MutableList<String>, private val frag
             val day = date.get(Calendar.DAY_OF_MONTH)
             return "$year.$month.$day"
         }
+
     }
     // DateAdd 추가
-    fun addItem(item: String) {
+    fun addItem(item: Timetable) {
         data.add(item)
         notifyItemInserted(data.size - 1)
+    }
+
+    fun getDataList(): MutableList<Timetable> {
+        return data
     }
 }
 

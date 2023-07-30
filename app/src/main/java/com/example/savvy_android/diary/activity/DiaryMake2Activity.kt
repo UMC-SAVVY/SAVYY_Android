@@ -15,6 +15,9 @@ import com.example.savvy_android.R
 import com.example.savvy_android.plan.adapter.MakeDateAddAdapter
 import com.example.savvy_android.databinding.ActivityDiaryStep2Binding
 import com.example.savvy_android.diary.dialog.DiaryStopDialogFragment
+import com.example.savvy_android.plan.data.Checklist
+import com.example.savvy_android.plan.data.Schedule
+import com.example.savvy_android.plan.data.Timetable
 
 class DiaryMake2Activity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryStep2Binding
@@ -43,7 +46,11 @@ class DiaryMake2Activity : AppCompatActivity() {
         val showDateAddItem = intent.getBooleanExtra("showDateAddItem", false)
         if (showDateAddItem) {
             // DateAdd 아이템 추가
-            dateAddAdapter.addItem("")
+//            dateAddAdapter.addItem("")
+
+            val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
+            dateAddAdapter.addItem(newTimetable)
+
         }
 
 
@@ -74,8 +81,12 @@ class DiaryMake2Activity : AppCompatActivity() {
 
         // add_date_btn 클릭 시 새로운 날짜 추가
         binding.addDateBtn.setOnClickListener {
-            val newItem = ""
-            dateAddAdapter.addItem(newItem)
+//            val newItem = ""
+//            dateAddAdapter.addItem(newItem)
+
+            val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
+            dateAddAdapter.addItem(newTimetable)
+
         }
 
 
