@@ -1,6 +1,8 @@
 package com.example.savvy_android.plan.adapter
 
 import android.content.Intent
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
@@ -8,9 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.utils.place.PlaceAddActivity
 import com.example.savvy_android.databinding.ItemPlaceAddBinding
+import com.example.savvy_android.plan.data.Checklist
+import com.example.savvy_android.plan.data.Schedule
 import com.example.savvy_android.plan.dialog.TimeDialogFragment
 
-class MakePlaceAddAdapter(private val data: MutableList<String>, private val fragmentManager: FragmentManager) :
+class MakePlaceAddAdapter(private val data: MutableList<Schedule>, private val fragmentManager: FragmentManager) :
     RecyclerView.Adapter<MakePlaceAddAdapter.ViewHolder>() {
     private val checkListMap: MutableMap<Int, MakeCheckListAdapter> = mutableMapOf()
 
@@ -39,13 +43,17 @@ class MakePlaceAddAdapter(private val data: MutableList<String>, private val fra
 
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: String, position: Int) {
+        fun bind(item: Schedule, position: Int) {
             // checkList RecyclerView 설정
-            checkListAdapter = MakeCheckListAdapter(mutableListOf("", ""))
+            checkListAdapter = MakeCheckListAdapter(item.checklist)
             checkListMap[position] = checkListAdapter
             binding.recyclerviewChecklist.adapter = checkListAdapter
             binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
 
+            // 기본으로 두 개의 빈 checklist 아이템 추가
+            if (item.checklist.size < 2) {
+                item.checklist.add(Checklist(null, "", 0))
+            }
 
             // 아이템 삭제 버튼 클릭 시 해당 위치의 아이템을 제거하고 새로고침
             binding.icX.setOnClickListener {
@@ -58,7 +66,7 @@ class MakePlaceAddAdapter(private val data: MutableList<String>, private val fra
 
             // addChecklistBtn 클릭 시 새로운 체크 리스트 추가
             binding.addChecklistBtn.setOnClickListener {
-                val newItem = ""
+                val newItem = Checklist(null, "", 0)
                 checkListAdapter.addItem(newItem)
             }
 
@@ -67,6 +75,18 @@ class MakePlaceAddAdapter(private val data: MutableList<String>, private val fra
                 val intent = Intent(binding.root.context, PlaceAddActivity::class.java)
                 binding.root.context.startActivity(intent)
             }
+
+            binding.placeNameEdit.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    data[position].place_name = s.toString()
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                }
+            })
 
 
             binding.travelPlanTime.setOnClickListener {
@@ -78,18 +98,33 @@ class MakePlaceAddAdapter(private val data: MutableList<String>, private val fra
 
                     binding.travelPlanTimeTv.text = formattedTime1
                     binding.travelPlanTimeTv3.text = formattedTime2
+
+                    val placeName = binding.placeNameEdit.text.toString()
+
+                    val updatedSchedule = Schedule(
+                        id = null,
+                        place_name = placeName,
+                        started_at = formattedTime1,
+                        finished_at = formattedTime2,
+                        checklist = checkListAdapter.getDataList()
+                    )
+                    data[position] = updatedSchedule
                 }
-
-
                 timeDialogFragment.show(fragmentManager, "TimeDialog")
             }
-
         }
     }
 
+
     // PlaceAdd 추가
-    fun addItem(item: String) {
+    fun addItem(item: Schedule) {
         data.add(item)
         notifyItemInserted(data.size - 1)
     }
+
+    fun getDataList(): MutableList<Schedule> {
+        return data
+    }
+
+
 }

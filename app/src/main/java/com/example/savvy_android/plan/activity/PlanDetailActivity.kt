@@ -1,7 +1,10 @@
 package com.example.savvy_android.plan.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -10,11 +13,22 @@ import com.example.savvy_android.R
 import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
 import com.example.savvy_android.databinding.ActivityPlanDetialBinding
+import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
+import com.example.savvy_android.plan.data.PlanDetailResponse
+import com.example.savvy_android.plan.data.Timetable
+import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
+import com.example.savvy_android.plan.service.PlanDetailService
 import com.example.savvy_android.utils.BottomSheetDialogFragment
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class PlanDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlanDetialBinding
     private lateinit var viewDateAdapter: DetailDateAdapter
+    private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,15 +39,12 @@ class PlanDetailActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
-        viewDateAdapter = DetailDateAdapter(mutableListOf("", "", ""))
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
+
+        val timetableList: MutableList<Timetable> = mutableListOf()
+        viewDateAdapter = DetailDateAdapter(timetableList)
         binding.recyclerviewViewDate.adapter = viewDateAdapter
         binding.recyclerviewViewDate.layoutManager = LinearLayoutManager(this)
-
-        // 메모 수정 클릭
-        binding.memoCheckBtn.setOnClickListener {
-            val intent = Intent(this, MemoActivity::class.java)
-            startActivity(intent)
-        }
 
         // 뒤로 가기 버튼 클릭
         binding.arrowLeftBtn.setOnClickListener {
@@ -53,6 +64,19 @@ class PlanDetailActivity : AppCompatActivity() {
             }
 
             override fun onDialogDeleteClicked() {
+                val dialog = PlanDeleteDialogFragment()
+
+                // 다이얼로그 버튼 클릭 이벤트 설정
+                dialog.setButtonClickListener(object :
+                    PlanDeleteDialogFragment.OnButtonClickListener {
+                    override fun onDialogPlanBtnOClicked() {
+                        finish()
+                    }
+
+                    override fun onDialogPlanBtnXClicked() {
+                    }
+                })
+                dialog.show(supportFragmentManager,"DiaryDeleteDialog")
             }
         })
 
@@ -60,7 +84,63 @@ class PlanDetailActivity : AppCompatActivity() {
         //option 클릭하면 bottom sheet
         binding.optionBtn.setOnClickListener {
             bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-
         }
+        planDetailAPI()
+    }
+
+    private fun planDetailAPI() {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val planDetailService = retrofit.create(PlanDetailService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        planDetailService.planDetail(serverToken).enqueue(object : Callback<PlanDetailResponse> {
+            override fun onResponse(call: Call<PlanDetailResponse>, response: Response<PlanDetailResponse>) {
+                if (response.isSuccessful) {
+                    val planDetailResponse = response.body()
+                    val isSuccess = planDetailResponse?.isSuccess
+                    val code = planDetailResponse?.code
+                    val message = planDetailResponse?.message
+                    if (planDetailResponse != null && planDetailResponse.isSuccess) {
+                        val planDetailResult = planDetailResponse.result
+                        // planDetailResult에 들어있는 데이터를 사용하여 작업
+                        Log.d("PlanDetailActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+
+                        binding.travelPlanViewTitleTv.text = planDetailResult.title
+                        binding.travelPlanViewUserTv.text = planDetailResult.nickname
+                        binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
+
+                        viewDateAdapter.addAllItems(planDetailResponse.result.timetable)
+
+                        // Memo 데이터를 MemoActivity로 전달
+                        val memoText = planDetailResult.memo
+                        binding.memoCheckBtn.setOnClickListener {
+                            val intent = Intent(this@PlanDetailActivity, MemoActivity::class.java)
+                            intent.putExtra("memoText", memoText) // 메모 데이터를 Intent에 추가하여 전달
+                            intent.putExtra("isMemoAdd", false)
+                            startActivity(intent)
+                        }
+
+                    } else {
+                        Log.d("PlanDetailActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                    }
+                } else {
+                    val errorCode = response.code()
+                    Log.d("PlanDetailActivity", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanDetailResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("PlanDetailActivity", "통신 실패 - ${t.message}")
+            }
+        })
     }
 }

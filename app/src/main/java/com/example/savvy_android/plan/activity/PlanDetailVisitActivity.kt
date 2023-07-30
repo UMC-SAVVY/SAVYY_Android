@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityPlanDetailVisitBinding
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
+import com.example.savvy_android.plan.data.Timetable
 import com.example.savvy_android.plan.dialog.PlanGetDialogFragment
 import com.example.savvy_android.plan.dialog.PlanScrapDialogFragment
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
@@ -27,7 +28,8 @@ class PlanDetailVisitActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
-        viewDateAdapter = DetailDateAdapter(mutableListOf("", "", ""))
+        val timetableList: MutableList<Timetable> = mutableListOf()
+        viewDateAdapter = DetailDateAdapter(timetableList)
         binding.recyclerviewViewDate.adapter = viewDateAdapter
         binding.recyclerviewViewDate.layoutManager = LinearLayoutManager(this)
 

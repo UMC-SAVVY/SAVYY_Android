@@ -15,6 +15,9 @@ import com.example.savvy_android.plan.adapter.MakeDateAddAdapter
 import com.example.savvy_android.databinding.ActivityPlanModifyBinding
 import com.example.savvy_android.databinding.DialogPlanModifyBinding
 import com.example.savvy_android.diary.dialog.ModifySaveDialogFragment
+import com.example.savvy_android.plan.data.Checklist
+import com.example.savvy_android.plan.data.Schedule
+import com.example.savvy_android.plan.data.Timetable
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
 class PlanModifyActivity : AppCompatActivity() {
@@ -31,7 +34,17 @@ class PlanModifyActivity : AppCompatActivity() {
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // RecyclerView에 PlanMakeAdapter 설정
-        dateAddAdapter = MakeDateAddAdapter(mutableListOf(""), supportFragmentManager)
+//        dateAddAdapter = MakeDateAddAdapter(mutableListOf(""), supportFragmentManager)
+        dateAddAdapter = MakeDateAddAdapter(mutableListOf(
+            Timetable("", mutableListOf(
+                Schedule(null, mutableListOf(
+                    Checklist(null, "", 0)
+                ), "", "", "")
+            ))
+        ), supportFragmentManager)
+        binding.recyclerviewDateAdd.adapter = dateAddAdapter
+        binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
+
         binding.recyclerviewDateAdd.adapter = dateAddAdapter
         binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
 
@@ -70,8 +83,12 @@ class PlanModifyActivity : AppCompatActivity() {
 
         // add_date_btn 클릭 시 새로운 날짜 추가
         binding.addDateBtn.setOnClickListener {
-            val newItem = ""
-            dateAddAdapter.addItem(newItem)
+//            val newItem = ""
+//            dateAddAdapter.addItem(newItem)
+
+            val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
+            dateAddAdapter.addItem(newTimetable)
+
         }
 
         // 뒤로가기 클릭 이벤트
