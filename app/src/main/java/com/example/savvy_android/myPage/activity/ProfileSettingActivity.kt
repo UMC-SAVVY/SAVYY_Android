@@ -39,8 +39,8 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var duplicateState = false  // 중복 여부
     private var introState = true   // 소개글 가능 여부
     private var signupState = false // 회원 가입 가능 여부
+    private var profileUrl = "" // 프로필 사진
     private lateinit var sharedPreferences: SharedPreferences
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -175,7 +175,7 @@ class ProfileSettingActivity : AppCompatActivity() {
             val kakaoToken = intent.getStringExtra("kakaoToken")
             if (kakaoToken != null) {
                 val nickname = binding.profileNameEdit.text.toString()
-                val picUrl = ""
+                val picUrl = profileUrl
                 val intro = binding.profileIntroEdit.text.toString()
 
                 val signupRequest = SignupRequest(kakaoToken, picUrl, nickname, intro)
@@ -196,7 +196,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 )
 
                                 saveServerToken(serverToken) // 서버에서 받은 토큰 값
-
+                                saveNickname(nickname)
                                 val intent =
                                     Intent(this@ProfileSettingActivity, MainActivity::class.java)
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -241,11 +241,11 @@ class ProfileSettingActivity : AppCompatActivity() {
     ) {
         // 결과 코드 OK, 결과값 not null 일 때
         if (it.resultCode == RESULT_OK && it.data != null) {
-            val uri = it.data!!.data    // 결과 값 저장
+            profileUrl = it.data!!.data.toString()    // 결과 값 저장
 
             // 선택한 이미지 profileImageIv에 보여주기
             Glide.with(this)
-                .load(uri)
+                .load(profileUrl)
                 .into(binding.profileImgIv)
         }
     }
@@ -297,5 +297,11 @@ class ProfileSettingActivity : AppCompatActivity() {
         editor.apply()
     }
 
+    private fun saveNickname(nickname: String) {
+        // 닉네임을 SharedPreferences에 저장
+        val editor = sharedPreferences.edit()
+        editor.putString("USER_NICKNAME", nickname)
+        editor.apply()
+    }
 
 }

@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="68dp"
         android:fontFamily="@font/pretendard_semi_bold"
-        android:text="“SAVVY”를 탈퇴하시겠어요?"
+        android:text="“SAVVY”를 로그아웃하시겠어요?"
         android:textColor="@color/black"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"

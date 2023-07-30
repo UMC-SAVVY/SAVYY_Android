@@ -149,10 +149,8 @@ class PlanListAdapter(
 
     // 데이터 삭제
     private fun removePlan(position: Int) {
-        if (position >= 0 && position < planList.size) {
-            planList.removeAt(position)
-            notifyItemRemoved(position)
-        }
+        planList.removeAt(position)
+        notifyDataSetChanged()
     }
 
     fun clearList() {

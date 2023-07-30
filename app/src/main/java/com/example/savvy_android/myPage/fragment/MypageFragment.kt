@@ -1,6 +1,8 @@
 package com.example.savvy_android.myPage.fragment
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -22,14 +24,17 @@ import com.google.android.material.tabs.TabLayoutMediator
 class MypageFragment : Fragment() {
     private lateinit var binding: FragmentMypageBinding
     private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private lateinit var sharedPreferences: SharedPreferences
     private var isSetting = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         binding = FragmentMypageBinding.inflate(inflater, container, false)
+
+        sharedPreferences = requireContext().getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
 
         // 뒤로 가기 버튼 클릭 이벤트
         binding.mypageArrowIc.setOnClickListener {
@@ -86,6 +91,10 @@ class MypageFragment : Fragment() {
 
         // 로그아웃 클릭 이벤트
         binding.mypageSetting6.setOnClickListener {
+            val editor = sharedPreferences.edit()
+            editor.putString("SERVER_TOKEN_KEY", null)
+            editor.putString("USER_NICKNAME", null)
+            editor.apply()
             val dialog = MypageLogoutDialogFragment()
             dialog.show(requireFragmentManager(), "logoutDialog")
         }

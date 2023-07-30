@@ -40,7 +40,7 @@ class SplashActivity : AppCompatActivity() {
             // 서버 토큰이 이미 존재하면 자동 로그인을 수행하고 MainActivity
             autoLoginAPI(serverToken)
         } else {
-            moveToLoginActivity()
+            animationDuring(false)
         }
     }
 
@@ -110,6 +110,7 @@ class SplashActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         startActivity(intent)
         finish()
+        overridePendingTransition(0, 0)
     }
 
     private fun moveToLoginActivity() {
@@ -117,6 +118,7 @@ class SplashActivity : AppCompatActivity() {
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         startActivity(intent)
         finish()
+        overridePendingTransition(0, 0)
     }
 
     private fun animationDuring(isSuccess: Boolean) {
