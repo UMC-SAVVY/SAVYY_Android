@@ -2,6 +2,7 @@ package com.example.savvy_android.diary.fragment
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
@@ -17,17 +18,26 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.example.savvy_android.R
 import com.example.savvy_android.diary.activity.DiaryMake1Activity
 import com.example.savvy_android.diary.adapter.DiaryListAdapter
-import com.example.savvy_android.diary.data.DiaryItemData
 import com.example.savvy_android.databinding.FragmentDiaryBinding
 import com.example.savvy_android.diary.DiaryItemTouchCallback
+import com.example.savvy_android.diary.data.list.DiaryListResponse
+import com.example.savvy_android.diary.data.list.DiaryListResult
+import com.example.savvy_android.diary.service.DiaryService
+import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.utils.alarm.AlarmActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class DiaryFragment : Fragment() {
     private lateinit var binding: FragmentDiaryBinding
     private lateinit var diaryListAdapter: DiaryListAdapter
-    private var diaryListData = arrayListOf<DiaryItemData>()
+    private var diaryListData = arrayListOf<DiaryListResult>()
     private val diaryTouchSimpleCallback = DiaryItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(diaryTouchSimpleCallback)
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,6 +45,9 @@ class DiaryFragment : Fragment() {
         savedInstanceState: Bundle?,
     ): View? {
         binding = FragmentDiaryBinding.inflate(inflater, container, false)
+
+        sharedPreferences =
+            activity?.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
 
         // 알람 버튼 클릭시 알람 페이지 연결
         binding.diaryAlarm.setOnClickListener {
@@ -55,7 +68,7 @@ class DiaryFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        // Plan Data & Adapter
+        // Diary Data & Adapter
         diaryListAdapter =
             DiaryListAdapter(
                 binding.diaryRecycle,
@@ -94,6 +107,10 @@ class DiaryFragment : Fragment() {
             Log.e("TEST", "검색 버튼 눌림")
             searchDiaryList(binding.diarySearchEdit.text.toString())
         }
+
+        // 목록 (나의 다이어리) 다시 불러오기
+        diaryListAdapter.clearList() // 리스트 정보 초기화
+        diaryListAPI()
     }
 
     // 클릭 가능 여부에 따른 button 배경 변경 함수
@@ -112,5 +129,69 @@ class DiaryFragment : Fragment() {
         Log.e("TEST", "$searchText")
         // 검색 단어를 포함하는지 확인
         // 검색 API
+    }
+
+    // 다이어리 목록(나의 다이어리) API
+    private fun diaryListAPI(){
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val diaryListService = retrofit.create(DiaryService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        diaryListService.diaryListMine(token = accessToken)
+            .enqueue(object : Callback<DiaryListResponse> {
+                override fun onResponse(
+                    call: Call<DiaryListResponse>,
+                    response: Response<DiaryListResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val planResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                            for (result in planResponse.result) {
+                                diaryListAdapter.addPlan(
+                                    DiaryListResult(
+                                        id = result.id,
+                                        title = result.title,
+                                        updated_at = result.updated_at,
+                                        likes_count = result.likes_count,
+                                        comments_count = result.comments_count,
+                                        thumbnail = result.thumbnail,
+                                        img_count = result.img_count,
+                                        is_public = result.is_public,
+                                    )
+                                )
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            planResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PLAN",
+                                    detailType = "MINE",
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "DIARY",
+                            "[DIARY MINE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<DiaryListResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("DIARY", "[DIARY MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
     }
 }

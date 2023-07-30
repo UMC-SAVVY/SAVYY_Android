@@ -20,7 +20,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.plan.activity.PlanMakeActivity
 import com.example.savvy_android.plan.adapter.PlanListAdapter
 import com.example.savvy_android.databinding.FragmentPlanBinding
-import com.example.savvy_android.init.MainActivity
+import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.plan.PlanItemTouchCallback
 import com.example.savvy_android.plan.data.list.PlanListResponse
 import com.example.savvy_android.plan.data.list.PlanListResult
@@ -40,17 +40,18 @@ class PlanFragment : Fragment() {
     private val planTouchSimpleCallback = PlanItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(planTouchSimpleCallback)
     private lateinit var sharedPreferences: SharedPreferences
-    private var nickname = "이프"
+    private lateinit var nickname: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         binding = FragmentPlanBinding.inflate(inflater, container, false)
 
         sharedPreferences =
             activity?.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+        nickname = sharedPreferences.getString("USER_NICKNAME", null)!!
 
         // 알람 버튼 클릭시 알람 페이지 연결
         binding.planAlarm.setOnClickListener {
@@ -74,6 +75,7 @@ class PlanFragment : Fragment() {
         // Plan Data & Adapter
         planListAdapter =
             PlanListAdapter(
+                requireContext(),
                 binding.planRecycle,
                 planListData,
                 nickname,
@@ -92,12 +94,15 @@ class PlanFragment : Fragment() {
             startActivity(intent)
         }
 
+        // 초기 처음 생성될 때 목록(전체 보기) 불러오기
+        planListAdapter.clearList() // 리스트 정보 초기화
+        planListAPI(1, null)
+
         return binding.root
     }
 
     override fun onResume() {
         super.onResume()
-        //
 
         val hasAlarm = true
         if (hasAlarm)
@@ -202,7 +207,7 @@ class PlanFragment : Fragment() {
                             if (response.isSuccessful) {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
-                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                if (planResponse?.isSuccess == true) {
                                     for (result in planResponse.result) {
                                         planListAdapter.addPlan(
                                             PlanListResult(
@@ -216,11 +221,12 @@ class PlanFragment : Fragment() {
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
-                                        MainActivity.errorCodeList(
-                                            it.code,
-                                            it.message,
-                                            "PLAN",
-                                            "ALL"
+                                        context?.errorCodeList(
+                                            errorCode = it.code,
+                                            message = it.message,
+                                            type = "PLAN",
+                                            detailType = "ALL",
+                                            intentData = null
                                         )
                                     }
                                 }
@@ -249,7 +255,7 @@ class PlanFragment : Fragment() {
                             if (response.isSuccessful) {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
-                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                if (planResponse?.isSuccess == true) {
                                     for (result in planResponse.result) {
                                         planListAdapter.addPlan(
                                             PlanListResult(
@@ -263,11 +269,12 @@ class PlanFragment : Fragment() {
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
-                                        MainActivity.errorCodeList(
-                                            it.code,
-                                            it.message,
-                                            "PLAN",
-                                            "MINE"
+                                        context?.errorCodeList(
+                                            errorCode = it.code,
+                                            message = it.message,
+                                            type = "PLAN",
+                                            detailType = "MINE",
+                                            intentData = null
                                         )
                                     }
                                 }
@@ -296,7 +303,7 @@ class PlanFragment : Fragment() {
                             if (response.isSuccessful) {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
-                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                if (planResponse?.isSuccess == true) {
                                     for (result in planResponse.result) {
                                         planListAdapter.addPlan(
                                             PlanListResult(
@@ -310,11 +317,12 @@ class PlanFragment : Fragment() {
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
-                                        MainActivity.errorCodeList(
-                                            it.code,
-                                            it.message,
-                                            "PLAN",
-                                            "SCRAP"
+                                        context?.errorCodeList(
+                                            errorCode = it.code,
+                                            message = it.message,
+                                            type = "PLAN",
+                                            detailType = "SCRAP",
+                                            intentData = null
                                         )
                                     }
                                 }
@@ -343,7 +351,7 @@ class PlanFragment : Fragment() {
                             if (response.isSuccessful) {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
-                                if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                                if (planResponse?.isSuccess == true) {
                                     for (result in planResponse.result) {
                                         planListAdapter.addPlan(
                                             PlanListResult(
@@ -357,11 +365,12 @@ class PlanFragment : Fragment() {
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
-                                        MainActivity.errorCodeList(
-                                            it.code,
-                                            it.message,
-                                            "PLAN",
-                                            "SEARCH"
+                                        context?.errorCodeList(
+                                            errorCode = it.code,
+                                            message = it.message,
+                                            type = "PLAN",
+                                            detailType = "SEARCH",
+                                            intentData = null
                                         )
                                     }
                                 }

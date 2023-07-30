@@ -1,5 +1,9 @@
 package com.example.savvy_android.init.data
 
+data class LoginRequest(
+    val kakaoToken : String
+)
+
 data class LoginResponse(
     val isSuccess: Boolean,
     val code: Int,
@@ -8,5 +12,6 @@ data class LoginResponse(
 )
 
 data class LoginResultData(
-    val token: String
+    val token: String,
+    val nickname:String
 )

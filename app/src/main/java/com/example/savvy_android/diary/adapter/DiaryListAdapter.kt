@@ -13,14 +13,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.diary.activity.DiaryDetailActivity
-import com.example.savvy_android.diary.data.DiaryItemData
 import com.example.savvy_android.databinding.ItemDiaryBinding
+import com.example.savvy_android.diary.data.list.DiaryListResult
 import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
 
 
 class DiaryListAdapter(
     private val recyclerView: RecyclerView,
-    private var diaryList: ArrayList<DiaryItemData>,
+    private var diaryList: ArrayList<DiaryListResult>,
     private val fragmentManager: FragmentManager,
     private val isDiary: Boolean,
 ) :
@@ -66,25 +66,25 @@ class DiaryListAdapter(
 
         val data = diaryList[holder.adapterPosition]
         holder.title.text = data.title
-        holder.date.text = data.date
-        holder.like.text = data.like.toString()
-        holder.comment.text = data.comment.toString()
-        if (data.photoCount > 0) {
+        holder.date.text = data.updated_at
+        holder.like.text = data.likes_count.toString()
+        holder.comment.text = data.comments_count.toString()
+        if (data.img_count > 0) {
             holder.photoCard.isVisible = true
-            holder.photoCount.setBackgroundResource(if (data.photoCount == 1) 0 else R.color.gray50)
-            holder.photoCount.text = if (data.photoCount == 1) "" else "+${data.photoCount}"
+            holder.photoCount.setBackgroundResource(if (data.img_count == 1) 0 else R.color.gray50)
+            holder.photoCount.text = if (data.img_count == 1) "" else "+${data.img_count}"
             Glide.with(holder.itemView)
-                .load(data.photoUrl)
+                .load(data.thumbnail)
                 .into(holder.photoImg)
         } else {
             holder.photoCard.isVisible = false
         }
-        showResource(data.isShow, holder)
+        showResource(data.is_public, holder)
 
         // 숨겨진 공개 여부 버튼 클릭 이벤트
         holder.hideOShow.setOnClickListener {
-            data.isShow = !(data.isShow)
-            showResource(data.isShow, holder)
+            data.is_public = !(data.is_public)
+            showResource(data.is_public, holder)
         }
 
         // 숨겨진 삭제 버튼 클릭 이벤트
@@ -94,11 +94,11 @@ class DiaryListAdapter(
             // 다이얼로그 버튼 클릭 이벤트 설정
             dialog.setButtonClickListener(object :
                 DiaryDeleteDialogFragment.OnButtonClickListener {
-                override fun onDialogPlanBtnOClicked() {
+                override fun onDialogBtnOClicked() {
                     removePlan(holder.adapterPosition)
                 }
 
-                override fun onDialogPlanBtnXClicked() {
+                override fun onDialogBtnXClicked() {
                     resetHideX(holder.adapterPosition, recyclerView)
                 }
             })
@@ -111,6 +111,7 @@ class DiaryListAdapter(
                 resetHideX(hasSwipePosition, recyclerView)
             } else {
                 val mIntent = Intent(holder.itemView.context, DiaryDetailActivity::class.java)
+                mIntent.putExtra("diaryID", data.id)
                 holder.itemView.context.startActivity(mIntent)
             }
         }
@@ -140,7 +141,7 @@ class DiaryListAdapter(
     override fun getItemCount(): Int = diaryList.size
 
     // 데이터 추가
-    fun addPlan(insertData: DiaryItemData) {
+    fun addPlan(insertData: DiaryListResult) {
         diaryList.add(insertData)
         notifyItemInserted(diaryList.size)
     }
@@ -151,6 +152,11 @@ class DiaryListAdapter(
             diaryList.removeAt(position)
             notifyItemRemoved(position)
         }
+    }
+
+    fun clearList(){
+        diaryList.clear() // 데이터 리스트를 비움
+        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
 
     // 공개 비공개 여부에 따른 리소스

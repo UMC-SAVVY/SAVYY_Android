@@ -1,5 +1,6 @@
 package com.example.savvy_android.init
 
+import android.content.Intent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -77,39 +78,5 @@ class MainActivity : AppCompatActivity() {
     private fun setFragment(fragment: Fragment) {
         // 바뀐 fragment 로 commit()
         supportFragmentManager.beginTransaction().replace(R.id.main_frm, fragment).commit()
-    }
-
-    companion object {
-        fun errorCodeList(errorCode: Int, message: String, type: String, detailType: String?) {
-            when (errorCode) {
-                // 존재하지 않는 사용자의 아이디가 담긴 JWT 토큰을 넘겨주었을 때
-                2013 -> {
-
-                }
-                // 여행계획서가 존재하지 않을 때
-                3007 -> {
-
-                }
-                // JWT 토큰 내부의 사용자 아이디가 존재하지 않을 때 → 토큰 문제
-                2012 -> {
-
-                }
-                // JWT 토큰 검증 오류 (ex. 만료된 경우)
-                3000 -> {
-
-                }
-                // 헤더에 JWT 토큰을 담지 않았을 경우
-                2000 -> {
-
-                }
-                // 기타의 경우
-                else -> {
-                    Log.e(
-                        type,
-                        "[$type $detailType] 알 수 없는 에러 코드: ($errorCode) $message"
-                    )
-                }
-            }
-        }
     }
 }

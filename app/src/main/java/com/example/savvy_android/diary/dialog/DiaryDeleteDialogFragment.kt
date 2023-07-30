@@ -35,7 +35,7 @@ class DiaryDeleteDialogFragment : DialogFragment() {
 
         // 삭제하기 버튼 클릭 시
         binding.dialogDiaryBtnO.setOnClickListener {
-            buttonClickListener.onDialogPlanBtnOClicked()
+            buttonClickListener.onDialogBtnOClicked()
             dismiss()
 
             // 커스텀 Toast 메시지 생성
@@ -53,7 +53,7 @@ class DiaryDeleteDialogFragment : DialogFragment() {
 
         // 취소하기 버튼 클릭 시
         binding.dialogDiaryBtnX.setOnClickListener {
-            buttonClickListener.onDialogPlanBtnXClicked()
+            buttonClickListener.onDialogBtnXClicked()
             dismiss()
         }
     }
@@ -71,8 +71,8 @@ class DiaryDeleteDialogFragment : DialogFragment() {
 
     // 인터페이스
     interface OnButtonClickListener {
-        fun onDialogPlanBtnOClicked()
-        fun onDialogPlanBtnXClicked()
+        fun onDialogBtnOClicked()
+        fun onDialogBtnXClicked()
     }
 
     // 클릭 이벤트 설정

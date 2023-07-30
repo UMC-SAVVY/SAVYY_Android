@@ -1,19 +1,16 @@
 package com.example.savvy_android.diary.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.savvy_android.R
-import com.example.savvy_android.diary.data.DiaryDetailItemData
 import com.example.savvy_android.databinding.ItemDiaryViewBinding
+import com.example.savvy_android.diary.data.detail.DiaryContent
 
 
 class DetailAdapter(
-    private var diaryViewData: ArrayList<DiaryDetailItemData>,
+    private var diaryViewData: ArrayList<DiaryContent>,
 ) :
     RecyclerView.Adapter<DetailAdapter.DiaryViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -42,24 +39,22 @@ class DetailAdapter(
     // View에 내용이 작성되는 method, 스크롤을 올리거나 내릴 때마다 호출
     override fun onBindViewHolder(holder: DiaryViewHolder, position: Int) {
         val data = diaryViewData[position]
-        val hasText = data.isText
-        val hasPlace = data.hasPlace
-        val placeName = data.placeName
-        val placeUrl = data.placeUrl
+        val type = data.type
+        val content = data.content
+        val placeName = data.location
 
         // 텍스트 or 이미지 인지
-        if (hasText) {
+        if (type=="text") {
             // 텍스트 경우
             holder.text.visibility = View.VISIBLE   // 텍스트 보이게
             holder.imageLayout.visibility = View.GONE // 이미지 안 보이게
-            holder.text.text = data.text
+            holder.text.text = content
         } else {
             // 이미지 경우
             holder.text.visibility = View.GONE   // 텍스트 안 보이게
             holder.imageLayout.visibility = View.VISIBLE    // 이미지 보이게
-            holder.text.text = data.text
             Glide.with(holder.itemView)
-                .load(data.image)
+                .load(content)
                 .into(holder.image)
 
             // 장소가 장소 저장함에 있을 때
@@ -93,10 +88,9 @@ class DetailAdapter(
     override fun getItemCount(): Int = diaryViewData.size
 
     // 데이터 추가
-    fun addDiary(insertData: DiaryDetailItemData) {
+    fun addDiary(insertData: DiaryContent) {
         diaryViewData.add(insertData)
         notifyItemInserted(diaryViewData.size)
-        Log.e("TEST", "$diaryViewData")
     }
 
     // 데이터 삭제

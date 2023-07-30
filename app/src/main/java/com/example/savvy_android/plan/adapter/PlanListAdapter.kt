@@ -1,21 +1,38 @@
 package com.example.savvy_android.plan.adapter
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.text.TextUtils
+import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.savvy_android.R
 import com.example.savvy_android.plan.activity.PlanDetailActivity
 import com.example.savvy_android.databinding.ItemPlanBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
+import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.plan.activity.PlanDetailVisitActivity
+import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
 import com.example.savvy_android.plan.data.list.PlanListResult
 import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
+import com.example.savvy_android.plan.service.PlanListService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class PlanListAdapter(
+    private val context: Context,
     private val recyclerView: RecyclerView,
     private var planList: ArrayList<PlanListResult>,
     private val myName: String,
@@ -68,8 +85,13 @@ class PlanListAdapter(
             dialog.setButtonClickListener(object :
                 PlanDeleteDialogFragment.OnButtonClickListener {
                 override fun onDialogPlanBtnOClicked() {
-                    removePlan(holder.adapterPosition)
+                    planRemoveAPI(
+                        plannerId = data.id.toString(),
+                        plannerType = if (holder.user.text == "") "0" else "1",
+                        position = holder.adapterPosition,
+                    )
                 }
+
                 override fun onDialogPlanBtnXClicked() {
                     resetHideX(holder.adapterPosition, recyclerView)
                 }
@@ -82,8 +104,17 @@ class PlanListAdapter(
             if (hasSwipe) {
                 resetHideX(hasSwipePosition, recyclerView)
             } else {
-                val mIntent = Intent(holder.itemView.context, PlanDetailActivity::class.java)
-                holder.itemView.context.startActivity(mIntent)
+                // 자신의 여행 계획서 경우
+                if (data.nickname == myName || data.nickname == null) {
+                    val mIntent = Intent(holder.itemView.context, PlanDetailActivity::class.java)
+                    holder.itemView.context.startActivity(mIntent)
+                }
+                // 타인의 여행 계획서 경우
+                else {
+                    val mIntent =
+                        Intent(holder.itemView.context, PlanDetailVisitActivity::class.java)
+                    holder.itemView.context.startActivity(mIntent)
+                }
             }
         }
 
@@ -124,7 +155,7 @@ class PlanListAdapter(
         }
     }
 
-    fun clearList(){
+    fun clearList() {
         planList.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
@@ -155,4 +186,87 @@ class PlanListAdapter(
             }
         }
     }
+
+    // 여행계획서 삭제 API
+    private fun planRemoveAPI(plannerId: String, plannerType: String, position: Int) {
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val planListService = retrofit.create(PlanListService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // Delete 요청
+        planListService.planDelete(
+            token = accessToken,
+            plannerId = plannerId,
+            plannerType = plannerType,
+        )
+            .enqueue(object : Callback<PlanRemoveResponse> {
+                override fun onResponse(
+                    call: Call<PlanRemoveResponse>,
+                    response: Response<PlanRemoveResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            removePlan(position)
+
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("성공적으로 계획서가 삭제되었습니다.")
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                context.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PLAN",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("계획서 삭제를 실패하였습니다.")
+                        }
+                    } else {
+                        Log.e(
+                            "PLAN",
+                            "[PLAN DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+
+                        // 삭제 성공 시 토스트 메시지 표시
+                        showToast("계획서 삭제를 실패하였습니다.")
+                    }
+                }
+
+                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("PLAN", "[PLAN DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+
+                    // 삭제 성공 시 토스트 메시지 표시
+                    showToast("계획서 삭제를 실패하였습니다.")
+                }
+            })
+    }
+
+    // 토스트 메시지 표시 함수 추가
+    private fun showToast(message: String) {
+        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(context))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(context)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
+
 }

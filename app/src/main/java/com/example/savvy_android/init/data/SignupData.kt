@@ -15,5 +15,6 @@ data class SignupResponse(
 )
 
 data class SignupResultData(
-    val token: String
+    val token: String,
+    val nickname: String
 )

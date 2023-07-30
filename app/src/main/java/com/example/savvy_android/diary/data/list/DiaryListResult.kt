@@ -8,4 +8,5 @@ data class DiaryListResult(
     val comments_count: Int,
     val thumbnail: String?,
     val img_count: Int,
+    var is_public: Boolean,
 )

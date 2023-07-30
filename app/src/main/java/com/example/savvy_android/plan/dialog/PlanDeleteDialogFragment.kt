@@ -3,6 +3,7 @@ package com.example.savvy_android.plan.dialog
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +22,7 @@ class PlanDeleteDialogFragment : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = DialogPlanDeleteBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,18 +38,6 @@ class PlanDeleteDialogFragment : DialogFragment() {
         binding.dialogPlanBtnO.setOnClickListener {
             buttonClickListener.onDialogPlanBtnOClicked()
             dismiss()
-
-            // 커스텀 Toast 메시지 생성
-            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "성공적으로 삭제가 완료되었습니다."
-
-            val toast = Toast(requireContext())
-            toast.duration = Toast.LENGTH_SHORT
-            toast.view = toastBinding.root
-
-            toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
-
-            toast.show()
         }
 
         // 취소하기 버튼 클릭 시
