@@ -16,6 +16,7 @@ class MakeCheckListAdapter(private val items: MutableList<Checklist>) :
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
         fun bind(item: Checklist) {
+            binding.checklistEdit.setText(item.contents)
 
             binding.checklistEdit.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {

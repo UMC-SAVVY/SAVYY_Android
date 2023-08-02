@@ -8,7 +8,7 @@ class PlanDetailResponse(
 )
 
 data class Result(
-    val id: Long?,
+    val id: Int,
     val memo: String,
     val nickname: String,
     val title: String,

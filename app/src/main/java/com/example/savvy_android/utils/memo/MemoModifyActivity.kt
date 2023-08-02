@@ -24,6 +24,11 @@ class MemoModifyActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
+        val memoText = intent.getStringExtra("memoText")
+
+        // 메모 데이터를 띄워주기
+        binding.memoEdit.setText(memoText)
+
         //메모 입력 변화 이벤트 처리
         binding.memoEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -39,14 +44,19 @@ class MemoModifyActivity : AppCompatActivity() {
 
                 //한글자라도 입력하면 '등록'버튼의 색이 바뀜
                 if (textLength > 0) {
-                    binding.memoEdit.setTextColor(Color.BLACK)
                     binding.memoRegistrationBtn.setTextColor(Color.parseColor("#FF5487"))
                 } else {
-                    binding.memoEdit.setTextColor(Color.parseColor("#5F5F5F"))
-                    binding.memoRegistrationBtn.setTextColor(Color.BLACK)
+                    binding.memoRegistrationBtn.setTextColor(Color.parseColor("#5F5F5F"))
                 }
             }
         })
+
+        // 완료 버튼의 색 설정
+        if (memoText != null && memoText.isNotEmpty()) {
+            binding.memoRegistrationBtn.setTextColor(Color.parseColor("#FF5487"))
+        } else {
+            binding.memoRegistrationBtn.setTextColor(Color.parseColor("#5F5F5F"))
+        }
 
 
         // arrowLeft 아이콘 클릭하면 저장하지 않고 여행 계획서 보기 페이지로 돌아가기
@@ -58,8 +68,15 @@ class MemoModifyActivity : AppCompatActivity() {
         binding.memoRegistrationBtn.setOnClickListener {
             val memoText = binding.memoEdit.text.toString().trim()
             if (memoText.isNotEmpty()) {
-                val intent = Intent(this, PlanModifyActivity::class.java)
-                startActivity(intent)
+               // val intent = Intent(this, PlanModifyActivity::class.java)
+               // intent.putExtra("memoText", memoText)
+               // startActivity(intent)
+               // finish()
+
+                val intent = Intent()
+                intent.putExtra("memoText", memoText)
+                setResult(RESULT_OK, intent)
+                finish()
             }
         }
     }
