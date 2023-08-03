@@ -38,6 +38,7 @@
                 />
 
             <TextView
+                android:id="@+id/travel_plan_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/pretendard_medium"
@@ -64,7 +65,7 @@
                 android:id="@+id/border_circle_gray"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:background="@drawable/border_circle_gray"
+                android:src="@drawable/border_circle_gray"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +75,7 @@
                 android:id="@+id/checkmark_gray"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:background="@drawable/ic_checkmark_gray"
+                android:src="@drawable/ic_checkmark_gray"
                 app:layout_constraintBottom_toBottomOf="@+id/border_circle_gray"
                 app:layout_constraintEnd_toEndOf="@+id/border_circle_gray"
                 app:layout_constraintStart_toStartOf="@+id/border_circle_gray"

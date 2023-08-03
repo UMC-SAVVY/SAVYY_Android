@@ -194,7 +194,9 @@ class DiaryDetailActivity : AppCompatActivity() {
                             binding.diaryTitleTv.text = result.title
 
                             // 다이어리 작성자 프로필 사진
-                            binding.diaryUserImg.setImageResource(R.drawable.ic_launcher_foreground)
+                            Glide.with(this@DiaryDetailActivity)
+                                .load(result.pic_url)
+                                .into(binding.diaryUserImg)
 
                             // 다이어리 작성자
                             binding.diaryNameTv.text = result.nickname
@@ -206,7 +208,7 @@ class DiaryDetailActivity : AppCompatActivity() {
                             var diaryHashTag = ""
                             if (result.hashtag != null) {
                                 for (hashtag in result.hashtag) {
-                                    diaryHashTag += "# ${hashtag.tag} "
+                                    diaryHashTag += "#${hashtag.tag} "
                                 }
                             }
                             binding.diaryTagTv.text = diaryHashTag

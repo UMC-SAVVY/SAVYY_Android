@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,9 +22,10 @@ import com.example.savvy_android.plan.data.Timetable
 
 class DiaryMake2Activity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryStep2Binding
-    private lateinit var dateAddAdapter : MakeDateAddAdapter
+    private lateinit var dateAddAdapter: MakeDateAddAdapter
     private lateinit var valueAnimator: ValueAnimator
     private var isDiary: Boolean = true
+    private var planID: Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +35,8 @@ class DiaryMake2Activity : AppCompatActivity() {
         setContentView(binding.root)
 
         // 시작된 fragment 정보 받기
-        isDiary = intent.getBooleanExtra("isDiary",true)
+        isDiary = intent.getBooleanExtra("isDiary", true)
+        planID = intent.getIntExtra("planID", 0)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -48,9 +51,11 @@ class DiaryMake2Activity : AppCompatActivity() {
             // DateAdd 아이템 추가
 //            dateAddAdapter.addItem("")
 
-            val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
+            val newTimetable = Timetable(
+                "",
+                mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", ""))
+            )
             dateAddAdapter.addItem(newTimetable)
-
         }
 
 
@@ -70,7 +75,7 @@ class DiaryMake2Activity : AppCompatActivity() {
 
         binding.diaryNextBtn.setOnClickListener {
             val intent = Intent(this, DiaryMake3Activity::class.java)
-            intent.putExtra("isDiary",isDiary)
+            intent.putExtra("isDiary", isDiary)
             startActivity(intent)
         }
 
@@ -84,11 +89,13 @@ class DiaryMake2Activity : AppCompatActivity() {
 //            val newItem = ""
 //            dateAddAdapter.addItem(newItem)
 
-            val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
+            val newTimetable = Timetable(
+                "",
+                mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", ""))
+            )
             dateAddAdapter.addItem(newTimetable)
 
         }
-
 
 
         // 하나의 text에서 특정 글자 색 바꾸기

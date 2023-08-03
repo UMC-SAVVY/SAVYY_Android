@@ -217,7 +217,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/diary_content_btn"
+                android:id="@+id/diary_text_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -258,7 +258,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/diary_plan_btn"
-                app:layout_constraintStart_toEndOf="@id/diary_content_btn"
+                app:layout_constraintStart_toEndOf="@id/diary_text_btn"
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView

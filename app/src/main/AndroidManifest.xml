@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--앱이 외부 저장소(External Storage)에 있는 파일을 읽기 위해 필요한 권한-->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!--앱이 외부 저장소(External Storage)에 있는 파일을 읽고 쓰기 위해 필요한 권한-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
 
     <!--앱 인터넷 사용 권한-->
     <uses-permission android:name="android.permission.INTERNET" />

@@ -9,10 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
-import com.example.savvy_android.diary.activity.DiaryMake2Activity
 import com.example.savvy_android.databinding.DialogNextStepBinding
+import com.example.savvy_android.diary.activity.DiaryMake3Activity
 
-class NextStepDialogFragment(private val isDiary: Boolean) : DialogFragment() {
+class NextStepDialogFragment(
+    private val isDiary: Boolean,
+) : DialogFragment() {
     private var _binding: DialogNextStepBinding? = null
     private val binding get() = _binding!!
 
@@ -33,22 +35,19 @@ class NextStepDialogFragment(private val isDiary: Boolean) : DialogFragment() {
         )
         dialog?.setCancelable(true)
 
-
         binding.btnNext.setOnClickListener {
             dismiss()
 
-            val intent = Intent(activity, DiaryMake2Activity::class.java)
+            val intent = Intent(activity, DiaryMake3Activity::class.java)
             intent.putExtra("isDiary", isDiary)
             startActivity(intent)
         }
-
 
         binding.cancelBtn.setOnClickListener {
             dismiss()
         }
         return view
     }
-
 
     override fun onStart() {
         super.onStart()

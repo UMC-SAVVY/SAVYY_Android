@@ -43,7 +43,7 @@ class DiaryFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         binding = FragmentDiaryBinding.inflate(inflater, container, false)
 
         sharedPreferences =

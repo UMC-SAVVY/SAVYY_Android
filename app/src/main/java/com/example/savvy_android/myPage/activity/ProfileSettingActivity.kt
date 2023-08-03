@@ -3,20 +3,23 @@ package com.example.savvy_android.myPage.activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.bumptech.glide.Glide
@@ -25,12 +28,18 @@ import com.example.savvy_android.databinding.ActivityProfileSettingBinding
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.init.data.SignupRequest
 import com.example.savvy_android.init.data.SignupResponse
+import com.example.savvy_android.init.data.image.UploadImageResponse
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.init.service.SignupService
-import com.example.savvy_android.plan.activity.PlanDetailActivity
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 import java.util.regex.Pattern
 
 
@@ -39,7 +48,11 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var duplicateState = false  // 중복 여부
     private var introState = true   // 소개글 가능 여부
     private var signupState = false // 회원 가입 가능 여부
-    private var profileUrl = "" // 프로필 사진
+    private var isChange = false // 프로필 사진 변경 여부
+    private var isMypage = true // 연결 페이지 구분 (true: 마이페이지, false: 회원가입)
+    private var profileLocalUri = Uri.EMPTY // 프로필 사진 (local)
+    private var profileServerUrl = "" // 프로필 사진 (sever)
+    private lateinit var imageBody: MultipartBody.Part
     private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +65,7 @@ class ProfileSettingActivity : AppCompatActivity() {
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // 처음 회원가입으로 연결인지, 마이페이지 연결인지 구분
-        val isMypage = intent.getBooleanExtra("isMyPage", true)
+        isMypage = intent.getBooleanExtra("isMyPage", true)
         if (isMypage) { // 마이페이지에서 연결 경우 (프로필 편집 경우)
             binding.profileEditMode.visibility = View.VISIBLE
             binding.profileSignupBtn.text = "저장하기"
@@ -68,10 +81,7 @@ class ProfileSettingActivity : AppCompatActivity() {
 
         // 프로필 사진 layout 클릭 시 이벤트 처리
         binding.profileImgLayout.setOnClickListener {
-            // 갤러리 호출
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            activityResult.launch(intent)
+            selectGallery()
         }
 
         // 닉네임 EditText 한글만 입력 (source: 입력된 문자열)
@@ -159,37 +169,113 @@ class ProfileSettingActivity : AppCompatActivity() {
             override fun afterTextChanged(p0: Editable?) {}
         })
 
-        //서버 주소
-        val serverAdress = getString(R.string.serverAddress)
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(serverAdress)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val signupService = retrofit.create(SignupService::class.java)
-        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
-
         // 회원 가입 버튼 클릭 이벤트
         binding.profileSignupBtn.setOnClickListener {
-            val kakaoToken = intent.getStringExtra("kakaoToken")
-            if (kakaoToken != null) {
-                val nickname = binding.profileNameEdit.text.toString()
-                val picUrl = profileUrl
-                val intro = binding.profileIntroEdit.text.toString()
+            profileCombineAPI()
+        }
+    }
 
-                val signupRequest = SignupRequest(kakaoToken, picUrl, nickname, intro)
+    // 갤러리 권한 후 이미지 선택
+    private fun selectGallery() {
+        val writePermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+        val readPermission = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        )
 
-                // 회원가입 API 호출
-                signupService.signup(signupRequest).enqueue(object : Callback<SignupResponse> {
+        if (writePermission == PackageManager.PERMISSION_DENIED ||
+            readPermission == PackageManager.PERMISSION_DENIED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE
+                ),
+                1
+            )
+        } else {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.setDataAndType(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                "image/*"
+            )
+            imageResult.launch(intent)
+        }
+    }
+
+    // 갤러리에서 선택한 이미지 결과 가져오기
+    private val imageResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            profileLocalUri = result.data?.data
+            profileLocalUri?.let {
+                val imageFile = File(getPathFromUri(profileLocalUri))
+
+                // MIME 타입을 따르기 위해 image/jpg로 변환하여 RequestBody 객체 생성
+                val mimeType = getMimeType(profileLocalUri!!) ?: "image/*"
+                val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                // RequestBody로 Multipart.Part 객체 생성
+                imageBody =
+                    MultipartBody.Part.createFormData("image", imageFile.name, fileRequestBody)
+
+                // 선택한 이미지 profileImageIv에 보여주기
+                Glide.with(this)
+                    .load(profileLocalUri)
+                    .into(binding.profileImgIv)
+
+                // 이미지 변경 여부 변경
+                isChange = true
+            }
+        }
+    }
+
+    // 이미지 확장자 확인
+    private fun getMimeType(uri: Uri): String? {
+        val contentResolver = contentResolver
+        val mimeTypeMap = MimeTypeMap.getSingleton()
+        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri))
+    }
+
+    // 이미지 local uri를 절대 경로로 변환
+    private fun getPathFromUri(uri: Uri): String {
+        val proj =
+            arrayOf(MediaStore.Images.Media.DATA)
+        val c = contentResolver.query(uri, proj, null, null, null)
+        val index = c!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+
+        c.moveToFirst()
+
+        return c.getString(index)
+    }
+
+    // 회원가입 API
+    private fun signupAPI(signupService: SignupService) {
+        val kakaoToken = intent.getStringExtra("kakaoToken")
+        if (kakaoToken != null) {
+            val nickname = binding.profileNameEdit.text.toString()
+            val picUrl = profileServerUrl
+            val intro = binding.profileIntroEdit.text.toString()
+
+            val signupRequest =
+                SignupRequest(kakaoToken, picUrl, nickname, intro)
+
+            // 회원가입 API 호출
+            signupService.signup(signupRequest)
+                .enqueue(object : Callback<SignupResponse> {
                     override fun onResponse(
-                        call: retrofit2.Call<SignupResponse>,
-                        response: retrofit2.Response<SignupResponse>,
+                        call: Call<SignupResponse>,
+                        response: Response<SignupResponse>,
                     ) {
                         if (response.isSuccessful) {
                             val signupResponse = response.body()
                             if (signupResponse?.isSuccess == true) {
-                                val serverToken = signupResponse.result.token
+                                val serverToken =
+                                    signupResponse.result.token
                                 Log.d(
                                     "SIGNUP",
                                     "[SIGNUP] 회원가입 성공 - 서버에서 받은 토큰: $serverToken"
@@ -198,8 +284,12 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 saveServerToken(serverToken) // 서버에서 받은 토큰 값
                                 saveNickname(nickname)
                                 val intent =
-                                    Intent(this@ProfileSettingActivity, MainActivity::class.java)
-                                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    Intent(
+                                        this@ProfileSettingActivity,
+                                        MainActivity::class.java
+                                    )
+                                intent.flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 startActivity(intent)
                                 finish()
                             } else {
@@ -221,32 +311,71 @@ class ProfileSettingActivity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: retrofit2.Call<SignupResponse>, t: Throwable) {
+                    override fun onFailure(
+                        call: Call<SignupResponse>,
+                        t: Throwable,
+                    ) {
                         Log.e(
                             "SIGNUP",
                             "[SIGNUP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
                     }
                 })
-            } else {
-                Log.e("SIGNUP", "[SIGNUP] API 호출 실패 - AccessToken이 없습니다.")
-            }
+        } else {
+            Log.e("SIGNUP", "[SIGNUP] API 호출 실패 - AccessToken이 없습니다.")
         }
     }
 
+    // 이미지 API와 회원가입 API 결합
+    private fun profileCombineAPI() {
+        //서버 주소
+        val serverAddress = getString(R.string.serverAddress)
 
-    // 갤러리에서 선택한 이미지 결과 가져오기
-    private val activityResult: ActivityResultLauncher<Intent> = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        // 결과 코드 OK, 결과값 not null 일 때
-        if (it.resultCode == RESULT_OK && it.data != null) {
-            profileUrl = it.data!!.data.toString()    // 결과 값 저장
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-            // 선택한 이미지 profileImageIv에 보여주기
-            Glide.with(this)
-                .load(profileUrl)
-                .into(binding.profileImgIv)
+        val signupService = retrofit.create(SignupService::class.java)
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
+
+        if (isMypage) {
+            // 프로필 편집 경우
+        } else {
+            // 회원 가입 경우
+            if (isChange) {
+                // 프로필 사진을 추가했을 때
+                signupService.uploadProfile(imageBody)
+                    .enqueue(object : Callback<UploadImageResponse> {
+                        override fun onResponse(
+                            call: Call<UploadImageResponse>,
+                            response: Response<UploadImageResponse>,
+                        ) {
+                            if (response.isSuccessful) {
+                                val uploadProfileResponse = response.body()
+                                if (uploadProfileResponse?.isSuccess == true) {
+                                    profileServerUrl = uploadProfileResponse.result[0].pic_url
+                                    signupAPI(signupService)
+                                }
+                            } else {
+                                Log.e(
+                                    "SIGNUP",
+                                    "[IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
+                                )
+                            }
+                        }
+
+                        override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
+                            Log.e(
+                                "SIGNUP",
+                                "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                            )
+                        }
+                    })
+            } else {
+                // 프로필 사진을 추가 안했을 경우
+                signupAPI(signupService)
+            }
         }
     }
 
