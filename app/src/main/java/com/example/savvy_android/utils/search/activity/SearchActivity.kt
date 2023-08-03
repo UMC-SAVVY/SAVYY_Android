@@ -1,4 +1,4 @@
-package com.example.savvy_android.utils.search
+package com.example.savvy_android.utils.search.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.savvy_android.R
+import com.example.savvy_android.utils.search.fragment.SearchDiaryFragment
+import com.example.savvy_android.utils.search.fragment.SearchUserFragment
 
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding

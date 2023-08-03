@@ -6,9 +6,11 @@ import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.data.make_modify.DiaryModifyRequest
 import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -34,6 +36,12 @@ interface DiaryService {
         @Header("Authorization") token: String,
         @Query("searchWord") word: String,
     ): Call<DiaryListResponse>
+
+    @DELETE("diary/{diary_id}")
+    fun diaryDelete(
+        @Header("Authorization") token: String,
+        @Path("diary_id") diaryID: String,
+    ): Call<PlanRemoveResponse>
 
     @GET("diary/{diary_id}")
     fun diaryDetail(

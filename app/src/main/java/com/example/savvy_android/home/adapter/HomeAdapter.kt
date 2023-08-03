@@ -67,4 +67,17 @@ class HomeAdapter(
         homeList.add(blockData)
         notifyItemInserted(homeList.size)
     }
+
+    // 데이터 삭제
+    private fun removePlan(position: Int) {
+        if (position >= 0 && position < homeList.size) {
+            homeList.removeAt(position)
+            notifyItemRemoved(position)
+        }
+    }
+
+    fun clearList(){
+        homeList.clear() // 데이터 리스트를 비움
+        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
+    }
 }

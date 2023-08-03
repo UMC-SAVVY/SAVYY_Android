@@ -13,7 +13,7 @@ import com.example.savvy_android.diary.activity.DiaryMake1Activity
 import com.example.savvy_android.home.adapter.HomeAdapter
 import com.example.savvy_android.home.adapter.HomeItemData
 import com.example.savvy_android.utils.alarm.AlarmActivity
-import com.example.savvy_android.utils.search.SearchActivity
+import com.example.savvy_android.utils.search.activity.SearchActivity
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding

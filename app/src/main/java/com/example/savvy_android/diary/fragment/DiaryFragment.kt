@@ -71,6 +71,7 @@ class DiaryFragment : Fragment() {
         // Diary Data & Adapter
         diaryListAdapter =
             DiaryListAdapter(
+                requireContext(),
                 binding.diaryRecycle,
                 diaryListData,
                 requireActivity().supportFragmentManager,

@@ -1,4 +1,4 @@
-package com.example.savvy_android.utils.search
+package com.example.savvy_android.utils.search.fragment
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -13,37 +13,37 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.savvy_android.R
-import com.example.savvy_android.databinding.FragmentSearchDiaryBinding
-import com.example.savvy_android.home.adapter.HomeAdapter
-import com.example.savvy_android.home.adapter.HomeItemData
+import com.example.savvy_android.databinding.FragmentSearchUserBinding
+import com.example.savvy_android.utils.search.adapter.SearchUserAdapter
+import com.example.savvy_android.utils.search.data.SearchUserItemData
 
-class SearchDiaryFragment : Fragment() {
-    private lateinit var binding: FragmentSearchDiaryBinding
-    private lateinit var recordAdapter: SearchRecordDiaryAdapter
-    private var recordData = arrayListOf<SearchRecordDiaryItemData>()
-    private lateinit var searchAdapter: HomeAdapter
-    private var searchData = arrayListOf<HomeItemData>()
+class SearchUserFragment : Fragment() {
+    private lateinit var binding: FragmentSearchUserBinding
+    private lateinit var recordAdapter: SearchUserAdapter
+    private var recordData = arrayListOf<SearchUserItemData>()
+    private lateinit var searchAdapter: SearchUserAdapter
+    private var searchData = arrayListOf<SearchUserItemData>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
-        binding = FragmentSearchDiaryBinding.inflate(inflater, container, false)
+    ): View {
+        binding = FragmentSearchUserBinding.inflate(inflater, container, false)
 
         // 닉네임 EditText 입력 변화 이벤트 처리 (한글자라도 입력 시)
-        binding.searchDiaryEdit.addTextChangedListener(object : TextWatcher {
+        binding.searchUserEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val isEnableState = binding.searchDiaryEdit.length() != 0
-                binding.searchDiaryBtn.isEnabled = isEnableState
-                btnStateBackground(isEnableState, binding.searchDiaryBtn)
+                val isEnableState = binding.searchUserEdit.length() != 0
+                binding.searchUserBtn.isEnabled = isEnableState
+                btnStateBackground(isEnableState, binding.searchUserBtn)
 
                 if (!isEnableState) {
-                    binding.searchNoticeDiary.visibility = View.VISIBLE
-                    binding.searchRecordDiaryRecycle.visibility = View.VISIBLE
-                    binding.searchResultDiaryRecycle.visibility = View.GONE
+                    binding.searchNoticeUser.visibility = View.VISIBLE
+                    binding.searchRecordUserRecycle.visibility = View.VISIBLE
+                    binding.searchResultUserRecycle.visibility = View.GONE
                 }
             }
 
@@ -51,25 +51,26 @@ class SearchDiaryFragment : Fragment() {
         })
 
         // 검색 버튼 클릭 이벤트
-        binding.searchDiaryBtn.setOnClickListener {
+        binding.searchUserBtn.setOnClickListener {
             // 안내 문구 안 보이도록 설정
-            binding.searchNoticeDiary.visibility = View.GONE
-            binding.searchRecordDiaryRecycle.visibility = View.GONE
-            binding.searchResultDiaryRecycle.visibility = View.VISIBLE
+            binding.searchNoticeUser.visibility = View.GONE
+            binding.searchRecordUserRecycle.visibility = View.GONE
+            binding.searchResultUserRecycle.visibility = View.VISIBLE
+            Log.e("TEST", "유저 검색")
         }
 
         // 검색 기록 삭제하기
-        binding.searchWordClear.setOnClickListener {
+        binding.searchUserClear.setOnClickListener {
             // 삭제 API를 넣어야함~~~
         }
 
         // 검색 기록에 대한 Data & Adapter
-        recordAdapter = SearchRecordDiaryAdapter(recordData)
-        binding.searchRecordDiaryRecycle.adapter = recordAdapter
+        recordAdapter = SearchUserAdapter(recordData)
+        binding.searchRecordUserRecycle.adapter = recordAdapter
 
         // 검색 결과에 대한 Data & Adapter
-        searchAdapter = HomeAdapter(searchData)
-        binding.searchResultDiaryRecycle.adapter = searchAdapter
+        searchAdapter = SearchUserAdapter(searchData)
+        binding.searchResultUserRecycle.adapter = searchAdapter
 
         return binding.root
     }

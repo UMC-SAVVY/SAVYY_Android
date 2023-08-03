@@ -1,4 +1,4 @@
-package com.example.savvy_android.utils.search
+package com.example.savvy_android.utils.search.data
 
 data class SearchUserItemData(
     var name: String,

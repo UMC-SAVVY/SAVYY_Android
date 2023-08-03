@@ -1,10 +1,11 @@
-package com.example.savvy_android.utils.search
+package com.example.savvy_android.utils.search.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.savvy_android.databinding.ItemSearchUserBinding
+import com.example.savvy_android.utils.search.data.SearchUserItemData
 
 class SearchUserAdapter(private var searchList: ArrayList<SearchUserItemData>) :
     RecyclerView.Adapter<SearchUserAdapter.SearchUserViewHolder>() {
