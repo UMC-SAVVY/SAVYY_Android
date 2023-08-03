@@ -38,19 +38,21 @@ class ModifySaveDialogFragment : DialogFragment() {
 
 
         binding.btnSave.setOnClickListener {
+            buttonClickListener.onDialogBtnOClicked()
+
             dismiss()
 
-            // 커스텀 Toast 메시지 생성
-            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "성공적으로 수정이 완료되었습니다"
-
-            val toast = Toast(requireContext())
-            toast.duration = Toast.LENGTH_SHORT
-            toast.view = toastBinding.root
-
-            toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
-
-            toast.show()
+//            // 커스텀 Toast 메시지 생성
+//            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
+//            toastBinding.toastMessage.text = "성공적으로 수정이 완료되었습니다"
+//
+//            val toast = Toast(requireContext())
+//            toast.duration = Toast.LENGTH_SHORT
+//            toast.view = toastBinding.root
+//
+//            toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
+//
+//            toast.show()
 
             val intent = Intent(activity, PlanDetailActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -59,6 +61,8 @@ class ModifySaveDialogFragment : DialogFragment() {
 
 
         binding.cancelBtn.setOnClickListener {
+            buttonClickListener.onDialogBtnXClicked()
+
             dismiss()
         }
         return view
@@ -78,4 +82,18 @@ class ModifySaveDialogFragment : DialogFragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    interface OnButtonClickListener {
+        fun onDialogBtnOClicked()
+        fun onDialogBtnXClicked()
+    }
+
+    // 클릭 이벤트 설정
+    fun setButtonClickListener(buttonClickListener: OnButtonClickListener) {
+        this.buttonClickListener = buttonClickListener
+    }
+
+    // 클릭 이벤트 실행
+    private lateinit var buttonClickListener: OnButtonClickListener
+
 }

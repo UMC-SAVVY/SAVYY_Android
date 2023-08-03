@@ -1,9 +1,12 @@
 package com.example.savvy_android.utils.report
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.Toast
@@ -13,13 +16,19 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityReportBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
-import com.example.savvy_android.diary.activity.DiaryDetailActivity
-import com.example.savvy_android.home.fragment.HomeFragment
 import com.example.savvy_android.init.MainActivity
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class ReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityReportBinding
+    private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
+    private var planID: Int = 0
+
 
     private var besidesChecked: Boolean = false
     private var nicknameChecked: Boolean = false
@@ -36,6 +45,9 @@ class ReportActivity : AppCompatActivity() {
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+        planID = intent.getIntExtra("planID", 0)
+
 
         // arrowLeft 아이콘 클릭하면 뒤로가기
         binding.arrowLeftBtn.setOnClickListener {
@@ -43,6 +55,20 @@ class ReportActivity : AppCompatActivity() {
         }
 
         binding.reportCompletionBtn.setOnClickListener {
+
+            val reportRequest = ReportRequest(
+                planner_id = planID,
+                reason_1 = if (nicknameChecked) 1 else 0,
+                reason_2 = if (contentChecked) 1 else 0,
+                reason_3 = if (abuseChecked) 1 else 0,
+                reason_4 = if (besidesChecked) 1 else 0,
+                contents = besidesText,
+                is_blocked = if (blockChecked) 1 else 0
+            )
+            Log.d("test", "Request: $reportRequest")
+
+            reportAPI(reportRequest)
+
             if (isReportCompletionButtonEnabled()) {
                 // 커스텀 Toast 메시지 생성
                 val toastBinding = LayoutToastBinding.inflate(layoutInflater)
@@ -201,4 +227,51 @@ class ReportActivity : AppCompatActivity() {
         val textColorResId = if (isReportCompletionButtonEnabled()) R.color.main else R.color.icon
         binding.reportCompletionBtn.setTextColor(ContextCompat.getColor(this, textColorResId))
     }
+
+    private fun reportAPI(reportRequest: ReportRequest) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val reportService = retrofit.create(ReportService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        // 서버에 데이터 전송
+        reportService.report(serverToken, reportRequest).enqueue(object :
+            Callback<ReportResponse> {
+            override fun onResponse(call: Call<ReportResponse>, response: Response<ReportResponse>) {
+                if (response.isSuccessful) {
+                    val reportResponse = response.body()
+                    val isSuccess = reportResponse?.isSuccess
+                    val code = reportResponse?.code
+                    val message = reportResponse?.message
+                    if (reportResponse != null && reportResponse.isSuccess) {
+                        // 전송 성공
+                        Log.d("PlanMakeActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+                        finish()
+
+                        planID = reportRequest.planner_id
+                    } else {
+                        // 전송 실패
+                        Log.d("PlanMakeActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                    }
+                } else {
+                    // 서버 오류
+                    val errorCode = response.code()
+                    Log.d("PlanMakeActivity", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<ReportResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("PlanMakeActivity", "통신 실패 - ${t.message}")
+            }
+        })
+    }
+
 }

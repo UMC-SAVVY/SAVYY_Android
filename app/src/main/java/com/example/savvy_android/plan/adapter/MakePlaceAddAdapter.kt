@@ -14,9 +14,12 @@ import com.example.savvy_android.plan.data.Checklist
 import com.example.savvy_android.plan.data.Schedule
 import com.example.savvy_android.plan.dialog.TimeDialogFragment
 
-class MakePlaceAddAdapter(private val data: MutableList<Schedule>, private val fragmentManager: FragmentManager) :
+class MakePlaceAddAdapter(private val data: MutableList<Schedule>,
+                          private val fragmentManager: FragmentManager,
+                          private var isMake: Boolean
+) :
     RecyclerView.Adapter<MakePlaceAddAdapter.ViewHolder>() {
-    private val checkListMap: MutableMap<Int, MakeCheckListAdapter> = mutableMapOf()
+//    private val checkListMap: MutableMap<Int, MakeCheckListAdapter> = mutableMapOf()
 
 
     // 새로운 뷰 홀더 생성
@@ -44,16 +47,40 @@ class MakePlaceAddAdapter(private val data: MutableList<Schedule>, private val f
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
         fun bind(item: Schedule, position: Int) {
-            // checkList RecyclerView 설정
-            checkListAdapter = MakeCheckListAdapter(item.checklist)
-            checkListMap[position] = checkListAdapter
-            binding.recyclerviewChecklist.adapter = checkListAdapter
-            binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
 
-            // 기본으로 두 개의 빈 checklist 아이템 추가
-            if (item.checklist.size < 2) {
-                item.checklist.add(Checklist(null, "", 0))
+            if(isMake){
+                // 이 코드 때문에 날짜 아이템 추가하고 날짜 바꾸면 에러남
+                // 기본으로 두 개의 빈 checklist 아이템 추가
+                if (item.checklist.size < 2) {
+                    item.checklist.add(Checklist(null, "", 0))
+                }
+            }else{
+                binding.placeNameEdit.setText(item.place_name)
+                binding.travelPlanTimeTv.text = item.started_at
+                binding.travelPlanTimeTv3.text = item.finished_at
             }
+
+
+
+//            // checkList RecyclerView 설정
+//            checkListAdapter = MakeCheckListAdapter(item.checklist)
+//            checkListMap[position] = checkListAdapter
+//            binding.recyclerviewChecklist.adapter = checkListAdapter
+//            binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
+
+            if (item.checklist != null) {
+                checkListAdapter = MakeCheckListAdapter(item.checklist)
+                binding.recyclerviewChecklist.adapter = checkListAdapter
+                binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
+            } else {
+                // checklist가 null인 경우 처리 방법
+                // 예를 들어, 빈 checklist를 생성하여 NullPointerException을 피할 수 있음
+                checkListAdapter = MakeCheckListAdapter(mutableListOf())
+                binding.recyclerviewChecklist.adapter = checkListAdapter
+                binding.recyclerviewChecklist.layoutManager = LinearLayoutManager(itemView.context)
+            }
+
+
 
             // 아이템 삭제 버튼 클릭 시 해당 위치의 아이템을 제거하고 새로고침
             binding.icX.setOnClickListener {
@@ -114,7 +141,6 @@ class MakePlaceAddAdapter(private val data: MutableList<Schedule>, private val f
             }
         }
     }
-
 
     // PlaceAdd 추가
     fun addItem(item: Schedule) {

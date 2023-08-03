@@ -42,7 +42,7 @@ class DiaryMake2Activity : AppCompatActivity() {
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
         // RecyclerView에 DateAddAdapter 설정
-        dateAddAdapter = MakeDateAddAdapter(mutableListOf(), supportFragmentManager)
+        dateAddAdapter = MakeDateAddAdapter(mutableListOf(), supportFragmentManager, false)
         binding.recyclerviewTravelPlan.adapter = dateAddAdapter
         binding.recyclerviewTravelPlan.layoutManager = LinearLayoutManager(this)
 
@@ -51,10 +51,9 @@ class DiaryMake2Activity : AppCompatActivity() {
             // DateAdd 아이템 추가
 //            dateAddAdapter.addItem("")
 
-            val newTimetable = Timetable(
-                "",
-                mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", ""))
-            )
+            val newTimetable = Timetable("", mutableListOf(
+                Schedule(null, mutableListOf(
+                    Checklist(null, "", 0)), "", "", "")))
             dateAddAdapter.addItem(newTimetable)
         }
 

@@ -1,10 +1,15 @@
 package com.example.savvy_android.plan.activity
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
+import android.view.Gravity
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -14,15 +19,37 @@ import com.example.savvy_android.utils.memo.MemoModifyActivity
 import com.example.savvy_android.plan.adapter.MakeDateAddAdapter
 import com.example.savvy_android.databinding.ActivityPlanModifyBinding
 import com.example.savvy_android.databinding.DialogPlanModifyBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.dialog.ModifySaveDialogFragment
+import com.example.savvy_android.plan.adapter.DetailDateAdapter
 import com.example.savvy_android.plan.data.Checklist
+import com.example.savvy_android.plan.data.PlanDetailResponse
+import com.example.savvy_android.plan.data.PlanModifyRequest
+import com.example.savvy_android.plan.data.PlanModifyResponse
 import com.example.savvy_android.plan.data.Schedule
 import com.example.savvy_android.plan.data.Timetable
+import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
+import com.example.savvy_android.plan.service.PlanDetailService
+import com.example.savvy_android.plan.service.PlanModifyService
+import com.example.savvy_android.utils.memo.MemoActivity
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class PlanModifyActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlanModifyBinding
     private lateinit var dateAddAdapter: MakeDateAddAdapter
+    private lateinit var sharedPreferences: SharedPreferences
+    private var planID: Int = 0
+    private var memoText: String = ""
+
+    companion object {
+        private const val MEMO_MODIFY_REQUEST_CODE = 1
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,18 +60,12 @@ class PlanModifyActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
-        // RecyclerView에 PlanMakeAdapter 설정
-//        dateAddAdapter = MakeDateAddAdapter(mutableListOf(""), supportFragmentManager)
-        dateAddAdapter = MakeDateAddAdapter(mutableListOf(
-            Timetable("", mutableListOf(
-                Schedule(null, mutableListOf(
-                    Checklist(null, "", 0)
-                ), "", "", "")
-            ))
-        ), supportFragmentManager)
-        binding.recyclerviewDateAdd.adapter = dateAddAdapter
-        binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+        planID = intent.getIntExtra("planID", 0)
+        memoText = intent.getStringExtra("memoText") ?: ""
 
+        val timetableList: MutableList<Timetable> = mutableListOf()
+        dateAddAdapter = MakeDateAddAdapter(timetableList, supportFragmentManager, false)
         binding.recyclerviewDateAdd.adapter = dateAddAdapter
         binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
 
@@ -75,20 +96,11 @@ class PlanModifyActivity : AppCompatActivity() {
             }
         })
 
-
-        val planName = intent.getStringExtra("planName")
-        if (planName != null) {
-            binding.titleEdit.setText(planName)
-        }
-
         // add_date_btn 클릭 시 새로운 날짜 추가
         binding.addDateBtn.setOnClickListener {
-//            val newItem = ""
-//            dateAddAdapter.addItem(newItem)
-
             val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
             dateAddAdapter.addItem(newTimetable)
-
+            dateAddAdapter.isMake = true
         }
 
         // 뒤로가기 클릭 이벤트
@@ -96,21 +108,160 @@ class PlanModifyActivity : AppCompatActivity() {
             finish()
         }
 
-        // 메모 수정하기 버튼 클릭 이벤트
-        binding.memoModifyBtn.setOnClickListener {
-            val intent = Intent(this, MemoModifyActivity::class.java)
-            startActivity(intent)
-        }
-
         // 수정 완료 버튼 클릭 이벤트
         binding.modifyCompletionBtn.setOnClickListener {
+            val id = planID
             val titleText = binding.titleEdit.text.toString()
+            val memoText = memoText
+            val nickname = ""
+            val currentTime = ""
             if (titleText.isNotEmpty()) {
                 val dialog = ModifySaveDialogFragment()
+                dialog.setButtonClickListener(object : ModifySaveDialogFragment.OnButtonClickListener {
+                    override fun onDialogBtnOClicked() {
+                        val timetableList = dateAddAdapter.getDataList()
+
+                        val planModifyRequest = PlanModifyRequest(id, memoText, nickname,
+                            timetableList, titleText, currentTime)
+
+                        planModifyAPI(planModifyRequest)
+
+                        Log.d("PlanModifyRequest", "Request: $planModifyRequest")
+                    }
+
+                    override fun onDialogBtnXClicked() {
+                    }
+                })
                 dialog.show(supportFragmentManager, "modifySaveDialog")
             }
-
         }
-
+        planDetailAPI(planID, binding)
     }
+
+    // 서버로 작성 데이터 전송하는 함수
+    private fun planModifyAPI(planModifyRequest: PlanModifyRequest) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val planModifyService = retrofit.create(PlanModifyService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        // 서버에 데이터 전송
+        planModifyService.planModify(serverToken, planModifyRequest).enqueue(object :
+            Callback<PlanModifyResponse> {
+            override fun onResponse(call: Call<PlanModifyResponse>, response: Response<PlanModifyResponse>) {
+                if (response.isSuccessful) {
+                    val planModifyResponse = response.body()
+                    val isSuccess = planModifyResponse?.isSuccess
+                    val code = planModifyResponse?.code
+                    val message = planModifyResponse?.message
+                    if (planModifyResponse != null && planModifyResponse.isSuccess) {
+                        // 전송 성공
+                        Log.d("PlanModify", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+
+                        val intent = Intent(this@PlanModifyActivity, PlanDetailActivity::class.java)
+                        intent.putExtra("planID", planID)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        startActivity(intent)
+
+                        finish()
+                    } else {
+                        // 전송 실패
+                        Log.d("PlanModify", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                    }
+                } else {
+                    // 서버 오류
+                    val errorCode = response.code()
+                    Log.d("PlanModifyActivity", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanModifyResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("PlanModifyActivity", "통신 실패 - ${t.message}")
+            }
+        })
+    }
+
+    private fun planDetailAPI(planId: Int, binding: ActivityPlanModifyBinding) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val planDetailService = retrofit.create(PlanDetailService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        planDetailService.planDetail(serverToken, planId.toString()).enqueue(object : Callback<PlanDetailResponse> {
+            override fun onResponse(call: Call<PlanDetailResponse>, response: Response<PlanDetailResponse>) {
+                if (response.isSuccessful) {
+                    val planDetailResponse = response.body()
+                    val isSuccess = planDetailResponse?.isSuccess
+                    val code = planDetailResponse?.code
+                    val message = planDetailResponse?.message
+                    if (planDetailResponse != null && planDetailResponse.isSuccess) {
+                        val planDetailResult = planDetailResponse.result
+                        // planDetailResult에 들어있는 데이터를 사용하여 작업
+                        Log.d("PlanDetail(Modify)", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+
+                        binding.titleEdit.setText(planDetailResponse.result.title)
+
+                        dateAddAdapter.addAllItems(planDetailResponse.result.timetable)
+
+                        planID = planDetailResult.id
+
+                        binding.memoModifyBtn.setOnClickListener {
+
+                            // Memo 데이터를 MemoActivity로 전달
+                            if (planDetailResult != null && planDetailResult.memo != null) {
+                                memoText = planDetailResult.memo
+                                Log.d("MemoModify", "memoText updated: $memoText")
+                                val intent = Intent(this@PlanModifyActivity, MemoModifyActivity::class.java)
+                                intent.putExtra("memoText", memoText)
+                                startActivityForResult(intent, MEMO_MODIFY_REQUEST_CODE)
+
+                            } else {
+                                val intent =
+                                    Intent(this@PlanModifyActivity, MemoModifyActivity::class.java)
+                                startActivityForResult(intent, MEMO_MODIFY_REQUEST_CODE)
+
+                            }
+                        }
+
+
+                    } else {
+                        Log.d("PlanDetail(Modify)", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                    }
+                } else {
+                    val errorCode = response.code()
+                    Log.e("PlanDetail(Modify)", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanDetailResponse>, t: Throwable) {
+                // 통신 실패
+                Log.e("PlanDetail(Modify)", "통신 실패 - ${t.message}")
+            }
+        })
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == MEMO_MODIFY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
+            val updatedMemoText = data.getStringExtra("memoText")
+            memoText = updatedMemoText ?: ""
+        }
+    }
+
 }

@@ -107,12 +107,14 @@ class PlanListAdapter(
                 // 자신의 여행 계획서 경우
                 if (data.nickname == myName || data.nickname == null) {
                     val mIntent = Intent(holder.itemView.context, PlanDetailActivity::class.java)
+                    mIntent.putExtra("planID", data.id)
                     holder.itemView.context.startActivity(mIntent)
                 }
                 // 타인의 여행 계획서 경우
                 else {
                     val mIntent =
                         Intent(holder.itemView.context, PlanDetailVisitActivity::class.java)
+                    mIntent.putExtra("planID", data.id)
                     holder.itemView.context.startActivity(mIntent)
                 }
             }

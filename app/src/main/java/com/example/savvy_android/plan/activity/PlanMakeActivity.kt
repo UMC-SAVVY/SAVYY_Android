@@ -80,7 +80,7 @@ class PlanMakeActivity : AppCompatActivity() {
         dateAddAdapter = MakeDateAddAdapter(mutableListOf(
             Timetable("", mutableListOf(
                 Schedule(null, mutableListOf(Checklist(null, "", 0)
-        ), "", "", "")))), supportFragmentManager)
+        ), "", "", "")))), supportFragmentManager, true)
         binding.recyclerviewDateAdd.adapter = dateAddAdapter
         binding.recyclerviewDateAdd.layoutManager = LinearLayoutManager(this)
 
