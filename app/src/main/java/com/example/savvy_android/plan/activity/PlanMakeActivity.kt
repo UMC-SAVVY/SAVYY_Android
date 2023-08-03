@@ -74,6 +74,7 @@ class PlanMakeActivity : AppCompatActivity() {
         binding.addDateBtn.setOnClickListener {
             val newTimetable = Timetable("", mutableListOf(Schedule(null,mutableListOf(Checklist(null,"", 0)), "", "", "")))
             dateAddAdapter.addItem(newTimetable)
+            dateAddAdapter.isMake = true
         }
 
         // RecyclerView에 DateAddAdapter 설정

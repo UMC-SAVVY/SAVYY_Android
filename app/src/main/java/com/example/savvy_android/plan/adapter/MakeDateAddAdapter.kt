@@ -67,6 +67,7 @@ class MakeDateAddAdapter(private val data: MutableList<Timetable>,
             binding.addPlaceBtn.setOnClickListener {
                 val newSchedule = Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")
                 placeAddAdapter.addItem(newSchedule)
+                placeAddAdapter.isMake = true
             }
 
             if (position == 0) {
