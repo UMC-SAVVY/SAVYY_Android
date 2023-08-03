@@ -184,8 +184,6 @@ class DiaryMake4Activity : AppCompatActivity() {
                         if (diaryImageResponse?.isSuccess == true) {
                             // 수신 받은 서버 이미지 주소를 알맞게 다시 넣어줌
                             var imageCount = 0
-                            Log.e("TEST","response: ${response}")
-                            Log.e("TEST","diaryImageResponse: ${diaryImageResponse}")
                             for (item in diaryDetailContent) {
                                 if (item.type == "image") {
                                     item.content = diaryImageResponse.result[imageCount].pic_url

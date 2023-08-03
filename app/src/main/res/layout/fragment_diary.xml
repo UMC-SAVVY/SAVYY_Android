@@ -69,6 +69,7 @@
             android:layout_height="50dp"
             android:layout_marginStart="12dp"
             android:background="@null"
+            android:singleLine="true"
             android:fontFamily="@font/pretendard_medium"
             android:hint="@string/plz_enter_search"
             android:importantForAutofill="no"

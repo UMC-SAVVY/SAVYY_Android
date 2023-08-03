@@ -74,6 +74,7 @@ class PlanFragment : Fragment() {
         })
 
         // Plan Data & Adapter
+        binding.planRecycle.itemAnimator = null
         planListAdapter =
             PlanListAdapter(
                 requireContext(),

@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.R.drawable.ic_heart
 import com.example.savvy_android.R.drawable.ic_heart_gray
@@ -144,15 +145,12 @@ class DiaryDetailActivity : AppCompatActivity() {
             }
         })
 
-        // API 연결 전 임시 연결
-        // Option 버튼 클릭 시 번갈아가며 bottom sheet 표시
+        // Option 버튼 클릭 시 본인  bottom sheet 표시
         binding.diaryOptionBtn.setOnClickListener {
-            if (planID != null) {
-                if (isMine)
-                    bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-                else
-                    bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-            }
+            if (isMine)
+                bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
+            else
+                bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
         }
 
 

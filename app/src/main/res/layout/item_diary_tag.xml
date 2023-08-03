@@ -48,6 +48,7 @@
                 android:fontFamily="@font/pretendard_medium"
                 android:hint="해시태그 입력하기 (예시: 여행)"
                 android:maxLines="1"
+                android:singleLine="true"
                 android:textColor="@color/black"
                 android:textColorHint="@color/icon"
                 android:textSize="15sp"
