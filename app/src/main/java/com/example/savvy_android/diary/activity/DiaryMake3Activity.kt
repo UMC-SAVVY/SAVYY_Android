@@ -34,8 +34,8 @@ import com.example.savvy_android.databinding.ActivityDiaryStep3Binding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.adapter.Make3Adapter
 import com.example.savvy_android.diary.data.detail.DiaryContent
-import com.example.savvy_android.diary.data.make.DiaryMakeRequest
-import com.example.savvy_android.diary.data.make.DiaryMakeResponse
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
@@ -70,6 +70,9 @@ class DiaryMake3Activity : AppCompatActivity() {
         binding = ActivityDiaryStep3Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // 0으로 초기화
+        imageCount = 0
+
         // 시작된 fragment 정보 받기
         isDiary = intent.getBooleanExtra("isDiary", true)
 
@@ -96,16 +99,14 @@ class DiaryMake3Activity : AppCompatActivity() {
             if (binding.titleEdit.text.toString().isNotEmpty() && diaryDetailData.isNotEmpty()) {
                 val intent =
                     Intent(this@DiaryMake3Activity, DiaryMake4Activity::class.java)
-                val bundle = Bundle()
                 intent.putExtra("isDiary", isDiary)
                 intent.putExtra("title", binding.titleEdit.text.toString())
                 intent.putExtra("planner_id", -1)
                 intent.putParcelableArrayListExtra("diaryContent", diaryDetailData)
-                intent.putExtras(bundle)
                 startActivity(intent)
-            }else if(binding.titleEdit.text.toString().isEmpty()){
+            } else if (binding.titleEdit.text.toString().isEmpty()) {
                 showToast("제목이 작성되지 않았습니다")
-            }else if (diaryDetailData.isEmpty()) {
+            } else if (diaryDetailData.isEmpty()) {
                 showToast("내용이 작성되지 않았습니다")
             }
         }
@@ -348,10 +349,10 @@ class DiaryMake3Activity : AppCompatActivity() {
     ) {
         // POST 요청
         diaryService.diaryMake(token = accessToken, diaryMakeRequest = diaryMakeRequest)
-            .enqueue(object : Callback<DiaryMakeResponse> {
+            .enqueue(object : Callback<DiaryMakeModifyResponse> {
                 override fun onResponse(
-                    call: Call<DiaryMakeResponse>,
-                    response: Response<DiaryMakeResponse>,
+                    call: Call<DiaryMakeModifyResponse>,
+                    response: Response<DiaryMakeModifyResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val planResponse = response.body()
@@ -395,7 +396,7 @@ class DiaryMake3Activity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<DiaryMakeResponse>, t: Throwable) {
+                override fun onFailure(call: Call<DiaryMakeModifyResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e(
                         "DIARY",

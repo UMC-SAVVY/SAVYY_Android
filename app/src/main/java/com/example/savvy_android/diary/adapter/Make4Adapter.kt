@@ -37,8 +37,9 @@ class Make4Adapter(
     // View에 내용이 작성되는 method, 스크롤을 올리거나 내릴 때마다 호출
     override fun onBindViewHolder(holder: DiaryHashtagViewHolder, position: Int) {
         val data = hashtagData[holder.adapterPosition]
+        holder.text.setText(data.tag)
 
-        if (!holder.text.hasFocus()) {
+        if (!holder.text.hasFocus() && holder.text.text.isEmpty()) {
             holder.text.requestFocus() // EditText에 포커스를 주기 위한 메소드
 
             // 필요에 따라 키보드를 자동으로 올릴 수도 있음

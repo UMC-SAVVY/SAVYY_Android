@@ -16,6 +16,7 @@ import com.example.savvy_android.diary.adapter.DetailAdapter
 import com.example.savvy_android.databinding.ActivityDiaryDetailBinding
 import com.example.savvy_android.diary.data.detail.DiaryContent
 import com.example.savvy_android.diary.data.detail.DiaryDetailResponse
+import com.example.savvy_android.diary.data.detail.DiaryHashtag
 import com.example.savvy_android.utils.BottomSheetDialogFragment
 import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
 import com.example.savvy_android.diary.dialog.DiaryModifyDialogFragment
@@ -35,6 +36,7 @@ class DiaryDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryDetailBinding
     private lateinit var diaryViewAdapter: DetailAdapter
     private var diaryViewData = arrayListOf<DiaryContent>()
+    private var diaryHashtagData = arrayListOf<DiaryHashtag>()
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var nickname: String
     private var isMine: Boolean = true // 다이어리가 본인것인지 판단
@@ -82,12 +84,12 @@ class DiaryDetailActivity : AppCompatActivity() {
             diaryViewData
         )
         binding.diaryDescribeRecycle.adapter = diaryViewAdapter
-
-        diaryDetailAPI(diaryID, binding)
     }
 
     override fun onResume() {
         super.onResume()
+        diaryViewAdapter.clearList()
+        diaryDetailAPI(diaryID, binding)
 
         // 여행계획서 보러가기
         if (planID != null) {
@@ -108,13 +110,12 @@ class DiaryDetailActivity : AppCompatActivity() {
         bottomSheet.setButtonClickListener(object :
             BottomSheetDialogFragment.OnButtonClickListener {
             override fun onDialogEditClicked() {    // 수정하기 클릭 시
-//                val intent = Intent(this,DiaryModify1Activity::class.java)
-//                intent.putExtra("planName", diaryID)
-//                startActivity(intent)
-
-//                여기에 modifyDialog에서 수정 클릭시 뜨는 다이얼로그에 diaryID 넘겨줘야함
-
-                val dialog = DiaryModifyDialogFragment()
+                val dialog = DiaryModifyDialogFragment(
+                    diaryID,
+                    binding.diaryTitleTv.text.toString(),
+                    diaryViewData,
+                    diaryHashtagData
+                )
                 dialog.show(supportFragmentManager, "DiaryModifyDialog")
             }
 
@@ -208,6 +209,7 @@ class DiaryDetailActivity : AppCompatActivity() {
                                 for (hashtag in result.hashtag) {
                                     diaryHashTag += "#${hashtag.tag} "
                                 }
+                                diaryHashtagData = result.hashtag
                             }
                             binding.diaryTagTv.text = diaryHashTag
 

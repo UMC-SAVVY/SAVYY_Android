@@ -2,8 +2,9 @@ package com.example.savvy_android.diary.service
 
 import com.example.savvy_android.diary.data.detail.DiaryDetailResponse
 import com.example.savvy_android.diary.data.list.DiaryListResponse
-import com.example.savvy_android.diary.data.make.DiaryMakeRequest
-import com.example.savvy_android.diary.data.make.DiaryMakeResponse
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
+import com.example.savvy_android.diary.data.make_modify.DiaryModifyRequest
 import com.example.savvy_android.init.data.image.UploadImageResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -12,6 +13,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -43,12 +45,18 @@ interface DiaryService {
     fun diaryMake(
         @Header("Authorization") token: String,
         @Body diaryMakeRequest: DiaryMakeRequest,
-    ): Call<DiaryMakeResponse>
+    ): Call<DiaryMakeModifyResponse>
+
+    @PUT("diary")
+    fun diaryModify(
+        @Header("Authorization") token: String,
+        @Body diaryModifyRequest: DiaryModifyRequest,
+    ): Call<DiaryMakeModifyResponse>
 
     @Multipart
     @POST("diary/image")
     fun diaryImage(
         @Header("Authorization") token: String,
         @Part imageFileList: ArrayList<MultipartBody.Part>,
-    ):Call<UploadImageResponse>
+    ): Call<UploadImageResponse>
 }

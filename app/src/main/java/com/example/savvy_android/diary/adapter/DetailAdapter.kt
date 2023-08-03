@@ -100,4 +100,9 @@ class DetailAdapter(
             notifyItemRemoved(position)
         }
     }
+
+    fun clearList(){
+        diaryViewData.clear() // 데이터 리스트를 비움
+        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
+    }
 }

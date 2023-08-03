@@ -29,8 +29,8 @@ import com.example.savvy_android.databinding.ActivityDiaryStep4Binding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.data.detail.DiaryContent
 import com.example.savvy_android.diary.data.detail.DiaryHashtag
-import com.example.savvy_android.diary.data.make.DiaryMakeRequest
-import com.example.savvy_android.diary.data.make.DiaryMakeResponse
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
@@ -241,10 +241,10 @@ class DiaryMake4Activity : AppCompatActivity() {
     ) {
         // POST 요청
         diaryService.diaryMake(token = accessToken, diaryMakeRequest = diaryMakeRequest)
-            .enqueue(object : Callback<DiaryMakeResponse> {
+            .enqueue(object : Callback<DiaryMakeModifyResponse> {
                 override fun onResponse(
-                    call: Call<DiaryMakeResponse>,
-                    response: Response<DiaryMakeResponse>,
+                    call: Call<DiaryMakeModifyResponse>,
+                    response: Response<DiaryMakeModifyResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val planResponse = response.body()
@@ -288,7 +288,7 @@ class DiaryMake4Activity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<DiaryMakeResponse>, t: Throwable) {
+                override fun onFailure(call: Call<DiaryMakeModifyResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e(
                         "DIARY",

@@ -49,9 +49,8 @@ class Make3Adapter(
     override fun onBindViewHolder(holder: DiaryViewHolder, position: Int) {
         val data = diaryViewData[holder.adapterPosition]
         val type = data.type
-        var content = data.content
-        var placeName = data.location
-        // val hasPlace = data.hasPlace
+        val content = data.content
+        val placeName = data.location
 
         // 텍스트 or 이미지 인지
         if (type == "text") {
@@ -83,13 +82,14 @@ class Make3Adapter(
                 .into(holder.image)
 
             // 장소가 장소 저장함에 있을 때
-//            if (hasPlace!!) {
+            if (placeName != null) {
 //                holder.placeIcon.setImageResource(R.drawable.ic_map)
-//                holder.placeName.text = data.placeName  // 장소 이름
-//            } else {
+                holder.placeName.setText(placeName)  // 장소 이름
+                holder.placeName.hint = ""
+            } else {
 //                holder.placeIcon.setImageResource(R.drawable.ic_plus_round)
-//                holder.placeName.text = "장소 정보 입력하기"
-//            }
+                holder.placeName.setText("장소 정보 입력하기")
+            }
 
             // 이미지 삭제 클릭 이벤트
             holder.imageDelete.setOnClickListener {

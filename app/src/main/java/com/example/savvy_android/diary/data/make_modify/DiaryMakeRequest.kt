@@ -1,4 +1,4 @@
-package com.example.savvy_android.diary.data.make
+package com.example.savvy_android.diary.data.make_modify
 
 import com.example.savvy_android.diary.data.detail.DiaryContent
 import com.example.savvy_android.diary.data.detail.DiaryHashtag
