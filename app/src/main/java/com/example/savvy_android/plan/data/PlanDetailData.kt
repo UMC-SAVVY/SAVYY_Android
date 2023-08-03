@@ -1,6 +1,6 @@
 package com.example.savvy_android.plan.data
 
-class PlanDetailResponse(
+data class PlanDetailResponse(
     val isSuccess: Boolean,
     val code: Int,
     val message: String,

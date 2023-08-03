@@ -47,7 +47,7 @@ class PlanModifyActivity : AppCompatActivity() {
     private var memoText: String = ""
 
     companion object {
-        private const val MEMO_MODIFY_REQUEST_CODE = 123 // Use any unique integer value
+        private const val MEMO_MODIFY_REQUEST_CODE = 1
     }
 
 
@@ -112,10 +112,7 @@ class PlanModifyActivity : AppCompatActivity() {
         binding.modifyCompletionBtn.setOnClickListener {
             val id = planID
             val titleText = binding.titleEdit.text.toString()
-//            memoText = intent.getStringExtra("memoText") ?: ""
             val memoText = memoText
-            Log.d("PlanModifyRequest", "memoText: $memoText") // Add this log statement
-
             val nickname = ""
             val currentTime = ""
             if (titleText.isNotEmpty()) {
@@ -170,7 +167,7 @@ class PlanModifyActivity : AppCompatActivity() {
 
                         val intent = Intent(this@PlanModifyActivity, PlanDetailActivity::class.java)
                         intent.putExtra("planID", planID)
-                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP // Add this line to clear previous instances of DetailActivity
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                         startActivity(intent)
 
                         finish()
@@ -231,13 +228,11 @@ class PlanModifyActivity : AppCompatActivity() {
                                 Log.d("MemoModify", "memoText updated: $memoText")
                                 val intent = Intent(this@PlanModifyActivity, MemoModifyActivity::class.java)
                                 intent.putExtra("memoText", memoText)
-                               // startActivity(intent)
                                 startActivityForResult(intent, MEMO_MODIFY_REQUEST_CODE)
 
                             } else {
                                 val intent =
                                     Intent(this@PlanModifyActivity, MemoModifyActivity::class.java)
-                               // startActivity(intent)
                                 startActivityForResult(intent, MEMO_MODIFY_REQUEST_CODE)
 
                             }
@@ -265,9 +260,7 @@ class PlanModifyActivity : AppCompatActivity() {
 
         if (requestCode == MEMO_MODIFY_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             val updatedMemoText = data.getStringExtra("memoText")
-            // Update the memoText variable with the new memoText value
             memoText = updatedMemoText ?: ""
-            // You can also update any UI elements that display the memoText
         }
     }
 
