@@ -46,7 +46,6 @@ class DiaryCommentActivity : AppCompatActivity(),
     private lateinit var nickname: String
     private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -59,6 +58,9 @@ class DiaryCommentActivity : AppCompatActivity(),
         nickname = sharedPreferences.getString("USER_NICKNAME", null)!!
 
         diaryID = intent.getIntExtra("diaryID", 0)
+
+        commentCheckAPI(diaryID)
+
 
         // 뒤로가기 클릭 이벤트
         binding.arrowLeftBtn.setOnClickListener {
@@ -164,25 +166,6 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
         }
 
-//        // 옵션 관련 (다른사람이 작성한 댓글)
-//        val bottomSheetOther = BottomSheetOtherDialogFragment()
-//        bottomSheetOther.setButtonClickListener(object :
-//            BottomSheetOtherDialogFragment.OnButtonClickListener {
-//            override fun onDialogReportClicked() {
-//                val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-//                startActivity(intent)
-//            }
-//        })
-//
-//        // API 연결 전 임시 연결
-//        // Option 버튼 클릭 시 번갈아가며 bottom sheet 표시
-//        if (isShowingBottomSheet) {
-//            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-//        } else {
-//            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-//        }
-//        // Toggle the flag
-//        isShowingBottomSheet = !isShowingBottomSheet
     }
 
     override fun onNestedOptionClick(commentPosition: Int, nestedCommentPosition: Int) {
@@ -243,27 +226,6 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
         }
 
-        commentCheckAPI(diaryID)
-
-//        // 옵션 관련 (다른사람이 작성한 댓글)
-//        val bottomSheetOther = BottomSheetOtherDialogFragment()
-//        bottomSheetOther.setButtonClickListener(object :
-//            BottomSheetOtherDialogFragment.OnButtonClickListener {
-//            override fun onDialogReportClicked() {
-//                val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-//                startActivity(intent)
-//            }
-//        })
-//
-//        // API 연결 전 임시 연결
-//        // Option 버튼 클릭 시 번갈아가며 bottom sheet 표시
-//        if (isShowingBottomSheet) {
-//            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-//        } else {
-//            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-//        }
-//        // Toggle the flag
-//        isShowingBottomSheet = !isShowingBottomSheet
     }
 
     private fun btnStateBackground(able: Boolean, button: AppCompatButton) {
@@ -298,14 +260,13 @@ class DiaryCommentActivity : AppCompatActivity(),
                     val message = commentCheckResponse?.message
                     if (commentCheckResponse != null && commentCheckResponse.isSuccess) {
                         val commentCheckResult = commentCheckResponse.result
-
                         // planDetailResult에 들어있는 데이터를 사용하여 작업
                         Log.d("DiaryCommentActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
-                        val firstComment = commentCheckResult[0]
-
-                        isMine = nickname == firstComment.nickname
-
-                        diaryID = firstComment.id
+//                        val firstComment = commentCheckResult[0]
+//
+//                        isMine = nickname == firstComment.nickname
+//
+//                        diaryID = firstComment.id
 
                     } else {
                         Log.d("DiaryCommentActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")

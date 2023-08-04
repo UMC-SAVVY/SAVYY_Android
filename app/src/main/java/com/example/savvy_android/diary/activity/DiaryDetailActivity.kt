@@ -163,6 +163,7 @@ class DiaryDetailActivity : AppCompatActivity() {
         // 댓글 레이아웃 클릭 이벤트
         binding.diaryCommentLayout.setOnClickListener {
             val intent = Intent(this, DiaryCommentActivity::class.java)
+            intent.putExtra("diaryID", diaryID)
             startActivity(intent)
         }
     }

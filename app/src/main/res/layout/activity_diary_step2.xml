@@ -54,14 +54,14 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Wrap the layout with ScrollView -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/diary_top">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0dp">
 
             <SeekBar
                 android:id="@+id/seekBar"
@@ -171,7 +171,7 @@
                 android:layout_height="40dp"
                 android:layout_centerInParent="true"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginEnd="16dp"
                 android:background="@drawable/btn_radius10"
                 android:elevation="4dp"
@@ -226,14 +226,14 @@
                 android:id="@+id/travel_plan_margin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10dp"
+                android:textSize="45dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/add_date_btn" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
