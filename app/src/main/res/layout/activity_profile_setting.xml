@@ -63,6 +63,7 @@
             <ImageView
                 android:id="@+id/profile_img_iv"
                 android:layout_width="match_parent"
+                android:src="@drawable/ic_profile_default"
                 android:layout_height="match_parent"
                 android:importantForAccessibility="no"
                 android:scaleType="centerCrop" />
