@@ -83,11 +83,11 @@ class Make3Adapter(
 
             // 장소가 장소 저장함에 있을 때
             if (placeName != null) {
-//                holder.placeIcon.setImageResource(R.drawable.ic_map)
+                // holder.placeIcon.setImageResource(R.drawable.ic_map)
                 holder.placeName.setText(placeName)  // 장소 이름
                 holder.placeName.hint = ""
             } else {
-//                holder.placeIcon.setImageResource(R.drawable.ic_plus_round)
+                // holder.placeIcon.setImageResource(R.drawable.ic_plus_round)
                 holder.placeName.setText("장소 정보 입력하기")
             }
 

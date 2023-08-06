@@ -28,7 +28,7 @@ import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.plan.activity.PlanDetailActivity
 import com.example.savvy_android.plan.activity.PlanDetailVisitActivity
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
 import com.example.savvy_android.utils.report.ReportActivity
 import retrofit2.Call
@@ -48,6 +48,8 @@ class DiaryDetailActivity : AppCompatActivity() {
     private var isLike: Boolean = false
     private var diaryID: Int = 0
     private var planID: Int? = null
+    private val likePush= "up"
+    private val likeCancel= "down"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,16 +74,10 @@ class DiaryDetailActivity : AppCompatActivity() {
         // 좋아요 버튼 클릭 이벤트
         binding.diaryLikeBtn.setOnClickListener {
             if (isLike) {
-                binding.diaryLikeBtn.setImageResource(ic_heart_gray)
-                binding.diaryLikeTv.text =
-                    "${Integer.parseInt(binding.diaryLikeTv.text as String) - 1}"
+                likeAPI(diaryId = diaryID, changeValue = likeCancel)
             } else {
-                binding.diaryLikeBtn.setImageResource(ic_heart)
-                binding.diaryLikeTv.text =
-                    "${Integer.parseInt(binding.diaryLikeTv.text as String) + 1}"
+                likeAPI(diaryId = diaryID, changeValue = likePush)
             }
-            // !!!! 좋아요 변한 내용 서버 전송 코드 필요
-            isLike = !isLike
         }
 
         // Plan Data & Adapter
@@ -212,7 +208,7 @@ class DiaryDetailActivity : AppCompatActivity() {
                             var diaryHashTag = ""
                             if (result.hashtag != null) {
                                 for (hashtag in result.hashtag) {
-                                    diaryHashTag += "#${hashtag.tag} "
+                                    diaryHashTag += "# ${hashtag.tag} "
                                 }
                                 diaryHashtagData = result.hashtag
                             }
@@ -299,10 +295,10 @@ class DiaryDetailActivity : AppCompatActivity() {
             token = accessToken,
             diaryID = diaryId
         )
-            .enqueue(object : Callback<PlanRemoveResponse> {
+            .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
-                    call: Call<PlanRemoveResponse>,
-                    response: Response<PlanRemoveResponse>,
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -335,11 +331,86 @@ class DiaryDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                     // 삭제 실패 시 토스트 메시지 표시
                     showToast("계획서 삭제를 실패하였습니다.")
+                }
+            })
+    }
+
+    private fun likeAPI(diaryId: Int, changeValue: String) {
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val diaryStatusService = retrofit.create(DiaryService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // 좋아요 변경 요청
+        diaryStatusService.diaryStatus(
+            token = accessToken,
+            type = "like",
+            value = changeValue,
+            diaryID = diaryId
+        )
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 좋아요 성공
+                            if (isLike) {
+                                binding.diaryLikeBtn.setImageResource(ic_heart_gray)
+                                binding.diaryLikeTv.text =
+                                    "${Integer.parseInt(binding.diaryLikeTv.text as String) - 1}"
+                            } else {
+                                binding.diaryLikeBtn.setImageResource(ic_heart)
+                                binding.diaryLikeTv.text =
+                                    "${Integer.parseInt(binding.diaryLikeTv.text as String) + 1}"
+                            }
+                            // !!!! 좋아요 변한 내용 서버 전송 코드 필요
+                            isLike = !isLike
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "DIARY",
+                                    detailType = "LIKE",
+                                    intentData = null
+                                )
+                            }
+                            // 삭제 실패 시 토스트 메시지 표시
+                            showToast("다시 시도해주세요.")
+                        }
+                    } else {
+                        Log.e(
+                            "DIARY",
+                            "[DIARY LIKE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        // 삭제 실패 시 토스트 메시지 표시
+                        showToast("다시 시도해주세요.")
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("DIARY", "[DIARY LIKE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    // 삭제 실패 시 토스트 메시지 표시
+                    showToast("다시 시도해주세요.")
                 }
             })
     }

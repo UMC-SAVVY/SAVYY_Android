@@ -24,13 +24,13 @@ import com.example.savvy_android.diary.data.list.DiaryListResult
 import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.errorCodeList
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
-import com.example.savvy_android.plan.service.PlanListService
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.properties.Delegates
 
 
 class DiaryListAdapter(
@@ -41,6 +41,8 @@ class DiaryListAdapter(
     private val isDiary: Boolean,
 ) :
     RecyclerView.Adapter<DiaryListAdapter.DiaryViewHolder>() {
+    private var itemPublic by Delegates.notNull<Boolean>()
+
     // 각 뷰들을 binding 사용하여 View 연결
     inner class DiaryViewHolder(binding: ItemDiaryBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -95,12 +97,12 @@ class DiaryListAdapter(
         } else {
             holder.photoCard.isVisible = false
         }
-        showResource(data.is_public, holder)
+        itemPublic = data.is_public
+        showResource(itemPublic, holder)
 
         // 숨겨진 공개 여부 버튼 클릭 이벤트
         holder.hideOShow.setOnClickListener {
-            data.is_public = !(data.is_public)
-            showResource(data.is_public, holder)
+            publicAPI(diaryId = data.id, status = itemPublic, holder = holder)
         }
 
         // 숨겨진 삭제 버튼 클릭 이벤트
@@ -113,7 +115,8 @@ class DiaryListAdapter(
                 override fun onDialogBtnOClicked() {
                     diaryRemoveAPI(
                         diaryId = data.id.toString(),
-                        position = holder.adapterPosition)
+                        position = holder.adapterPosition
+                    )
                 }
 
                 override fun onDialogBtnXClicked() {
@@ -172,7 +175,7 @@ class DiaryListAdapter(
         }
     }
 
-    fun clearList(){
+    fun clearList() {
         diaryList.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
@@ -239,10 +242,10 @@ class DiaryListAdapter(
             token = accessToken,
             diaryID = diaryId
         )
-            .enqueue(object : Callback<PlanRemoveResponse> {
+            .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
-                    call: Call<PlanRemoveResponse>,
-                    response: Response<PlanRemoveResponse>,
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -276,11 +279,78 @@ class DiaryListAdapter(
                     }
                 }
 
-                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                     // 삭제 실패 시 토스트 메시지 표시
                     showToast("계획서 삭제를 실패하였습니다.")
+                }
+            })
+    }
+
+    private fun publicAPI(diaryId: Int, status: Boolean, holder: DiaryViewHolder) {
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val diaryStatusService = retrofit.create(DiaryService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // 좋아요 변경 요청
+        diaryStatusService.diaryStatus(
+            token = accessToken,
+            type = "public",
+            value = (!status).toString(),
+            diaryID = diaryId
+        )
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 공개 여부 전환 성공
+                            itemPublic = !itemPublic
+                            showResource(itemPublic, holder)
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                context.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "DIARY",
+                                    detailType = "PUBLIC",
+                                    intentData = null
+                                )
+                            }
+                            // 삭제 실패 시 토스트 메시지 표시
+                            showToast("다시 시도해주세요.")
+                        }
+                    } else {
+                        Log.e(
+                            "DIARY",
+                            "[DIARY PUBLIC] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        // 삭제 실패 시 토스트 메시지 표시
+                        showToast("다시 시도해주세요.")
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("DIARY", "[DIARY PUBLIC] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    // 삭제 실패 시 토스트 메시지 표시
+                    showToast("다시 시도해주세요.")
                 }
             })
     }

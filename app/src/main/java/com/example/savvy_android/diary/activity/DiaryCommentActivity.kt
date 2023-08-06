@@ -15,7 +15,6 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityDiaryCommentBinding
-import com.example.savvy_android.databinding.ActivityPlanDetialBinding
 import com.example.savvy_android.diary.adapter.CommentAdapter
 import com.example.savvy_android.diary.adapter.NestedCommentAdapter
 import com.example.savvy_android.diary.data.CommentItemData
@@ -23,11 +22,8 @@ import com.example.savvy_android.diary.data.comment.CommentCheckResponse
 import com.example.savvy_android.diary.dialog.CommentDeleteDialogFragment
 import com.example.savvy_android.diary.dialog.CommentModifyDialogFragment
 import com.example.savvy_android.diary.service.CommentCheckService
-import com.example.savvy_android.plan.data.PlanDetailResponse
-import com.example.savvy_android.plan.service.PlanDetailService
 import com.example.savvy_android.utils.BottomSheetDialogFragment
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
-import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.utils.report.ReportActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -164,25 +160,6 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
         }
 
-//        // 옵션 관련 (다른사람이 작성한 댓글)
-//        val bottomSheetOther = BottomSheetOtherDialogFragment()
-//        bottomSheetOther.setButtonClickListener(object :
-//            BottomSheetOtherDialogFragment.OnButtonClickListener {
-//            override fun onDialogReportClicked() {
-//                val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-//                startActivity(intent)
-//            }
-//        })
-//
-//        // API 연결 전 임시 연결
-//        // Option 버튼 클릭 시 번갈아가며 bottom sheet 표시
-//        if (isShowingBottomSheet) {
-//            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-//        } else {
-//            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-//        }
-//        // Toggle the flag
-//        isShowingBottomSheet = !isShowingBottomSheet
     }
 
     override fun onNestedOptionClick(commentPosition: Int, nestedCommentPosition: Int) {
@@ -243,27 +220,7 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
         }
 
-        commentCheckAPI(diaryID)
 
-//        // 옵션 관련 (다른사람이 작성한 댓글)
-//        val bottomSheetOther = BottomSheetOtherDialogFragment()
-//        bottomSheetOther.setButtonClickListener(object :
-//            BottomSheetOtherDialogFragment.OnButtonClickListener {
-//            override fun onDialogReportClicked() {
-//                val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-//                startActivity(intent)
-//            }
-//        })
-//
-//        // API 연결 전 임시 연결
-//        // Option 버튼 클릭 시 번갈아가며 bottom sheet 표시
-//        if (isShowingBottomSheet) {
-//            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-//        } else {
-//            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-//        }
-//        // Toggle the flag
-//        isShowingBottomSheet = !isShowingBottomSheet
     }
 
     private fun btnStateBackground(able: Boolean, button: AppCompatButton) {

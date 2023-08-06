@@ -224,12 +224,14 @@ class DiaryModify2Activity : AppCompatActivity() {
                                         intentData = null
                                     )
                                 }
+                                showToast("다이어리 수정을 실패했습니다")
                             }
                         } else {
                             Log.e(
                                 "DIARY",
                                 "[DIARY MODIFY IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
                             )
+                            showToast("다이어리 수정을 실패했습니다")
                         }
                     }
 
@@ -239,6 +241,7 @@ class DiaryModify2Activity : AppCompatActivity() {
                             "DIARY",
                             "[DIARY MODIFY IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
+                        showToast("다이어리 수정을 실패했습니다")
                     }
                 })
         }
@@ -281,12 +284,14 @@ class DiaryModify2Activity : AppCompatActivity() {
                                     intentData = null
                                 )
                             }
+                            showToast("다이어리 수정을 실패했습니다")
                         }
                     } else {
                         Log.e(
                             "DIARY",
                             "[DIARY MODIFY] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
+                        showToast("다이어리 수정을 실패했습니다")
                     }
                 }
 

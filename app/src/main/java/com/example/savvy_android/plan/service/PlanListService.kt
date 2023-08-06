@@ -1,6 +1,6 @@
 package com.example.savvy_android.plan.service
 
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.plan.data.list.PlanListResponse
 import retrofit2.Call
 import retrofit2.http.DELETE
@@ -35,5 +35,5 @@ interface PlanListService {
         @Header("Authorization") token: String,
         @Query("plannerId") plannerId: String,
         @Query("type") plannerType: String,
-    ): Call<PlanRemoveResponse>
+    ): Call<ServerDefaultResponse>
 }

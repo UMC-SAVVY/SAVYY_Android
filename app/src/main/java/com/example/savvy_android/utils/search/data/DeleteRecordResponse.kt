@@ -1,8 +1,7 @@
 package com.example.savvy_android.utils.search.data
 
-data class RecordWordResponse(
+data class DeleteRecordResponse(
     val code: Int,
     val isSuccess: Boolean,
     val message: String,
-    val result: List<RecordWordResult>,
 )

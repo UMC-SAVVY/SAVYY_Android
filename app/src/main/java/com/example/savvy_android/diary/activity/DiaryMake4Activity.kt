@@ -170,67 +170,84 @@ class DiaryMake4Activity : AppCompatActivity() {
                 imageFileList.add(imageBody)
             }
         }
+        if (imageFileList.isEmpty()) {
+            // 다이어리 생성 API에 필요한 요청 내용 생성
+            val diaryMakeRequest = DiaryMakeRequest(
+                title = title,
+                planner_id = if (plannerId == -1) null else plannerId,
+                is_public = false,
+                is_temporary = false,
+                content = diaryDetailContent,
+                hashtag = hashtagList,
+            )
 
-        // 이미지 전송하고 이미지 서버 주소 response
-        diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
-            .enqueue(object : Callback<UploadImageResponse> {
-                override fun onResponse(
-                    call: Call<UploadImageResponse>,
-                    response: Response<UploadImageResponse>,
-                ) {
-                    if (response.isSuccessful) {
-                        val diaryImageResponse = response.body()
-                        // 서버 응답 처리 로직 작성
-                        if (diaryImageResponse?.isSuccess == true) {
-                            // 수신 받은 서버 이미지 주소를 알맞게 다시 넣어줌
-                            var imageCount = 0
-                            for (item in diaryDetailContent) {
-                                if (item.type == "image") {
-                                    item.content = diaryImageResponse.result[imageCount].pic_url
-                                    imageCount++
+            // 다이어리 작성 API 실행
+            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+        } else {
+            // 이미지 전송하고 이미지 서버 주소 response
+            diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
+                .enqueue(object : Callback<UploadImageResponse> {
+                    override fun onResponse(
+                        call: Call<UploadImageResponse>,
+                        response: Response<UploadImageResponse>,
+                    ) {
+                        if (response.isSuccessful) {
+                            val diaryImageResponse = response.body()
+                            // 서버 응답 처리 로직 작성
+                            if (diaryImageResponse?.isSuccess == true) {
+                                // 수신 받은 서버 이미지 주소를 알맞게 다시 넣어줌
+                                var imageCount = 0
+                                for (item in diaryDetailContent) {
+                                    if (item.type == "image") {
+                                        item.content = diaryImageResponse.result[imageCount].pic_url
+                                        imageCount++
+                                    }
                                 }
-                            }
 
-                            // 다이어리 생성 API에 필요한 요청 내용 생성
-                            val diaryMakeRequest = DiaryMakeRequest(
-                                title = title,
-                                planner_id = if (plannerId == -1) null else plannerId,
-                                is_public = false,
-                                is_temporary = false,
-                                content = diaryDetailContent,
-                                hashtag = hashtagList,
-                            )
-
-                            // 다이어리 작성 API 실행
-                            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
-                        } else {
-                            // 응답 에러 코드 분류
-                            diaryImageResponse?.let {
-                                errorCodeList(
-                                    errorCode = it.code,
-                                    message = it.message,
-                                    type = "DIARY",
-                                    detailType = "MAKE4 IMAGE",
-                                    intentData = null
+                                // 다이어리 생성 API에 필요한 요청 내용 생성
+                                val diaryMakeRequest = DiaryMakeRequest(
+                                    title = title,
+                                    planner_id = if (plannerId == -1) null else plannerId,
+                                    is_public = true,
+                                    is_temporary = false,
+                                    content = diaryDetailContent,
+                                    hashtag = hashtagList,
                                 )
+
+                                // 다이어리 작성 API 실행
+                                diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+                            } else {
+                                // 응답 에러 코드 분류
+                                diaryImageResponse?.let {
+                                    errorCodeList(
+                                        errorCode = it.code,
+                                        message = it.message,
+                                        type = "DIARY",
+                                        detailType = "MAKE4 IMAGE",
+                                        intentData = null
+                                    )
+                                }
+                                showToast("다이어리 작성을 실패했습니다")
                             }
+                        } else {
+                            Log.e(
+                                "DIARY",
+                                "[DIARY MAKE4 IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
+                            )
+                            showToast("다이어리 작성을 실패했습니다")
                         }
-                    } else {
+                    }
+
+                    override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
+                        // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                         Log.e(
                             "DIARY",
-                            "[DIARY MAKE4 IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
+                            "[DIARY MAKE4 IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
+                        showToast("다이어리 작성을 실패했습니다")
                     }
-                }
-
-                override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
-                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
-                    Log.e(
-                        "DIARY",
-                        "[DIARY MAKE4 IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
-                    )
-                }
-            })
+                })
+        }
     }
 
     // 다이어리 작성 API
@@ -279,12 +296,14 @@ class DiaryMake4Activity : AppCompatActivity() {
                                     intentData = null
                                 )
                             }
+                            showToast("다이어리 작성을 실패했습니다")
                         }
                     } else {
                         Log.e(
                             "DIARY",
                             "[DIARY MAKE4] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
+                        showToast("다이어리 작성을 실패했습니다")
                     }
                 }
 
@@ -294,6 +313,7 @@ class DiaryMake4Activity : AppCompatActivity() {
                         "DIARY",
                         "[DIARY MAKE4] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                     )
+                    showToast("다이어리 작성을 실패했습니다")
                 }
             })
     }

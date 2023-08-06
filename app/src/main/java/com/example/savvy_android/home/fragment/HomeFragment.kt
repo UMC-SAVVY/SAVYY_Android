@@ -11,14 +11,14 @@ import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentHomeBinding
 import com.example.savvy_android.diary.activity.DiaryMake1Activity
 import com.example.savvy_android.home.adapter.HomeAdapter
-import com.example.savvy_android.home.adapter.HomeItemData
 import com.example.savvy_android.utils.alarm.AlarmActivity
 import com.example.savvy_android.utils.search.activity.SearchActivity
+import com.example.savvy_android.utils.search.data.WordSearchResult
 
 class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
     private lateinit var homeAdapter: HomeAdapter
-    private var homeData = arrayListOf<HomeItemData>()
+    private var homeData = arrayListOf<WordSearchResult>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +40,7 @@ class HomeFragment : Fragment() {
         }
 
         // 홈화면 게시글 어뎁터
-        homeAdapter = HomeAdapter(homeData)
+        homeAdapter = HomeAdapter(requireContext(), homeData)
         binding.homeRecycle.adapter = homeAdapter
 
         // 당겨서 새로고침 아이콘 색상
@@ -59,7 +59,7 @@ class HomeFragment : Fragment() {
         // Floating Button 클릭 시 계획서 작성 페이지로 연결
         binding.homeAddFbtn.setOnClickListener {
             val intent = Intent(context, DiaryMake1Activity::class.java)
-            intent.putExtra("isDiary",false)
+            intent.putExtra("isDiary", false)
             startActivity(intent)
         }
 

@@ -6,7 +6,7 @@ import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.data.make_modify.DiaryModifyRequest
 import com.example.savvy_android.init.data.image.UploadImageResponse
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -41,7 +41,7 @@ interface DiaryService {
     fun diaryDelete(
         @Header("Authorization") token: String,
         @Path("diary_id") diaryID: String,
-    ): Call<PlanRemoveResponse>
+    ): Call<ServerDefaultResponse>
 
     @GET("diary/{diary_id}")
     fun diaryDetail(
@@ -67,4 +67,12 @@ interface DiaryService {
         @Header("Authorization") token: String,
         @Part imageFileList: ArrayList<MultipartBody.Part>,
     ): Call<UploadImageResponse>
+
+    @POST("diary/status")
+    fun diaryStatus(
+        @Header("Authorization") token: String,
+        @Query("type") type: String,
+        @Query("value") value: String,
+        @Query("diary_id") diaryID: Int,
+    ): Call<ServerDefaultResponse>
 }

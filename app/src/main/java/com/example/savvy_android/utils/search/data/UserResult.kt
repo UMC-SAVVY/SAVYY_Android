@@ -1,8 +1,8 @@
 package com.example.savvy_android.utils.search.data
 
-data class RecordUserResult(
+data class UserResult(
     val id: Int,
-    val search_word: String,
+    val nickname: String,
     val pic_url: String?,
     val likes: Int,
     val amount_planner: Int,

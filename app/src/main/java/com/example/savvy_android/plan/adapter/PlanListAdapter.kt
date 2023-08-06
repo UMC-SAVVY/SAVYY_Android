@@ -20,7 +20,7 @@ import com.example.savvy_android.databinding.ItemPlanBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.plan.activity.PlanDetailVisitActivity
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.plan.data.list.PlanListResult
 import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
 import com.example.savvy_android.plan.service.PlanListService
@@ -209,10 +209,10 @@ class PlanListAdapter(
             plannerId = plannerId,
             plannerType = plannerType,
         )
-            .enqueue(object : Callback<PlanRemoveResponse> {
+            .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
-                    call: Call<PlanRemoveResponse>,
-                    response: Response<PlanRemoveResponse>,
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -248,7 +248,7 @@ class PlanListAdapter(
                     }
                 }
 
-                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("PLAN", "[PLAN DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
 
