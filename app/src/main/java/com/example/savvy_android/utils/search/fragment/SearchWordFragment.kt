@@ -20,6 +20,7 @@ import com.example.savvy_android.databinding.FragmentSearchWordBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.home.adapter.HomeAdapter
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.example.savvy_android.utils.search.adapter.SearchRecordWordAdapter
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.WordRecordResponse
@@ -228,6 +229,8 @@ class SearchWordFragment : Fragment() {
 
     // 검색 (제목/해시태그)
     private fun searchWordAPI(word: String) {
+        val dialog = LoadingDialogFragment()
+        dialog.show(requireFragmentManager(), "LoadingDialog")
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -276,11 +279,13 @@ class SearchWordFragment : Fragment() {
                             "[SEARCH WORD] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
+                    dialog.dismiss()
                 }
 
                 override fun onFailure(call: Call<WordSearchResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("SEARCH", "[SEARCH WORD] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    dialog.dismiss()
                 }
             })
     }

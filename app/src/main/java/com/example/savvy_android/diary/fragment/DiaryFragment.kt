@@ -24,6 +24,7 @@ import com.example.savvy_android.diary.data.list.DiaryListResponse
 import com.example.savvy_android.diary.data.list.DiaryListResult
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.example.savvy_android.utils.alarm.AlarmActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -134,6 +135,8 @@ class DiaryFragment : Fragment() {
 
     // 다이어리 목록(나의 다이어리) API
     private fun diaryListAPI(){
+        val dialog = LoadingDialogFragment()
+        dialog.show(requireFragmentManager(), "LoadingDialog")
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -187,11 +190,13 @@ class DiaryFragment : Fragment() {
                             "[DIARY MINE] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
+                    dialog.dismiss()
                 }
 
                 override fun onFailure(call: Call<DiaryListResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    dialog.dismiss()
                 }
             })
     }

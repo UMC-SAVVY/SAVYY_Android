@@ -25,6 +25,7 @@ import com.example.savvy_android.plan.PlanItemTouchCallback
 import com.example.savvy_android.plan.data.list.PlanListResponse
 import com.example.savvy_android.plan.data.list.PlanListResult
 import com.example.savvy_android.plan.service.PlanListService
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.example.savvy_android.utils.alarm.AlarmActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -188,6 +189,8 @@ class PlanFragment : Fragment() {
         type: Int,
         searchWord: String?,
     ) {
+        val dialog = LoadingDialogFragment()
+        dialog.show(requireFragmentManager(), "LoadingDialog")
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -241,11 +244,13 @@ class PlanFragment : Fragment() {
                                     "[PLAN ALL] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("PLAN", "[PLAN ALL] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                            dialog.dismiss()
                         }
                     })
             }
@@ -289,11 +294,13 @@ class PlanFragment : Fragment() {
                                     "[PLAN MINE] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("PLAN", "[PLAN MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                            dialog.dismiss()
                         }
                     })
             }
@@ -337,11 +344,13 @@ class PlanFragment : Fragment() {
                                     "[PLAN SCRAP] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("PLAN", "[PLAN SCRAP] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                            dialog.dismiss()
                         }
                     })
             }
@@ -385,11 +394,13 @@ class PlanFragment : Fragment() {
                                     "[PLAN SEARCH] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("PLAN", "[PLAN SEARCH] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                            dialog.dismiss()
                         }
                     })
             }

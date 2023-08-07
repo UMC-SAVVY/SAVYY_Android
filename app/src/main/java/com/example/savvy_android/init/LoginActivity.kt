@@ -13,6 +13,7 @@ import com.example.savvy_android.databinding.ActivityLoginBinding
 import com.example.savvy_android.init.data.LoginRequest
 import com.example.savvy_android.init.data.LoginResponse
 import com.example.savvy_android.init.service.LoginService
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.common.model.ClientError
 import com.kakao.sdk.common.model.ClientErrorCause
@@ -54,6 +55,9 @@ class LoginActivity : AppCompatActivity() {
                 } else if (token != null) {
                     Log.d("LOGIN", "[LOGIN KAKAO] 카카오계정으로 로그인 성공")
                     // 서버와 통신 파트
+
+                    val dialog = LoadingDialogFragment()
+                    dialog.show(supportFragmentManager, "LoadingDialog")
 
                     // 서버 주소
                     val serverAddress = getString(R.string.serverAddress)
@@ -108,11 +112,13 @@ class LoginActivity : AppCompatActivity() {
                                     "[LOGIN ACCOUNT] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("LOGIN", "[LOGIN ACCOUNT] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                            dialog.dismiss()
                         }
                     })
                 }
@@ -138,6 +144,9 @@ class LoginActivity : AppCompatActivity() {
                             "[LOGIN KAKAO] 카카오톡으로 로그인 성공"
                         )
                         // 서버와 통신 파트
+
+                        val dialog = LoadingDialogFragment()
+                        dialog.show(supportFragmentManager, "LoadingDialog")
 
                         // 서버 주소
                         val serverAddress = getString(R.string.serverAddress)
@@ -193,6 +202,7 @@ class LoginActivity : AppCompatActivity() {
                                             "[LOGIN APP] API 호출 실패 - 응답 코드: ${response.code()}"
                                         )
                                     }
+                                    dialog.dismiss()
                                 }
 
                                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
@@ -201,6 +211,7 @@ class LoginActivity : AppCompatActivity() {
                                         "LOGIN",
                                         "[LOGIN APP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                                     )
+                                    dialog.dismiss()
                                 }
                             })
                     }

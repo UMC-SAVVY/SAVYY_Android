@@ -31,6 +31,7 @@ import com.example.savvy_android.init.data.SignupResponse
 import com.example.savvy_android.init.data.image.UploadImageResponse
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.init.service.SignupService
+import com.example.savvy_android.utils.LoadingDialogFragment
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -254,7 +255,7 @@ class ProfileSettingActivity : AppCompatActivity() {
     }
 
     // 회원가입 API
-    private fun signupAPI(signupService: SignupService) {
+    private fun signupAPI(signupService: SignupService, dialog: LoadingDialogFragment) {
         val kakaoToken = intent.getStringExtra("kakaoToken")
         if (kakaoToken != null) {
             val nickname = binding.profileNameEdit.text.toString()
@@ -309,6 +310,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 "[SIGNUP] API 호출 실패 - 응답 코드: ${response.code()}"
                             )
                         }
+                        dialog.dismiss()
                     }
 
                     override fun onFailure(
@@ -319,6 +321,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                             "SIGNUP",
                             "[SIGNUP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
+                        dialog.dismiss()
                     }
                 })
         } else {
@@ -328,6 +331,9 @@ class ProfileSettingActivity : AppCompatActivity() {
 
     // 이미지 API와 회원가입 API 결합
     private fun profileCombineAPI() {
+        val dialog = LoadingDialogFragment()
+        dialog.show(supportFragmentManager, "LoadingDialog")
+
         //서버 주소
         val serverAddress = getString(R.string.serverAddress)
 
@@ -355,7 +361,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 val uploadProfileResponse = response.body()
                                 if (uploadProfileResponse?.isSuccess == true) {
                                     profileServerUrl = uploadProfileResponse.result[0].pic_url
-                                    signupAPI(signupService)
+                                    signupAPI(signupService, dialog)
                                 }
                             } else {
                                 Log.e(
@@ -363,6 +369,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                                     "[IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
+                            dialog.dismiss()
                         }
 
                         override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
@@ -370,11 +377,12 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 "SIGNUP",
                                 "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                             )
+                            dialog.dismiss()
                         }
                     })
             } else {
                 // 프로필 사진을 추가 안했을 경우
-                signupAPI(signupService)
+                signupAPI(signupService, dialog)
             }
         }
     }

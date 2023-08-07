@@ -30,6 +30,7 @@ import com.example.savvy_android.plan.activity.PlanDetailActivity
 import com.example.savvy_android.plan.activity.PlanDetailVisitActivity
 import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.example.savvy_android.utils.report.ReportActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -48,8 +49,8 @@ class DiaryDetailActivity : AppCompatActivity() {
     private var isLike: Boolean = false
     private var diaryID: Int = 0
     private var planID: Int? = null
-    private val likePush= "up"
-    private val likeCancel= "down"
+    private val likePush = "up"
+    private val likeCancel = "down"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +90,7 @@ class DiaryDetailActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+
         diaryViewAdapter.clearList()
         diaryDetailAPI(diaryID, binding)
 
@@ -165,6 +167,9 @@ class DiaryDetailActivity : AppCompatActivity() {
 
     // 여행계획서 상세보기 API
     private fun diaryDetailAPI(diaryId: Int, binding: ActivityDiaryDetailBinding) {
+        val dialog = LoadingDialogFragment()
+        dialog.show(supportFragmentManager, "LoadingDialog")
+
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
 
         // 서버 주소
@@ -265,12 +270,13 @@ class DiaryDetailActivity : AppCompatActivity() {
                             "[DIARY DETAIL] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
+                    dialog.dismiss()
                 }
 
                 override fun onFailure(call: Call<DiaryDetailResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY DETAIL] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-
+                    dialog.dismiss()
                 }
             })
     }

@@ -19,6 +19,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentSearchUserBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.utils.LoadingDialogFragment
 import com.example.savvy_android.utils.search.adapter.SearchUserAdapter
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.UserResponse
@@ -218,6 +219,8 @@ class SearchUserFragment : Fragment() {
 
     // 검색 (사용자)
     private fun searchUserAPI(word: String) {
+        val dialog = LoadingDialogFragment()
+        dialog.show(requireFragmentManager(), "LoadingDialog")
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -266,11 +269,13 @@ class SearchUserFragment : Fragment() {
                             "[SEARCH USER] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
+                    dialog.dismiss()
                 }
 
                 override fun onFailure(call: Call<UserResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("SEARCH", "[SEARCH USER] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    dialog.dismiss()
                 }
             })
     }
