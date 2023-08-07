@@ -37,6 +37,7 @@ class PlanSelectDialogFragment(
         dialog?.setCancelable(true)
 
 
+        // make2에서 받아서
         binding.btnSelect.setOnClickListener {
             dismiss()
 

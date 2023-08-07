@@ -10,6 +10,7 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 
+//댓글 작성
 interface CommentService{
     @POST("comment/")
     fun commentMake(
@@ -18,10 +19,3 @@ interface CommentService{
     ): Call<CommentResponse>
 }
 
-interface CommentCheckService{
-    @GET("comment/{diary_id}")
-    fun commentCheck(
-        @Header("Authorization") token: String,
-        @Path("diary_id") diaryID: String
-    ): Call<CommentCheckResponse>
-}

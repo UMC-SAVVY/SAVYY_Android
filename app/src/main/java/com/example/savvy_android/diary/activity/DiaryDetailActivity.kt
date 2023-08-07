@@ -168,6 +168,8 @@ class DiaryDetailActivity : AppCompatActivity() {
         }
     }
 
+
+    // 여기서 id를 planID가 있음 planID를 여행계획서 보기로 넘겨주기
     // 여행계획서 상세보기 API
     private fun diaryDetailAPI(diaryId: Int, binding: ActivityDiaryDetailBinding) {
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
@@ -252,6 +254,9 @@ class DiaryDetailActivity : AppCompatActivity() {
 
                             // 다이어리와 연결된 계획서 연결
                             planID = result.planner_id
+
+                            Log.d("test", "planID: $planID")
+
                         } else {
                             // 응답 에러 코드 분류
                             detailResponse?.let {

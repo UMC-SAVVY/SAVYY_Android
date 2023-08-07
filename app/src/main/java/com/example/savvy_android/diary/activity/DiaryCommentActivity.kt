@@ -15,19 +15,17 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityDiaryCommentBinding
-import com.example.savvy_android.databinding.ActivityPlanDetialBinding
 import com.example.savvy_android.diary.adapter.CommentAdapter
 import com.example.savvy_android.diary.adapter.NestedCommentAdapter
-import com.example.savvy_android.diary.data.CommentItemData
 import com.example.savvy_android.diary.data.comment.CommentCheckResponse
+import com.example.savvy_android.diary.data.comment.CommentRequest
+import com.example.savvy_android.diary.data.comment.CommentResponse
 import com.example.savvy_android.diary.dialog.CommentDeleteDialogFragment
 import com.example.savvy_android.diary.dialog.CommentModifyDialogFragment
 import com.example.savvy_android.diary.service.CommentCheckService
-import com.example.savvy_android.plan.data.PlanDetailResponse
-import com.example.savvy_android.plan.service.PlanDetailService
+import com.example.savvy_android.diary.service.CommentService
 import com.example.savvy_android.utils.BottomSheetDialogFragment
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
-import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.utils.report.ReportActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,6 +50,7 @@ class DiaryCommentActivity : AppCompatActivity(),
         binding = ActivityDiaryCommentBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
@@ -72,22 +71,20 @@ class DiaryCommentActivity : AppCompatActivity(),
             val newCommentContent = binding.commentEdit.text.toString()
             if (newCommentContent.isNotBlank()) {
                 // 댓글 정보를 담은 CommentItemData 객체 생성
-                val newCommentItem = CommentItemData(
-                    position = 0,
-                    userName = "내가 쓴 댓글",
-                    commentContent = newCommentContent,
-                    date = "",
-                    commentNum = 0,
-                    nestedComment = mutableListOf()
+                val newCommentItem = CommentRequest(
+                    diary_id = diaryID,
+                    content = newCommentContent
                 )
 
                 commentAdapter.addItem(newCommentItem) // 댓글 추가
                 binding.commentEdit.text.clear() // 댓글 입력창 비우기
+
+                commentMakeAPI(newCommentItem)
             }
         }
 
         // RecyclerView에 CommentAdapter 설정
-        commentAdapter = CommentAdapter(mutableListOf(), this, this)
+        commentAdapter = CommentAdapter(this, mutableListOf(), this, this)
         binding.recyclerviewComment.adapter = commentAdapter
         binding.recyclerviewComment.layoutManager = LinearLayoutManager(this)
 
@@ -142,7 +139,7 @@ class DiaryCommentActivity : AppCompatActivity(),
                             commentAdapter.removeCommentAtPosition(position)
                         }
 
-                        // 취소하기 버튼 클릭 시
+                        // 취소하기 버튼 클릭 시D
                         override fun onDialogCancelBtnClicked() {
                             dialog.dismiss() // 다이얼로그 닫기
                         }
@@ -182,7 +179,7 @@ class DiaryCommentActivity : AppCompatActivity(),
                         // 수정하기 버튼 클릭 시
                         override fun onDialogModifyBtnClicked() {
                             dialog.dismiss() // 다이얼로그 닫기
-                            commentAdapter.showNestedCommentEditText(commentPosition, nestedCommentPosition)
+                           // commentAdapter.showNestedCommentEditText(commentPosition, nestedCommentPosition)
                         }
 
                         // 취소하기 버튼 클릭 시
@@ -262,11 +259,14 @@ class DiaryCommentActivity : AppCompatActivity(),
                         val commentCheckResult = commentCheckResponse.result
                         // planDetailResult에 들어있는 데이터를 사용하여 작업
                         Log.d("DiaryCommentActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
-//                        val firstComment = commentCheckResult[0]
-//
-//                        isMine = nickname == firstComment.nickname
-//
-//                        diaryID = firstComment.id
+
+                        // 기존 댓글 데이터를 지우고 새로운 댓글 데이터로 대체
+                        commentAdapter.clearItems() // 댓글 목록 초기화
+                        commentAdapter.addAllItems(commentCheckResult) // 새로운 댓글 목록 추가
+
+
+
+                        Log.d("test", "diaryID: $diaryID")
 
                     } else {
                         Log.d("DiaryCommentActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
@@ -284,5 +284,59 @@ class DiaryCommentActivity : AppCompatActivity(),
         })
     }
 
+    // 서버로 작성 데이터 전송하는 함수
+    private fun commentMakeAPI(commentRequest: CommentRequest) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
 
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val commentService = retrofit.create(CommentService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        // 서버에 데이터 전송
+        commentService.commentMake(serverToken, commentRequest).enqueue(object :
+            Callback<CommentResponse> {
+            override fun onResponse(call: Call<CommentResponse>, response: Response<CommentResponse>) {
+                if (response.isSuccessful) {
+                    val commentMakeResponse = response.body()
+                    val isSuccess = commentMakeResponse?.isSuccess
+                    val code = commentMakeResponse?.code
+                    val message = commentMakeResponse?.message
+                    if (commentMakeResponse != null && commentMakeResponse.isSuccess) {
+                        // 전송 성공
+                        commentCheckAPI(diaryID)
+
+                        Log.d("DiaryCommentActivity - 댓글 전송", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+                    } else {
+                        // 전송 실패
+                        Log.d("DiaryCommentActivity - 댓글 전송", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                    }
+                } else {
+                    // 서버 오류
+                    val errorCode = response.code()
+                    Log.d("DiaryCommentActivity - 댓글 전송", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<CommentResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("DiaryCommentActivity - 댓글 전송", "통신 실패 - ${t.message}")
+            }
+        })
+    }
+
+    // 대댓글 추가 후 댓글 목록을 갱신하는 함수
+    fun refreshCommentListAfterAddingNestedComment(diaryId: Int) {
+        commentCheckAPI(diaryId)
+    }
+
+    // diaryId 값을 반환하는 메서드
+    fun getDiaryId(): Int {
+        return diaryID
+    }
 }
