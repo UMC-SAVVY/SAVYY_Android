@@ -57,6 +57,7 @@ class DiaryMake3Activity : AppCompatActivity() {
     private lateinit var make3Adapter: Make3Adapter
     private var diaryDetailData = arrayListOf<DiaryContent>()
     private var isDiary: Boolean = true
+    private var plannerId = -1
     private var imageFileList = arrayListOf<MultipartBody.Part>()
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -75,6 +76,7 @@ class DiaryMake3Activity : AppCompatActivity() {
 
         // 시작된 fragment 정보 받기
         isDiary = intent.getBooleanExtra("isDiary", true)
+        plannerId = intent.getIntExtra("planner_id", -1)
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -101,7 +103,7 @@ class DiaryMake3Activity : AppCompatActivity() {
                     Intent(this@DiaryMake3Activity, DiaryMake4Activity::class.java)
                 intent.putExtra("isDiary", isDiary)
                 intent.putExtra("title", binding.titleEdit.text.toString())
-                intent.putExtra("planner_id", -1)
+                intent.putExtra("planner_id", plannerId)
                 intent.putParcelableArrayListExtra("diaryContent", diaryDetailData)
                 startActivity(intent)
             } else if (binding.titleEdit.text.toString().isEmpty()) {

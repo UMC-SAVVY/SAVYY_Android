@@ -117,6 +117,7 @@ class DiaryMake2Activity : AppCompatActivity() {
 
             val intent = Intent(this, DiaryMake3Activity::class.java)
             intent.putExtra("isDiary", isDiary)
+            intent.putExtra("planner_id", planID)
             startActivity(intent)
         }
 
