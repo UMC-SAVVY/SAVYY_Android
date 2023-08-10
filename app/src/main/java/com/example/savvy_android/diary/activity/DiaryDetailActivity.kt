@@ -96,20 +96,6 @@ class DiaryDetailActivity : AppCompatActivity() {
         diaryViewAdapter.clearList()
         diaryDetailAPI(diaryID, binding)
 
-        // 여행계획서 보러가기
-        if (planID != null) {
-            binding.diaryShowPlan.setOnClickListener {
-                val intent = if (isMine) Intent(this, PlanDetailActivity::class.java) else Intent(
-                    this,
-                    PlanDetailVisitActivity::class.java
-                )
-                intent.putExtra("planID", planID)
-                startActivity(intent)
-            }
-        }
-
-        // 옵션에서 내가작성한/다른사람이 작성한 다이어리 구분은 API 연결 후에 진행
-
         // 옵션 관련 (내가 작성한 다이어리)
         val bottomSheet = BottomSheetDialogFragment()
         bottomSheet.setButtonClickListener(object :
@@ -169,7 +155,6 @@ class DiaryDetailActivity : AppCompatActivity() {
     }
 
 
-    // 여기서 id를 planID가 있음 planID를 여행계획서 보기로 넘겨주기
     // 여행계획서 상세보기 API
     private fun diaryDetailAPI(diaryId: Int, binding: ActivityDiaryDetailBinding) {
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
@@ -256,6 +241,24 @@ class DiaryDetailActivity : AppCompatActivity() {
                             planID = result.planner_id
 
                             Log.d("test", "planID: $planID")
+
+                            // 여행계획서 보러가기
+                            if (planID != null) {
+                                binding.diaryShowPlan.setOnClickListener {
+
+                                    val intent = if (isMine) Intent(this@DiaryDetailActivity, PlanDetailActivity::class.java) else Intent(
+                                        this@DiaryDetailActivity,
+                                        PlanDetailVisitActivity::class.java
+                                    )
+                                    intent.putExtra("planID", planID)
+                                    startActivity(intent)
+                                }
+                            }else{
+                                binding.diaryShowPlan.setOnClickListener {
+                                    showToast("여행계획서가 없습니다")
+                                }
+                            }
+
 
                         } else {
                             // 응답 에러 코드 분류

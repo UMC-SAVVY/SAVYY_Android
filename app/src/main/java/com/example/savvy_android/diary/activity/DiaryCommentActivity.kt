@@ -331,7 +331,7 @@ class DiaryCommentActivity : AppCompatActivity(),
     }
 
     // 대댓글 추가 후 댓글 목록을 갱신하는 함수
-    fun refreshCommentListAfterAddingNestedComment(diaryId: Int) {
+    fun refreshCommentList(diaryId: Int) {
         commentCheckAPI(diaryId)
     }
 

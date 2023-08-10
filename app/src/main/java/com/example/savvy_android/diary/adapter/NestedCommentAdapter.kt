@@ -115,9 +115,5 @@ class NestedCommentAdapter(
         notifyDataSetChanged()
     }
 
-    fun clearItems() {
-        items.clear()
-        notifyDataSetChanged()
-    }
 
 }

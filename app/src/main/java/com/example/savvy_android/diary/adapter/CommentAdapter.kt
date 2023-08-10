@@ -106,7 +106,7 @@ class CommentAdapter(
 
                     // 대댓글 추가 후 댓글 목록을 갱신하는 함수를 호출
                     val activity = context as DiaryCommentActivity
-                    activity.refreshCommentListAfterAddingNestedComment(activity.getDiaryId())
+                    activity.refreshCommentList(activity.getDiaryId())
 
                 }
             }
@@ -144,7 +144,7 @@ class CommentAdapter(
 
         // 대댓글 개수 감소 함수
         fun decrementCommentNum(position: Int) {
-            if (nestedCommentCounts[position] > 0) {
+            if (position in 0 until nestedCommentCounts.size && nestedCommentCounts[position] > 0) {
                 nestedCommentCounts[position]--
                 updateCommentNum(position)
             }
@@ -225,12 +225,17 @@ class CommentAdapter(
 
     // 대댓글 삭제
     fun removeNestedComment(commentPosition: Int, nestedCommentPosition: Int) {
-        val nestedComments: MutableList<NestedCommentRequest> = nestedCommentMap[commentPosition] ?: mutableListOf()
-        if (nestedCommentPosition in 0 until nestedComments.size) {
-            nestedComments.removeAt(nestedCommentPosition)
-            nestedCommentMap[commentPosition] = nestedComments
-            nestedCommentCounts[commentPosition]-- // 대댓글 개수 감소
-            notifyItemChanged(commentPosition)
+        val comment = items[commentPosition]
+        if (comment is CommentResult) {
+            val nestedComments: MutableList<NestedCommentResult> = comment.reply_List
+            if (nestedCommentPosition in 0 until nestedComments.size) {
+                nestedComments.removeAt(nestedCommentPosition)
+                notifyItemChanged(commentPosition)
+
+                // 대댓글이 삭제되었으므로 댓글의 대댓글 개수를 감소시킴
+                val viewHolder = getCommentViewHolder(commentPosition)
+                viewHolder?.decrementCommentNum(commentPosition)
+            }
         }
     }
 
@@ -325,6 +330,3 @@ class CommentAdapter(
 
 
 }
-
-// !해결할 것!
-// 현재 nestedComment 아이템 삭제 안됨

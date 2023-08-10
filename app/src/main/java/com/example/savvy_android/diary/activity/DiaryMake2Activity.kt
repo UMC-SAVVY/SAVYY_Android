@@ -9,7 +9,10 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -18,6 +21,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.plan.adapter.MakeDateAddAdapter
 import com.example.savvy_android.databinding.ActivityDiaryStep2Binding
 import com.example.savvy_android.databinding.ActivityPlanModifyBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.data.DiaryUploadRequest
 import com.example.savvy_android.diary.data.DiaryUploadResponse
 import com.example.savvy_android.diary.dialog.DiaryStopDialogFragment
@@ -46,6 +50,7 @@ class DiaryMake2Activity : AppCompatActivity() {
     private lateinit var sharedPreferences: SharedPreferences
     private var isDiary: Boolean = true
     private var planID: Int = 0
+    private var newPlanID: Int = 0
     private var memoText: String = ""
 
 
@@ -115,10 +120,6 @@ class DiaryMake2Activity : AppCompatActivity() {
 
             Log.d("PlanModifyRequest", "Request: $diaryUploadRequest")
 
-            val intent = Intent(this, DiaryMake3Activity::class.java)
-            intent.putExtra("isDiary", isDiary)
-            intent.putExtra("planner_id", planID)
-            startActivity(intent)
         }
 
         // 뒤로가기 클릭 이벤트
@@ -128,9 +129,6 @@ class DiaryMake2Activity : AppCompatActivity() {
 
         // add_date_btn 클릭 시 새로운 날짜 추가
         binding.addDateBtn.setOnClickListener {
-//            val newItem = ""
-//            dateAddAdapter.addItem(newItem)
-
             val newTimetable = Timetable("", mutableListOf(Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")))
             dateAddAdapter.addItem(newTimetable)
             dateAddAdapter.isMake = true
@@ -185,6 +183,15 @@ class DiaryMake2Activity : AppCompatActivity() {
                     if (diaryUploadResponse != null && diaryUploadResponse.isSuccess) {
                         // 전송 성공
                         Log.d("DiaryMake2Activity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+
+                        newPlanID = diaryUploadResponse.result.planner_id
+
+                        val intent = Intent(this@DiaryMake2Activity, DiaryMake3Activity::class.java)
+                        intent.putExtra("isDiary", isDiary)
+                        intent.putExtra("planID", newPlanID)
+                        startActivity(intent)
+
+                        Log.d("작성2 newPlanID", "newPlanID: $newPlanID")
 
                     } else {
                         // 전송 실패
