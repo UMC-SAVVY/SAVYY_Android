@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -25,8 +27,8 @@ import com.example.savvy_android.utils.search.adapter.SearchRecordWordAdapter
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.WordRecordResponse
 import com.example.savvy_android.utils.search.data.WordRecordResult
-import com.example.savvy_android.utils.search.data.WordSearchResponse
-import com.example.savvy_android.utils.search.data.WordSearchResult
+import com.example.savvy_android.home.data.HomeListResponse
+import com.example.savvy_android.home.data.HomeListResult
 import com.example.savvy_android.utils.search.service.SearchService
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,7 +41,7 @@ class SearchWordFragment : Fragment() {
     private lateinit var recordAdapter: SearchRecordWordAdapter
     private var recordData = arrayListOf<WordRecordResult>()
     private lateinit var searchAdapter: HomeAdapter
-    private var searchData = arrayListOf<WordSearchResult>()
+    private var searchData = arrayListOf<HomeListResult>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -97,8 +99,9 @@ class SearchWordFragment : Fragment() {
             searchAdapter = searchAdapter,
             editText = binding.searchWordEdit,
             searchBtn = binding.searchWordBtn,
+            noticeLayout = binding.searchNoticeDiary,
             recordRecycle = binding.searchRecordWordRecycle,
-            resulutRecycle = binding.searchResultWordRecycle,
+            resultRecycle = binding.searchResultWordRecycle,
         )
         binding.searchRecordWordRecycle.adapter = recordAdapter
 
@@ -229,8 +232,16 @@ class SearchWordFragment : Fragment() {
 
     // 검색 (제목/해시태그)
     private fun searchWordAPI(word: String) {
+        var isFinish = false
+        var isLoading = false
         val dialog = LoadingDialogFragment()
-        dialog.show(requireFragmentManager(), "LoadingDialog")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isFinish) {
+                dialog.show(requireFragmentManager(), "LoadingDialog")
+                isLoading = true
+            }
+        }, 500)
+
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -245,10 +256,10 @@ class SearchWordFragment : Fragment() {
         val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
 
         searchService.searchWord(token = accessToken, word = word)
-            .enqueue(object : Callback<WordSearchResponse> {
+            .enqueue(object : Callback<HomeListResponse> {
                 override fun onResponse(
-                    call: Call<WordSearchResponse>,
-                    response: Response<WordSearchResponse>,
+                    call: Call<HomeListResponse>,
+                    response: Response<HomeListResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val recordWordResponse = response.body()
@@ -279,13 +290,25 @@ class SearchWordFragment : Fragment() {
                             "[SEARCH WORD] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
 
-                override fun onFailure(call: Call<WordSearchResponse>, t: Throwable) {
+                override fun onFailure(call: Call<HomeListResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("SEARCH", "[SEARCH WORD] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
             })
     }

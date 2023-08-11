@@ -3,7 +3,7 @@ package com.example.savvy_android.utils.search.service
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.WordRecordResponse
 import com.example.savvy_android.utils.search.data.UserResponse
-import com.example.savvy_android.utils.search.data.WordSearchResponse
+import com.example.savvy_android.home.data.HomeListResponse
 import retrofit2.Call
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -17,7 +17,7 @@ interface SearchService {
     fun searchWord(
         @Header("Authorization") token: String,
         @Query("searchWord") word: String,
-    ): Call<WordSearchResponse>
+    ): Call<HomeListResponse>
 
     @GET("searching/word/list")
     fun recordWord(

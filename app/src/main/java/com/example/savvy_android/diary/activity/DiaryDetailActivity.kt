@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -167,8 +169,16 @@ class DiaryDetailActivity : AppCompatActivity() {
 
     // 여행계획서 상세보기 API
     private fun diaryDetailAPI(diaryId: Int, binding: ActivityDiaryDetailBinding) {
+        var isFinish = false
+        var isLoading = false
         val dialog = LoadingDialogFragment()
-        dialog.show(supportFragmentManager, "LoadingDialog")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isFinish) {
+                dialog.show(supportFragmentManager, "LoadingDialog")
+                isLoading = true
+            }
+        }, 500)
+
 
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
 
@@ -270,13 +280,25 @@ class DiaryDetailActivity : AppCompatActivity() {
                             "[DIARY DETAIL] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
 
                 override fun onFailure(call: Call<DiaryDetailResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY DETAIL] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
             })
     }

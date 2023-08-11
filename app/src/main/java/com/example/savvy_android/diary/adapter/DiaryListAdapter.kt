@@ -41,7 +41,6 @@ class DiaryListAdapter(
     private val isDiary: Boolean,
 ) :
     RecyclerView.Adapter<DiaryListAdapter.DiaryViewHolder>() {
-    private var itemPublic by Delegates.notNull<Boolean>()
 
     // 각 뷰들을 binding 사용하여 View 연결
     inner class DiaryViewHolder(binding: ItemDiaryBinding) :
@@ -97,12 +96,11 @@ class DiaryListAdapter(
         } else {
             holder.photoCard.isVisible = false
         }
-        itemPublic = data.is_public
-        showResource(itemPublic, holder)
+        showResource(data.is_public, holder)
 
         // 숨겨진 공개 여부 버튼 클릭 이벤트
         holder.hideOShow.setOnClickListener {
-            publicAPI(diaryId = data.id, status = itemPublic, holder = holder)
+            publicAPI(diaryId = data.id, position = position, holder = holder)
         }
 
         // 숨겨진 삭제 버튼 클릭 이벤트
@@ -288,7 +286,7 @@ class DiaryListAdapter(
             })
     }
 
-    private fun publicAPI(diaryId: Int, status: Boolean, holder: DiaryViewHolder) {
+    private fun publicAPI(diaryId: Int, position: Int, holder: DiaryViewHolder) {
         val sharedPreferences: SharedPreferences =
             context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
 
@@ -303,11 +301,11 @@ class DiaryListAdapter(
         val diaryStatusService = retrofit.create(DiaryService::class.java)
         val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
 
-        // 좋아요 변경 요청
+        // 공개 변경 요청
         diaryStatusService.diaryStatus(
             token = accessToken,
             type = "public",
-            value = (!status).toString(),
+            value = (!(diaryList[position].is_public)).toString(),
             diaryID = diaryId
         )
             .enqueue(object : Callback<ServerDefaultResponse> {
@@ -320,8 +318,8 @@ class DiaryListAdapter(
                         // 서버 응답 처리 로직 작성
                         if (deleteResponse?.isSuccess == true) {
                             // 공개 여부 전환 성공
-                            itemPublic = !itemPublic
-                            showResource(itemPublic, holder)
+                            diaryList[position].is_public = !(diaryList[position].is_public)
+                            showResource(diaryList[position].is_public, holder)
                         } else {
                             // 응답 에러 코드 분류
                             deleteResponse?.let {

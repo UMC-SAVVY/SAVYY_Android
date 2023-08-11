@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -56,8 +58,15 @@ class LoginActivity : AppCompatActivity() {
                     Log.d("LOGIN", "[LOGIN KAKAO] 카카오계정으로 로그인 성공")
                     // 서버와 통신 파트
 
+                    var isFinish = false
+                    var isLoading = false
                     val dialog = LoadingDialogFragment()
-                    dialog.show(supportFragmentManager, "LoadingDialog")
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (!isFinish) {
+                            dialog.show(supportFragmentManager, "LoadingDialog")
+                            isLoading = true
+                        }
+                    }, 500)
 
                     // 서버 주소
                     val serverAddress = getString(R.string.serverAddress)
@@ -83,12 +92,6 @@ class LoginActivity : AppCompatActivity() {
                                 val loginResponse = response.body()
                                 // 서버 응답 처리 로직 작성
                                 if (loginResponse?.isSuccess == true) {
-                                    Log.d(
-                                        "LOGIN",
-                                        "[LOGIN ACCOUNT] 성공"
-                                    )
-
-
                                     // 서버 토큰과 닉네임을 SharedPreferences에 저장
                                     saveServerToken(loginResponse.result.token)
                                     saveNickname(loginResponse.result.nickname)
@@ -112,13 +115,25 @@ class LoginActivity : AppCompatActivity() {
                                     "[LOGIN ACCOUNT] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
-                            dialog.dismiss()
+
+                            // 로딩 다이얼로그 실행 여부 판단
+                            if (isLoading) {
+                                dialog.dismiss()
+                            } else {
+                                isFinish = true
+                            }
                         }
 
                         override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
                             // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                             Log.e("LOGIN", "[LOGIN ACCOUNT] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-                            dialog.dismiss()
+
+                            // 로딩 다이얼로그 실행 여부 판단
+                            if (isLoading) {
+                                dialog.dismiss()
+                            } else {
+                                isFinish = true
+                            }
                         }
                     })
                 }
@@ -145,8 +160,15 @@ class LoginActivity : AppCompatActivity() {
                         )
                         // 서버와 통신 파트
 
+                        var isFinish = false
+                        var isLoading = false
                         val dialog = LoadingDialogFragment()
-                        dialog.show(supportFragmentManager, "LoadingDialog")
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            if (!isFinish) {
+                                dialog.show(supportFragmentManager, "LoadingDialog")
+                                isLoading = true
+                            }
+                        }, 500)
 
                         // 서버 주소
                         val serverAddress = getString(R.string.serverAddress)
@@ -174,10 +196,6 @@ class LoginActivity : AppCompatActivity() {
                                         val loginResponse = response.body()
                                         // 서버 응답 처리 로직 작성
                                         if (loginResponse?.isSuccess == true) {
-                                            Log.d(
-                                                "LOGIN",
-                                                "[LOGIN APP] 로그인 성공"
-                                            )
 
                                             // 서버 토큰과 닉네임을 SharedPreferences에 저장
                                             saveServerToken(loginResponse.result.token)
@@ -202,7 +220,13 @@ class LoginActivity : AppCompatActivity() {
                                             "[LOGIN APP] API 호출 실패 - 응답 코드: ${response.code()}"
                                         )
                                     }
-                                    dialog.dismiss()
+
+                                    // 로딩 다이얼로그 실행 여부 판단
+                                    if (isLoading) {
+                                        dialog.dismiss()
+                                    } else {
+                                        isFinish = true
+                                    }
                                 }
 
                                 override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
@@ -211,7 +235,13 @@ class LoginActivity : AppCompatActivity() {
                                         "LOGIN",
                                         "[LOGIN APP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                                     )
-                                    dialog.dismiss()
+
+                                    // 로딩 다이얼로그 실행 여부 판단
+                                    if (isLoading) {
+                                        dialog.dismiss()
+                                    } else {
+                                        isFinish = true
+                                    }
                                 }
                             })
                     }

@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.R
@@ -20,7 +21,7 @@ import com.example.savvy_android.home.adapter.HomeAdapter
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.WordRecordResult
-import com.example.savvy_android.utils.search.data.WordSearchResponse
+import com.example.savvy_android.home.data.HomeListResponse
 import com.example.savvy_android.utils.search.service.SearchService
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,8 +35,9 @@ class SearchRecordWordAdapter(
     private val searchAdapter: HomeAdapter,
     private val editText: EditText,
     private val searchBtn: AppCompatButton,
+    private val noticeLayout: ConstraintLayout,
     private val recordRecycle: RecyclerView,
-    private val resulutRecycle: RecyclerView,
+    private val resultRecycle: RecyclerView,
 ) :
     RecyclerView.Adapter<SearchRecordWordAdapter.SearchWordViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -169,18 +171,19 @@ class SearchRecordWordAdapter(
         val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
 
         searchService.searchWord(token = accessToken, word = word)
-            .enqueue(object : Callback<WordSearchResponse> {
+            .enqueue(object : Callback<HomeListResponse> {
                 override fun onResponse(
-                    call: Call<WordSearchResponse>,
-                    response: Response<WordSearchResponse>,
+                    call: Call<HomeListResponse>,
+                    response: Response<HomeListResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val recordWordResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         editText.setText(word)
                         btnStateBackground(true, searchBtn)
+                        noticeLayout.visibility = View.GONE
                         recordRecycle.visibility = View.GONE
-                        resulutRecycle.visibility = View.VISIBLE
+                        resultRecycle.visibility = View.VISIBLE
                         searchAdapter.clearList()
                         if (recordWordResponse?.isSuccess == true) {
                             for (result in recordWordResponse.result) {
@@ -208,7 +211,7 @@ class SearchRecordWordAdapter(
                     }
                 }
 
-                override fun onFailure(call: Call<WordSearchResponse>, t: Throwable) {
+                override fun onFailure(call: Call<HomeListResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("SEARCH", "[SEARCH WORD] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                 }

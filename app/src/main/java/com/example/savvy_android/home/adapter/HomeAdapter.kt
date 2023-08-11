@@ -1,31 +1,21 @@
 package com.example.savvy_android.home.adapter
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.content.Intent
 import android.util.Log
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemHomeBinding
-import com.example.savvy_android.databinding.LayoutToastBinding
-import com.example.savvy_android.init.errorCodeList
-import com.example.savvy_android.utils.search.data.WordSearchResponse
-import com.example.savvy_android.utils.search.data.WordSearchResult
-import com.example.savvy_android.utils.search.service.SearchService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import com.example.savvy_android.diary.activity.DiaryDetailActivity
+import com.example.savvy_android.diary.adapter.DiaryListAdapter
+import com.example.savvy_android.home.data.HomeListResult
 
 class HomeAdapter(
     private val context: Context,
-    private var homeList: ArrayList<WordSearchResult>,
+    private var homeList: ArrayList<HomeListResult>,
 ) :
     RecyclerView.Adapter<HomeAdapter.HomeViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -67,7 +57,6 @@ class HomeAdapter(
                 .load(data.thumbnail)
                 .into(holder.img)
         } else {
-            Log.e("TEST","작동하냐 ㅅㅂ: ${data.id}")
             holder.imgLayout.visibility = View.GONE
         }
         if (data.hashtag?.isEmpty() == false) {
@@ -80,13 +69,20 @@ class HomeAdapter(
         } else {
             holder.tag.visibility = View.GONE
         }
+
+        // 아이템 클릭 이벤트 (다이어리 상세보기)
+        holder.itemView.setOnClickListener {
+            val mIntent = Intent(holder.itemView.context, DiaryDetailActivity::class.java)
+            mIntent.putExtra("diaryID", data.id)
+            holder.itemView.context.startActivity(mIntent)
+        }
     }
 
     // 리스트의 수 count
     override fun getItemCount(): Int = homeList.size
 
     // 데이터 추가
-    fun addDiary(blockData: WordSearchResult) {
+    fun addDiary(blockData: HomeListResult) {
         homeList.add(blockData)
         notifyItemInserted(homeList.size)
     }
@@ -103,4 +99,12 @@ class HomeAdapter(
         homeList.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
+
+    // 마지막 아이템의 다이어리 id 반환
+    fun getLastItemId(): Int {
+        return homeList[itemCount - 1].id
+    }
+
+    // 클릭한 아이템 다이어리 view API
+
 }

@@ -44,7 +44,7 @@ class DetailAdapter(
         val placeName = data.location
 
         // 텍스트 or 이미지 인지
-        if (type=="text") {
+        if (type == "text") {
             // 텍스트 경우
             holder.text.visibility = View.VISIBLE   // 텍스트 보이게
             holder.imageLayout.visibility = View.GONE // 이미지 안 보이게
@@ -75,7 +75,11 @@ class DetailAdapter(
 //            }
 
             // 장소 이름
-            holder.placeName.text = placeName
+            if (placeName?.isNotEmpty() == true) {
+                holder.placeName.text = placeName
+            } else {
+                holder.placeCard.visibility = View.GONE
+            }
 
             // 장소 cardView 클릭 이벤트
             holder.placeCard.setOnClickListener {
@@ -101,7 +105,7 @@ class DetailAdapter(
         }
     }
 
-    fun clearList(){
+    fun clearList() {
         diaryViewData.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }

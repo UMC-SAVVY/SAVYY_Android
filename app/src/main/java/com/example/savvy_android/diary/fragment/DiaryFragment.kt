@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -87,7 +89,7 @@ class DiaryFragment : Fragment() {
         // Floating Button 클릭 시 계획서 작성 페이지로 연결
         binding.diaryAddFbtn.setOnClickListener {
             val intent = Intent(context, DiaryMake1Activity::class.java)
-            intent.putExtra("isDiary",true)
+            intent.putExtra("isDiary", true)
             startActivity(intent)
         }
 
@@ -134,9 +136,17 @@ class DiaryFragment : Fragment() {
     }
 
     // 다이어리 목록(나의 다이어리) API
-    private fun diaryListAPI(){
+    private fun diaryListAPI() {
+        var isFinish = false
+        var isLoading = false
         val dialog = LoadingDialogFragment()
-        dialog.show(requireFragmentManager(), "LoadingDialog")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isFinish) {
+                dialog.show(requireFragmentManager(), "LoadingDialog")
+                isLoading = true
+            }
+        }, 500)
+
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -190,13 +200,25 @@ class DiaryFragment : Fragment() {
                             "[DIARY MINE] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
 
                 override fun onFailure(call: Call<DiaryListResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("DIARY", "[DIARY MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
-                    dialog.dismiss()
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
                 }
             })
     }

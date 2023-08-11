@@ -1,8 +1,8 @@
-package com.example.savvy_android.utils.search.data
+package com.example.savvy_android.home.data
 
 import com.example.savvy_android.diary.data.detail.DiaryHashtag
 
-data class WordSearchResult(
+data class HomeListResult(
     val id: Int,
     val title: String,
     val nickname: String,

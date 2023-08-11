@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.InputFilter
@@ -55,6 +57,8 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var profileServerUrl = "" // 프로필 사진 (sever)
     private lateinit var imageBody: MultipartBody.Part
     private lateinit var sharedPreferences: SharedPreferences
+    private var isFinish = false
+    private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -310,7 +314,13 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 "[SIGNUP] API 호출 실패 - 응답 코드: ${response.code()}"
                             )
                         }
-                        dialog.dismiss()
+
+                        // 로딩 다이얼로그 실행 여부 판단
+                        if (isLoading) {
+                            dialog.dismiss()
+                        } else {
+                            isFinish = true
+                        }
                     }
 
                     override fun onFailure(
@@ -321,7 +331,13 @@ class ProfileSettingActivity : AppCompatActivity() {
                             "SIGNUP",
                             "[SIGNUP] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
-                        dialog.dismiss()
+
+                        // 로딩 다이얼로그 실행 여부 판단
+                        if (isLoading) {
+                            dialog.dismiss()
+                        } else {
+                            isFinish = true
+                        }
                     }
                 })
         } else {
@@ -331,8 +347,17 @@ class ProfileSettingActivity : AppCompatActivity() {
 
     // 이미지 API와 회원가입 API 결합
     private fun profileCombineAPI() {
+        var isFinish = false
+        var isLoading = false
         val dialog = LoadingDialogFragment()
-        dialog.show(supportFragmentManager, "LoadingDialog")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isFinish) {
+                dialog.show(supportFragmentManager, "LoadingDialog")
+                isLoading = true
+            }
+            isFinish = false
+            isLoading = false
+        }, 500)
 
         //서버 주소
         val serverAddress = getString(R.string.serverAddress)
@@ -369,7 +394,13 @@ class ProfileSettingActivity : AppCompatActivity() {
                                     "[IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
                                 )
                             }
-                            dialog.dismiss()
+
+                            // 로딩 다이얼로그 실행 여부 판단
+                            if (isLoading) {
+                                dialog.dismiss()
+                            } else {
+                                isFinish = true
+                            }
                         }
 
                         override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
@@ -377,7 +408,13 @@ class ProfileSettingActivity : AppCompatActivity() {
                                 "SIGNUP",
                                 "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                             )
-                            dialog.dismiss()
+
+                            // 로딩 다이얼로그 실행 여부 판단
+                            if (isLoading) {
+                                dialog.dismiss()
+                            } else {
+                                isFinish = true
+                            }
                         }
                     })
             } else {
