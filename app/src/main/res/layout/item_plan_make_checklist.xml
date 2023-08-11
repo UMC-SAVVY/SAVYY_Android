@@ -36,12 +36,13 @@
             android:textColor="@color/black"
             android:textColorHint="@color/basic_gray"
             android:background="@null"
-            android:maxLines="1"
             android:layout_marginStart="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ic_remove_checklist"
-            />
+            android:inputType="text"
+            android:maxLines="1"/>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

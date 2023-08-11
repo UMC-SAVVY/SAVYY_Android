@@ -165,7 +165,7 @@ class PlanDetailActivity : AppCompatActivity() {
                         binding.travelPlanViewUserTv.text = planDetailResult.nickname
                         binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
 
-                        viewDateAdapter.addAllItems(planDetailResponse.result.timetable)
+                        viewDateAdapter.addAllItems(planDetailResult.timetable)
 
                         binding.memoCheckBtn.setOnClickListener {
 

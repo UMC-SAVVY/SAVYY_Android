@@ -41,6 +41,7 @@
         android:textSize="32sp"
         android:gravity="center"
         app:layout_constraintStart_toEndOf="@+id/TimePicker1"
+        app:layout_constraintEnd_toStartOf="@+id/TimePicker2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

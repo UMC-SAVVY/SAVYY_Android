@@ -88,7 +88,9 @@
                 app:layout_constraintStart_toEndOf="@id/travel_plan_time"
                 app:layout_constraintEnd_toStartOf="@+id/ic_add_place"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent"
+                android:inputType="text"
+                android:maxLines="1"/>
 
             <ImageView
                 android:id="@+id/ic_add_place"
