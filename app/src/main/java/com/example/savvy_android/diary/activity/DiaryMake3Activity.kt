@@ -29,18 +29,18 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
-import com.example.savvy_android.plan.activity.PlanDetailActivity
 import com.example.savvy_android.databinding.ActivityDiaryStep3Binding
 import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.adapter.Make3Adapter
 import com.example.savvy_android.diary.data.detail.DiaryContent
-import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
+import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.init.data.image.UploadImageResponse
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.plan.activity.PlanDetailActivity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -183,13 +183,22 @@ class DiaryMake3Activity : AppCompatActivity() {
         val readPermission = when {
             // API 33 이상인 경우 READ_MEDIA_IMAGES 사용
             Build.VERSION.SDK_INT >= 33 -> {
-                ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.READ_MEDIA_IMAGES
-                )
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.READ_MEDIA_IMAGES
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // 권한이 없는 경우 권한 요청
+                    requestReadMediaImagesPermissionLauncher.launch(
+                        android.Manifest.permission.READ_MEDIA_IMAGES
+                    )
+                    return
+                }
+                PackageManager.PERMISSION_GRANTED // 이미 권한이 있는 경우
             }
 
             else -> {
+                Log.e("TEST", "Version under 32")
                 // API 32 이하인 경우 READ_EXTERNAL_STORAGE 사용
                 ContextCompat.checkSelfPermission(
                     this,
@@ -197,6 +206,7 @@ class DiaryMake3Activity : AppCompatActivity() {
                 )
             }
         }
+
         if (writePermission == PackageManager.PERMISSION_DENIED ||
             readPermission == PackageManager.PERMISSION_DENIED
         ) {
@@ -217,6 +227,23 @@ class DiaryMake3Activity : AppCompatActivity() {
             addImage.launch(intent)
         }
     }
+
+    // READ_MEDIA_IMAGES 권한 요청을 처리하기 위한 런처
+    private val requestReadMediaImagesPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // 권한이 허용된 경우에 대한 처리
+                val intent = Intent(Intent.ACTION_PICK)
+                intent.setDataAndType(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    "image/*"
+                )
+                addImage.launch(intent)
+            } else {
+                // 권한이 거부된 경우에 대한 처리
+                // 예를 들어 권한이 거부되면 사용자에게 알림을 표시하거나 다른 조치를 취할 수 있습니다.
+            }
+        }
 
     // 갤러리에서 선택한 이미지 결과 가져오기
     private val addImage: ActivityResultLauncher<Intent> = registerForActivityResult(
@@ -370,7 +397,8 @@ class DiaryMake3Activity : AppCompatActivity() {
                             showToast("작성 중인 다이어리가 임시 저장되었습니다.")
 
                             // MainActivity로 이동하면서 실행된 Fragment로 이동
-                            val intent = Intent(this@DiaryMake3Activity, MainActivity::class.java)
+                            val intent =
+                                Intent(this@DiaryMake3Activity, MainActivity::class.java)
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                             if (isDiary)
                                 intent.putExtra(
@@ -431,7 +459,8 @@ class DiaryMake3Activity : AppCompatActivity() {
 
     // 토스트 메시지
     private fun showToast(message: String) {
-        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(this@DiaryMake3Activity))
+        val toastBinding =
+            LayoutToastBinding.inflate(LayoutInflater.from(this@DiaryMake3Activity))
         toastBinding.toastMessage.text = message
         val toast = Toast(this@DiaryMake3Activity)
         toast.view = toastBinding.root
