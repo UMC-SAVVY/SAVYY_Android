@@ -11,7 +11,9 @@ import com.example.savvy_android.plan.data.Checklist
 import com.example.savvy_android.plan.data.Schedule
 import com.example.savvy_android.plan.data.Timetable
 import com.example.savvy_android.plan.dialog.DateDialogFragment
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class MakeDateAddAdapter(private val data: MutableList<Timetable>,
                          private val fragmentManager: FragmentManager,
@@ -53,6 +55,37 @@ class MakeDateAddAdapter(private val data: MutableList<Timetable>,
                 placeAddMap[position] = placeAddAdapter
                 binding.recyclerviewPlaceAdd.adapter = placeAddAdapter
                 binding.recyclerviewPlaceAdd.layoutManager = LinearLayoutManager(itemView.context)
+
+                //첫번째 아이템에서만 dialog 띄울 수 있음
+                if (position == 0) {
+                    // 첫 번째 아이템인 경우
+                    val currentDate = Calendar.getInstance()
+                    if (firstItemDate == null) {
+                        // 첫 번째 아이템의 날짜가 설정되지 않은 경우 - 오늘 날짜
+                        firstItemDate = currentDate
+                    }
+                    binding.travelDateTv.text = formatDate(firstItemDate!!)
+
+                    // 날짜 설정 버튼 클릭 시 DateDialogFragment 띄우기
+                    binding.travelDateTv.setOnClickListener {
+                        val dateDialogFragment = DateDialogFragment()
+                        dateDialogFragment.setCurrentDate(firstItemDate)
+                        dateDialogFragment.setOnDateSelectedListener { year, month, day ->
+                            val selectedDate = Calendar.getInstance()
+                            selectedDate.set(year, month, day)
+                            firstItemDate = selectedDate
+                            notifyDataSetChanged()
+                            binding.travelDateTv.text = formatDate(selectedDate)
+                        }
+                        dateDialogFragment.show(fragmentManager, "DateDialog")
+                    }
+                } else {
+                    // 첫 번째 아이템이 아닌 경우
+                    val newDate = firstItemDate!!.clone() as Calendar //firstItemDate를 기준으로
+                    newDate.add(Calendar.DAY_OF_MONTH, position)  // position일 수 만큼 더한 날짜를 계산
+                    binding.travelDateTv.text = formatDate(newDate)
+                }
+
             }else{
                 // placeAdd RecyclerView 설정
                 placeAddAdapter = MakePlaceAddAdapter(item.schedule, fragmentManager, false)
@@ -60,13 +93,66 @@ class MakeDateAddAdapter(private val data: MutableList<Timetable>,
                 binding.recyclerviewPlaceAdd.adapter = placeAddAdapter
                 binding.recyclerviewPlaceAdd.layoutManager = LinearLayoutManager(itemView.context)
 
-                binding.travelDateTv.text = item.date
+                //첫번째 아이템에서만 dialog 띄울 수 있음
+                if (position == 0) {
+                    // 첫 번째 아이템인 경우
+                    val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+                    val parsedDate = dateFormat.parse(item.date)
+                    val calendar = Calendar.getInstance()
+                    parsedDate?.let {
+                        calendar.time = it
+                    }
+                    firstItemDate = calendar
+
+                    binding.travelDateTv.text = formatDate(firstItemDate!!)
+
+                    // 날짜 설정 버튼 클릭 시 DateDialogFragment 띄우기
+                    binding.travelDateTv.setOnClickListener {
+                        val dateDialogFragment = DateDialogFragment()
+                        dateDialogFragment.setCurrentDate(firstItemDate)
+                        dateDialogFragment.setOnDateSelectedListener { year, month, day ->
+                            val selectedDate = Calendar.getInstance()
+                            selectedDate.set(year, month, day)
+
+                            if (position == 0) {
+                                // 첫 번째 아이템인 경우, 모든 아이템의 날짜를 수정
+                                val dateDiff = selectedDate.timeInMillis - firstItemDate!!.timeInMillis
+
+                                // 모든 아이템의 날짜를 수정
+                                for (i in 0 until data.size) {
+                                    val dateFormat = SimpleDateFormat("yyyy.MM.dd", Locale.getDefault())
+                                    val parsedDate = dateFormat.parse(data[i].date)
+                                    val newItemDate = Calendar.getInstance()
+                                    parsedDate?.let {
+                                        newItemDate.time = it
+                                    }
+                                    newItemDate.timeInMillis += dateDiff
+                                    data[i].date = formatDate(newItemDate)
+                                }
+
+                                // 날짜 변경 후에 notifyDataSetChanged() 호출
+                                notifyDataSetChanged()
+                            }
+
+                            binding.travelDateTv.text = formatDate(selectedDate)
+                        }
+
+                        dateDialogFragment.show(fragmentManager, "DateDialog")
+                    }
+
+                } else {
+                    // 첫 번째 아이템이 아닌 경우
+                    val newDate = firstItemDate!!.clone() as Calendar //firstItemDate를 기준으로
+                    newDate.add(Calendar.DAY_OF_MONTH, position)  // position일 수 만큼 더한 날짜를 계산
+                    binding.travelDateTv.text = formatDate(newDate)
+                }
             }
 
             // add_place_btn 클릭 시 새로운 장소 추가
             binding.addPlaceBtn.setOnClickListener {
                 val newSchedule = Schedule(null, mutableListOf(Checklist(null, "", 0)), "", "", "")
                 placeAddAdapter.addItem(newSchedule)
+                placeAddAdapter.isMake = true
             }
 
             if (position == 0) {
@@ -83,38 +169,48 @@ class MakeDateAddAdapter(private val data: MutableList<Timetable>,
                         data.removeAt(position)
                         notifyItemRemoved(position)
                     }
-                }
-            }
 
-            //첫번째 아이템에서만 dialog 띄울 수 있음
-            if (position == 0) {
-                // 첫 번째 아이템인 경우
-                val currentDate = Calendar.getInstance()
-                if (firstItemDate == null) {
-                    // 첫 번째 아이템의 날짜가 설정되지 않은 경우 - 오늘 날짜
-                    firstItemDate = currentDate
-                }
-                binding.travelDateTv.text = formatDate(firstItemDate!!)
-
-                // 날짜 설정 버튼 클릭 시 DateDialogFragment 띄우기
-                binding.travelDateTv.setOnClickListener {
-                    val dateDialogFragment = DateDialogFragment()
-                    dateDialogFragment.setCurrentDate(firstItemDate)
-                    dateDialogFragment.setOnDateSelectedListener { year, month, day ->
-                        val selectedDate = Calendar.getInstance()
-                        selectedDate.set(year, month, day)
-                        firstItemDate = selectedDate
-                        notifyDataSetChanged()
-                        binding.travelDateTv.text = formatDate(selectedDate)
+                    // 아이템 리스트 업데이트 후 삭제한 아이템 이후의 아이템 날짜를 수정
+                    // 만약 8.1, 8.2, 8.3 중 8.2를 삭제했을 때 8.3->8.2로 변하는 코드
+                    for (i in position until data.size) {
+                        val currentDate = firstItemDate!!.clone() as Calendar
+                        currentDate.add(Calendar.DAY_OF_MONTH, i)
+                        data[i].date = formatDate(currentDate)
                     }
-                    dateDialogFragment.show(fragmentManager, "DateDialog")
+                    notifyItemRangeChanged(position, data.size - position)
                 }
-            } else {
-                // 첫 번째 아이템이 아닌 경우
-                val newDate = firstItemDate!!.clone() as Calendar //firstItemDate를 기준으로
-                newDate.add(Calendar.DAY_OF_MONTH, position)  // position일 수 만큼 더한 날짜를 계산
-                binding.travelDateTv.text = formatDate(newDate)
+
             }
+
+//            //첫번째 아이템에서만 dialog 띄울 수 있음
+//            if (position == 0) {
+//                // 첫 번째 아이템인 경우
+//                val currentDate = Calendar.getInstance()
+//                if (firstItemDate == null) {
+//                    // 첫 번째 아이템의 날짜가 설정되지 않은 경우 - 오늘 날짜
+//                    firstItemDate = currentDate
+//                }
+//                binding.travelDateTv.text = formatDate(firstItemDate!!)
+//
+//                // 날짜 설정 버튼 클릭 시 DateDialogFragment 띄우기
+//                binding.travelDateTv.setOnClickListener {
+//                    val dateDialogFragment = DateDialogFragment()
+//                    dateDialogFragment.setCurrentDate(firstItemDate)
+//                    dateDialogFragment.setOnDateSelectedListener { year, month, day ->
+//                        val selectedDate = Calendar.getInstance()
+//                        selectedDate.set(year, month, day)
+//                        firstItemDate = selectedDate
+//                        notifyDataSetChanged()
+//                        binding.travelDateTv.text = formatDate(selectedDate)
+//                    }
+//                    dateDialogFragment.show(fragmentManager, "DateDialog")
+//                }
+//            } else {
+//                // 첫 번째 아이템이 아닌 경우
+//                val newDate = firstItemDate!!.clone() as Calendar //firstItemDate를 기준으로
+//                newDate.add(Calendar.DAY_OF_MONTH, position)  // position일 수 만큼 더한 날짜를 계산
+//                binding.travelDateTv.text = formatDate(newDate)
+//            }
 
             val updatedTimetable = Timetable(
                 date = binding.travelDateTv.text.toString(),
@@ -157,3 +253,6 @@ class MakeDateAddAdapter(private val data: MutableList<Timetable>,
 // 하지만 수정 액티비티에서 아이템을 사용할 때 true를 사용하고 있어서 발생하는 에러인듯
 // true에서는 무조건 첫번째 아이템이 오늘 날짜가 되어야 하고...?
 // 어쩌지
+
+
+// + 계획서 수정하기에서 날짜 변경이 안됨

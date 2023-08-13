@@ -5,10 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.databinding.ItemNestedCommentBinding
-import com.example.savvy_android.diary.data.NestedCommentItemData
+import com.example.savvy_android.diary.data.comment.NestedCommentRequest
+import com.example.savvy_android.diary.data.comment.NestedCommentResult
 
 class NestedCommentAdapter(
-    private val items: MutableList<NestedCommentItemData>,
+    private val items: MutableList<Any>,
     private val nestedOptionClickListener: OnNestedOptionClickListener,
     private val commentPosition: Int // Add commentPosition as a parameter
 ) : RecyclerView.Adapter<NestedCommentAdapter.NestedCommentViewHolder>() {
@@ -19,10 +20,18 @@ class NestedCommentAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         // 뷰 홀더에 데이터를 바인딩하는 함수
-        fun bind(item: NestedCommentItemData) {
-            binding.diaryNestedCommentName.text = item.userName
-            binding.nestedCommentContentTv.text = item.commentContent
-            binding.nestedCommentUpdateDate.text = item.date
+        fun bind(item: Any) {
+
+            if (item is NestedCommentRequest) {
+                // CommentRequest 처리
+                binding.nestedCommentContentTv.text = item.content
+
+            } else if (item is NestedCommentResult) {
+                binding.nestedCommentContentTv.text = item.content
+                binding.diaryNestedCommentName.text = item.nickname
+                binding.nestedCommentUpdateDate.text = item.updated_at
+            }
+
 
             // 옵션 버튼에 클릭 리스너 설정
             binding.nestedOption.setOnClickListener {
@@ -67,9 +76,9 @@ class NestedCommentAdapter(
     }
 
     // Nested Comment 추가
-    fun addItem(item: NestedCommentItemData) {
-        items.add(item)
-        notifyItemInserted(items.size - 1)
+    fun addItem(item: NestedCommentRequest) {
+        items.add(0, item) // 새 아이템을 리스트의 맨 앞에 추가
+        notifyDataSetChanged() // 추가한 아이템을 화면에 갱신
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -98,4 +107,13 @@ class NestedCommentAdapter(
     interface OnNestedOptionClickListener {
         fun onNestedOptionClick(commentPosition: Int, nestedCommentPosition: Int)
     }
+
+    // NestedCommentAdapter 클래스 내부
+    fun addAllItems(nestedComments: MutableList<NestedCommentResult>) {
+        this.items.clear()
+        this.items.addAll(nestedComments)
+        notifyDataSetChanged()
+    }
+
+
 }

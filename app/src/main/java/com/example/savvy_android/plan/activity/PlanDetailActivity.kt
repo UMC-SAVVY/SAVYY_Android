@@ -5,7 +5,10 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -15,13 +18,18 @@ import com.example.savvy_android.databinding.ActivityDiaryDetailBinding
 import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
 import com.example.savvy_android.databinding.ActivityPlanDetialBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.activity.DiaryCommentActivity
 import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
 import com.example.savvy_android.diary.dialog.DiaryModifyDialogFragment
+import com.example.savvy_android.diary.service.DiaryService
+import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.plan.data.PlanDetailResponse
 import com.example.savvy_android.plan.data.Timetable
+import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
 import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
 import com.example.savvy_android.plan.service.PlanDetailService
+import com.example.savvy_android.plan.service.PlanListService
 import com.example.savvy_android.utils.BottomSheetDialogFragment
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
 import com.example.savvy_android.utils.report.ReportActivity
@@ -90,6 +98,7 @@ class PlanDetailActivity : AppCompatActivity() {
                 dialog.setButtonClickListener(object :
                     PlanDeleteDialogFragment.OnButtonClickListener {
                     override fun onDialogPlanBtnOClicked() {
+                        planRemoveAPI(planId = planID.toString())
 
                         // 리스트에서 해당 아이템 삭제하는 코드 추가
                         finish()
@@ -156,18 +165,8 @@ class PlanDetailActivity : AppCompatActivity() {
                         binding.travelPlanViewUserTv.text = planDetailResult.nickname
                         binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
 
-                        viewDateAdapter.addAllItems(planDetailResponse.result.timetable)
+                        viewDateAdapter.addAllItems(planDetailResult.timetable)
 
-//                        // Memo 데이터를 MemoActivity로 전달
-//                        val memoText = planDetailResult.memo
-//                        binding.memoCheckBtn.setOnClickListener {
-//                            val intent = Intent(this@PlanDetailActivity, MemoActivity::class.java)
-//                            intent.putExtra("memoText", memoText) // 메모 데이터를 Intent에 추가하여 전달
-//                            intent.putExtra("isMemoAdd", false)
-//                            startActivity(intent)
-//
-//                        }
-//
                         binding.memoCheckBtn.setOnClickListener {
 
                             if (planDetailResult != null && planDetailResult.memo != null) {
@@ -205,4 +204,82 @@ class PlanDetailActivity : AppCompatActivity() {
             }
         })
     }
+
+    // 다이어리 삭제 API
+    private fun planRemoveAPI(planId: String) {
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val planListService = retrofit.create(PlanListService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // Delete 요청
+        planListService.planDelete(
+            token = accessToken,
+            plannerId = planId,
+            plannerType = if (isMine) "0" else "1"
+        )
+            .enqueue(object : Callback<PlanRemoveResponse> {
+                override fun onResponse(
+                    call: Call<PlanRemoveResponse>,
+                    response: Response<PlanRemoveResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("성공적으로 여행계획서가 삭제되었습니다.")
+                            finish()
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PLAN",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+                            // 삭제 실패 시 토스트 메시지 표시
+                            showToast("계획서 삭제를 실패하였습니다.")
+                        }
+                    } else {
+                        Log.e(
+                            "PLAN",
+                            "[PLAN DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        // 삭제 실패 시 토스트 메시지 표시
+                        showToast("계획서 삭제를 실패하였습니다.")
+                    }
+                }
+
+                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("PLAN", "[PLAN DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    // 삭제 실패 시 토스트 메시지 표시
+                    showToast("계획서 삭제를 실패하였습니다.")
+                }
+            })
+    }
+
+    // 토스트 메시지 표시 함수 추가
+    private fun showToast(message: String) {
+        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(this))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(this)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
+
 }

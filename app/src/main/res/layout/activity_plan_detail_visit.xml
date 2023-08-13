@@ -80,20 +80,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"/>
 
-                <TextView
-                    android:id="@+id/diary_tag_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/pretendard_medium"
-                    android:maxLines="1"
-                    android:text="#Tag #Place #Type"
-                    android:textColor="@color/main"
-                    android:textSize="13sp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/travel_plan_view_title_tv"
-                    android:layout_marginStart="16dp"
-                    />
-
 
                 <ImageView
                     android:id="@+id/profile"
@@ -105,7 +91,7 @@
                     android:src="@drawable/ic_profile_default"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/diary_tag_tv" />
+                    app:layout_constraintTop_toBottomOf="@+id/travel_plan_view_title_tv" />
 
                 <TextView
                     android:id="@+id/travel_plan_view_user_tv"
@@ -119,7 +105,7 @@
                     android:textColor="@color/icon"
                     android:textSize="15sp"
                     app:layout_constraintStart_toEndOf="@+id/profile"
-                    app:layout_constraintTop_toBottomOf="@+id/diary_tag_tv" />
+                    app:layout_constraintTop_toBottomOf="@+id/travel_plan_view_title_tv" />
 
                 <TextView
                     android:id="@+id/travel_plan_view_update_tv"

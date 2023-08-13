@@ -16,7 +16,7 @@ import com.example.savvy_android.plan.dialog.TimeDialogFragment
 
 class MakePlaceAddAdapter(private val data: MutableList<Schedule>,
                           private val fragmentManager: FragmentManager,
-                          private var isMake: Boolean
+                          var isMake: Boolean
 ) :
     RecyclerView.Adapter<MakePlaceAddAdapter.ViewHolder>() {
 //    private val checkListMap: MutableMap<Int, MakeCheckListAdapter> = mutableMapOf()

@@ -67,7 +67,7 @@ class DiaryMake4Activity : AppCompatActivity() {
         // 시작된 fragment 정보 받기
         isDiary = intent.getBooleanExtra("isDiary", true)
         this.title = intent.getStringExtra("title").toString()
-        this.plannerId = intent.getIntExtra("planner_id", -1)
+        this.plannerId = intent.getIntExtra("planID", -1)
         this.diaryDetailContent =
             intent.getParcelableArrayListExtra<DiaryContent>("diaryContent") as ArrayList<DiaryContent>
 

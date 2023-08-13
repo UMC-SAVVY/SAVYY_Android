@@ -10,7 +10,7 @@ data class PlanMakeRequest(
 )
 
 data class Timetable(
-    val date: String,
+    var date: String,
     val schedule: MutableList<Schedule>
 )
 

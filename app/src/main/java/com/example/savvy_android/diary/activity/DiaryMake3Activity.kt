@@ -57,6 +57,7 @@ class DiaryMake3Activity : AppCompatActivity() {
     private lateinit var make3Adapter: Make3Adapter
     private var diaryDetailData = arrayListOf<DiaryContent>()
     private var isDiary: Boolean = true
+    private var plannerId = -1
     private var imageFileList = arrayListOf<MultipartBody.Part>()
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -75,6 +76,8 @@ class DiaryMake3Activity : AppCompatActivity() {
 
         // 시작된 fragment 정보 받기
         isDiary = intent.getBooleanExtra("isDiary", true)
+        plannerId = intent.getIntExtra("planID", -1)
+        Log.d("다이어리 작성 3 id 받기", "plannerId: $plannerId")
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -101,7 +104,7 @@ class DiaryMake3Activity : AppCompatActivity() {
                     Intent(this@DiaryMake3Activity, DiaryMake4Activity::class.java)
                 intent.putExtra("isDiary", isDiary)
                 intent.putExtra("title", binding.titleEdit.text.toString())
-                intent.putExtra("planner_id", -1)
+                intent.putExtra("planID", plannerId)
                 intent.putParcelableArrayListExtra("diaryContent", diaryDetailData)
                 startActivity(intent)
             } else if (binding.titleEdit.text.toString().isEmpty()) {
@@ -153,8 +156,14 @@ class DiaryMake3Activity : AppCompatActivity() {
 
         // 계획서 보기 버튼 클릭 이벤트
         binding.diaryPlanBtn.setOnClickListener {
-            val intent = Intent(this, PlanDetailActivity::class.java)
-            startActivity(intent)
+            if (plannerId != -1) {
+                val intent = Intent(this, PlanDetailActivity::class.java)
+                intent.putExtra("planID", plannerId)
+                Log.d("다이어리 작성 3 id 보내기 test", "planID: $plannerId")
+                startActivity(intent)
+            } else {
+                showToast("계획서 ID가 없습니다")
+            }
         }
     }
 
