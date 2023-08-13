@@ -197,9 +197,10 @@ class DiaryDetailActivity : AppCompatActivity() {
                             binding.diaryTitleTv.text = result.title
 
                             // 다이어리 작성자 프로필 사진
-                            Glide.with(this@DiaryDetailActivity)
-                                .load(result.pic_url)
-                                .into(binding.diaryUserImg)
+                            if (result.pic_url != null)
+                                Glide.with(this@DiaryDetailActivity)
+                                    .load(result.pic_url)
+                                    .into(binding.diaryUserImg)
 
                             // 다이어리 작성자
                             binding.diaryNameTv.text = result.nickname
@@ -257,14 +258,17 @@ class DiaryDetailActivity : AppCompatActivity() {
                             if (planID != null) {
                                 binding.diaryShowPlan.setOnClickListener {
 
-                                    val intent = if (isMine) Intent(this@DiaryDetailActivity, PlanDetailActivity::class.java) else Intent(
+                                    val intent = if (isMine) Intent(
+                                        this@DiaryDetailActivity,
+                                        PlanDetailActivity::class.java
+                                    ) else Intent(
                                         this@DiaryDetailActivity,
                                         PlanDetailVisitActivity::class.java
                                     )
                                     intent.putExtra("planID", planID)
                                     startActivity(intent)
                                 }
-                            }else{
+                            } else {
                                 binding.diaryShowPlan.setOnClickListener {
                                     showToast("여행계획서가 없습니다")
                                 }

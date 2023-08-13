@@ -5,18 +5,27 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityPlanDetailVisitBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
 import com.example.savvy_android.plan.data.PlanDetailResponse
+import com.example.savvy_android.plan.data.PlanMakeRequest
+import com.example.savvy_android.plan.data.PlanMakeResponse
 import com.example.savvy_android.plan.data.Timetable
 import com.example.savvy_android.plan.dialog.PlanGetDialogFragment
 import com.example.savvy_android.plan.dialog.PlanScrapDialogFragment
 import com.example.savvy_android.plan.service.PlanDetailService
+import com.example.savvy_android.plan.service.PlanIDRequest
+import com.example.savvy_android.plan.service.PlanMakeService
+import com.example.savvy_android.plan.service.PlanScrapService
 import com.example.savvy_android.utils.BottomSheetOtherDialogFragment
 import com.example.savvy_android.utils.report.ReportActivity
 import retrofit2.Call
@@ -54,13 +63,30 @@ class PlanDetailVisitActivity : AppCompatActivity() {
         // 계획서 가져오기 클릭
         binding.planGetBtn.setOnClickListener {
             val dialog = PlanGetDialogFragment()
-            dialog.show(supportFragmentManager, "planGetDialog")
+            dialog.setButtonClickListener(object : PlanGetDialogFragment.OnButtonClickListener {
+                override fun onDialogCopyClicked() {
+                    planCopyAPI(binding, viewDateAdapter)
+                }
 
+                override fun onDialogCancelClicked() {
+
+                }
+            })
+            dialog.show(supportFragmentManager, "planGetDialog")
         }
 
         // 계획서 스크랩하기 클릭
         binding.planScrapBtn.setOnClickListener {
             val dialog = PlanScrapDialogFragment()
+            dialog.setButtonClickListener(object : PlanScrapDialogFragment.OnButtonClickListener {
+                override fun onDialogScrapClicked() {
+                    planScrapAPI(planId = planID)
+                }
+
+                override fun onDialogCancelClicked() {
+
+                }
+            })
             dialog.show(supportFragmentManager, "planScrapDialog")
         }
 
@@ -104,7 +130,10 @@ class PlanDetailVisitActivity : AppCompatActivity() {
         val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
         planDetailService.planDetail(serverToken, planId.toString()).enqueue(object :
             Callback<PlanDetailResponse> {
-            override fun onResponse(call: Call<PlanDetailResponse>, response: Response<PlanDetailResponse>) {
+            override fun onResponse(
+                call: Call<PlanDetailResponse>,
+                response: Response<PlanDetailResponse>,
+            ) {
                 if (response.isSuccessful) {
                     val planDetailResponse = response.body()
                     val isSuccess = planDetailResponse?.isSuccess
@@ -113,8 +142,6 @@ class PlanDetailVisitActivity : AppCompatActivity() {
                     if (planDetailResponse != null && planDetailResponse.isSuccess) {
                         val planDetailResult = planDetailResponse.result
                         // planDetailResult에 들어있는 데이터를 사용하여 작업
-                        Log.d("PlanDetailActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
-
                         binding.travelPlanViewTitleTv.text = planDetailResult.title
                         binding.travelPlanViewUserTv.text = planDetailResult.nickname
                         binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
@@ -124,7 +151,10 @@ class PlanDetailVisitActivity : AppCompatActivity() {
                         planID = planDetailResult.id
 
                     } else {
-                        Log.d("PlanDetailActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                        Log.d(
+                            "PlanDetailActivity",
+                            "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message"
+                        )
                     }
                 } else {
                     val errorCode = response.code()
@@ -139,4 +169,133 @@ class PlanDetailVisitActivity : AppCompatActivity() {
         })
     }
 
+    private fun planCopyAPI(binding: ActivityPlanDetailVisitBinding, adapter: DetailDateAdapter) {
+        // 만들기 완료 버튼 클릭 이벤트
+        val titleText = binding.travelPlanViewTitleTv.text.toString()
+        val memoText = intent.getStringExtra("memoText") ?: ""
+        val nickname = ""
+        val currentTime = ""
+        if (titleText.isNotEmpty()) {
+            val timetableList = adapter.getDataList()
+            val planMakeRequest = PlanMakeRequest(
+                null, memoText, nickname,
+                timetableList, titleText, currentTime
+            )
+
+            // 서버 주소
+            val serverAddress = getString(R.string.serverAddress)
+
+            val retrofit = Retrofit.Builder()
+                .baseUrl(serverAddress)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            val planMakeService = retrofit.create(PlanMakeService::class.java)
+
+            val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+            // 서버에 데이터 전송
+            planMakeService.planMake(serverToken, planMakeRequest).enqueue(object :
+                Callback<PlanMakeResponse> {
+                override fun onResponse(
+                    call: Call<PlanMakeResponse>,
+                    response: Response<PlanMakeResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val planMakeResponse = response.body()
+                        val isSuccess = planMakeResponse?.isSuccess
+                        val code = planMakeResponse?.code
+                        val message = planMakeResponse?.message
+                        if (planMakeResponse != null && planMakeResponse.isSuccess) {
+                            // 전송 성공
+                            finish()
+                            showToast("계획서를 성공적으로 가져왔습니다")
+                        } else {
+                            // 전송 실패
+                            Log.d(
+                                "PlanDetailVisitActivity",
+                                "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message"
+                            )
+                            showToast("계획서를 가져오는데 실패했습니다.")
+                        }
+                    } else {
+                        // 서버 오류
+                        val errorCode = response.code()
+                        Log.d("PlanDetailVisitActivity", "서버 오류 - $errorCode")
+                        showToast("계획서를 가져오는데 실패했습니다.")
+                    }
+                }
+
+                override fun onFailure(call: Call<PlanMakeResponse>, t: Throwable) {
+                    // 통신 실패
+                    Log.d("PlanDetailVisitActivity", "통신 실패 - ${t.message}")
+                    showToast("계획서를 가져오는데 실패했습니다.")
+                }
+            })
+        }
+    }
+
+    private fun planScrapAPI(planId: Int) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val planMakeService = retrofit.create(PlanScrapService::class.java)
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        // 서버에 데이터 전송
+        planMakeService.planScrap(serverToken, planID = PlanIDRequest(planId)).enqueue(object :
+            Callback<PlanMakeResponse> {
+            override fun onResponse(
+                call: Call<PlanMakeResponse>,
+                response: Response<PlanMakeResponse>,
+            ) {
+                Log.e("TEST", "${response.body()}")
+                if (response.isSuccessful) {
+                    val planMakeResponse = response.body()
+                    val isSuccess = planMakeResponse?.isSuccess
+                    val code = planMakeResponse?.code
+                    val message = planMakeResponse?.message
+                    if (planMakeResponse != null && planMakeResponse.isSuccess) {
+                        // 전송 성공
+                        finish()
+                        showToast("계획서를 성공적으로 저장했습니다")
+                    } else {
+                        // 전송 실패
+                        Log.d(
+                            "PlanDetailVisitActivity",
+                            "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message"
+                        )
+                        showToast("계획서를 저장하는데 실패했습니다.")
+                    }
+                } else {
+                    // 서버 오류
+                    val errorCode = response.code()
+                    Log.d("PlanDetailVisitActivity", "서버 오류 - $errorCode")
+                    showToast("계획서를 저장하는데 실패했습니다.")
+                }
+            }
+
+            override fun onFailure(call: Call<PlanMakeResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("PlanDetailVisitActivity", "통신 실패 - ${t.message}")
+                showToast("계획서를 저장하는데 실패했습니다.")
+            }
+        })
+    }
+
+    // 토스트 메시지 표시 함수 추가
+    private fun showToast(message: String) {
+        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(this))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(this)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
 }

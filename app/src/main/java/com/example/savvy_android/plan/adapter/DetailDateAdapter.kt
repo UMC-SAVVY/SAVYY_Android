@@ -92,6 +92,10 @@ class DetailDateAdapter(private val items: MutableList<Timetable>) :
         return items.size
     }
 
+    fun getDataList(): MutableList<Timetable> {
+        return items
+    }
+
     fun addAllItems(item: MutableList<Timetable>) {
         items.addAll(item)
         this.notifyDataSetChanged()

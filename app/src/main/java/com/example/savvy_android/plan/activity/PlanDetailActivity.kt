@@ -102,10 +102,9 @@ class PlanDetailActivity : AppCompatActivity() {
                     override fun onDialogPlanBtnXClicked() {
                     }
                 })
-                dialog.show(supportFragmentManager,"DiaryDeleteDialog")
+                dialog.show(supportFragmentManager, "DiaryDeleteDialog")
             }
         })
-
 
 
         // 옵션 관련 (다른사람이 작성한 다이어리)
@@ -119,12 +118,12 @@ class PlanDetailActivity : AppCompatActivity() {
             }
         })
 
-        if(isMine){
+        if (isMine) {
             binding.memoCheckCardview.visibility = View.VISIBLE
             binding.optionBtn.setOnClickListener {
                 bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
             }
-        }else{
+        } else {
             binding.memoCheckCardview.visibility = View.GONE
             binding.optionBtn.setOnClickListener {
                 bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
@@ -144,27 +143,32 @@ class PlanDetailActivity : AppCompatActivity() {
         val planDetailService = retrofit.create(PlanDetailService::class.java)
 
         val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
-        planDetailService.planDetail(serverToken, planId.toString()).enqueue(object : Callback<PlanDetailResponse> {
-            override fun onResponse(call: Call<PlanDetailResponse>, response: Response<PlanDetailResponse>) {
-                if (response.isSuccessful) {
-                    val planDetailResponse = response.body()
-                    val isSuccess = planDetailResponse?.isSuccess
-                    val code = planDetailResponse?.code
-                    val message = planDetailResponse?.message
-                    if (planDetailResponse != null && planDetailResponse.isSuccess) {
-                        val planDetailResult = planDetailResponse.result
-                        // planDetailResult에 들어있는 데이터를 사용하여 작업
-                        Log.d("PlanDetailActivity", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+        planDetailService.planDetail(serverToken, planId.toString())
+            .enqueue(object : Callback<PlanDetailResponse> {
+                override fun onResponse(
+                    call: Call<PlanDetailResponse>,
+                    response: Response<PlanDetailResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val planDetailResponse = response.body()
+                        val isSuccess = planDetailResponse?.isSuccess
+                        val code = planDetailResponse?.code
+                        val message = planDetailResponse?.message
+                        if (planDetailResponse != null && planDetailResponse.isSuccess) {
+                            val planDetailResult = planDetailResponse.result
+                            // planDetailResult에 들어있는 데이터를 사용하여 작업
+                            Log.d(
+                                "PlanDetailActivity",
+                                "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message"
+                            )
 
-                        binding.travelPlanViewTitleTv.text = planDetailResult.title
-                        binding.travelPlanViewUserTv.text = planDetailResult.nickname
-                        binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
+                            binding.travelPlanViewTitleTv.text = planDetailResult.title
+                            binding.travelPlanViewUserTv.text = planDetailResult.nickname
+                            binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
 
-                        viewDateAdapter.addAllItems(planDetailResult.timetable)
+                            viewDateAdapter.addAllItems(planDetailResult.timetable)
 
-                        binding.memoCheckBtn.setOnClickListener {
-
-                            if (planDetailResult != null && planDetailResult.memo != null) {
+                            binding.memoCheckBtn.setOnClickListener {
                                 val memoText = planDetailResult.memo
                                 val intent =
                                     Intent(this@PlanDetailActivity, MemoActivity::class.java)
@@ -172,32 +176,29 @@ class PlanDetailActivity : AppCompatActivity() {
                                 intent.putExtra("isMemoAdd", false)
                                 startActivity(intent)
 
-                            } else {
-                                val intent =
-                                    Intent(this@PlanDetailActivity, MemoActivity::class.java)
-                                intent.putExtra("isMemoAdd", false)
-                                startActivity(intent)
                             }
+
+                            isMine = nickname == planDetailResult.nickname
+
+                            planID = planDetailResult.id
+
+                        } else {
+                            Log.d(
+                                "PlanDetailActivity",
+                                "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message"
+                            )
                         }
-
-                        isMine = nickname == planDetailResult.nickname
-
-                        planID = planDetailResult.id
-
                     } else {
-                        Log.d("PlanDetailActivity", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                        val errorCode = response.code()
+                        Log.e("PlanDetailActivity", "서버 오류 - $errorCode")
                     }
-                } else {
-                    val errorCode = response.code()
-                    Log.e("PlanDetailActivity", "서버 오류 - $errorCode")
                 }
-            }
 
-            override fun onFailure(call: Call<PlanDetailResponse>, t: Throwable) {
-                // 통신 실패
-                Log.e("PlanDetailActivity", "통신 실패 - ${t.message}")
-            }
-        })
+                override fun onFailure(call: Call<PlanDetailResponse>, t: Throwable) {
+                    // 통신 실패
+                    Log.e("PlanDetailActivity", "통신 실패 - ${t.message}")
+                }
+            })
     }
 
     // 다이어리 삭제 API

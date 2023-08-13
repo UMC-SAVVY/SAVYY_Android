@@ -36,23 +36,12 @@ class PlanGetDialogFragment : DialogFragment() {
 
 
         binding.getBtn.setOnClickListener {
+            buttonClickListener.onDialogCopyClicked()
             dismiss()
-
-            // 커스텀 Toast 메시지 생성
-            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "계획서를 성공적으로 가져왔습니다"
-
-            val toast = Toast(requireContext())
-            toast.duration = Toast.LENGTH_SHORT
-            toast.view = toastBinding.root
-
-            toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
-
-            toast.show()
-
         }
 
         binding.cancelBtn.setOnClickListener {
+            buttonClickListener.onDialogCancelClicked()
             dismiss()
         }
         return view
@@ -72,4 +61,20 @@ class PlanGetDialogFragment : DialogFragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
+
+    // 인터페이스
+    interface OnButtonClickListener {
+        fun onDialogCopyClicked()
+        fun onDialogCancelClicked()
+    }
+
+    // 클릭 이벤트 설정
+    fun setButtonClickListener(buttonClickListener: OnButtonClickListener) {
+        this.buttonClickListener = buttonClickListener
+    }
+
+    // 클릭 이벤트 실행
+    private lateinit var buttonClickListener: OnButtonClickListener
 }
