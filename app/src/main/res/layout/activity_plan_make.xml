@@ -15,9 +15,9 @@
 
         <ImageView
             android:id="@+id/ic_arrow_left"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="7dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="7dp"
             android:src="@drawable/ic_arrow_left"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -32,16 +32,17 @@
             android:textColor="@android:color/black"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/make_completion_btn"
-            app:layout_constraintStart_toEndOf="@id/ic_arrow_left"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/make_completion_btn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="7dp"
+            android:layout_height="match_parent"
             android:fontFamily="@font/pretendard_bold"
+            android:gravity="center"
+            android:paddingHorizontal="10dp"
             android:text="완료"
             android:textColor="@color/icon"
             android:textSize="16sp"
@@ -55,15 +56,13 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/travel_plan_top"
         app:layout_constraintBottom_toTopOf="@id/memo_add_cardview"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/travel_plan_top">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/travel_plan_top"
-            >
+            app:layout_constraintTop_toBottomOf="@+id/travel_plan_top">
 
             <EditText
                 android:id="@+id/title_edit"
@@ -169,12 +168,12 @@
         android:id="@+id/memo_add_cardview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardElevation="4dp"
-        app:cardCornerRadius="0dp"
         app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -182,16 +181,16 @@
             android:layout_width="match_parent"
             android:layout_height="46dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
                     android:id="@+id/ic_sticky_note"
@@ -206,14 +205,14 @@
                     android:id="@+id/edd_memo_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="메모장 추가하기"
+                    android:layout_marginStart="8dp"
                     android:fontFamily="@font/pretendard_medium"
+                    android:text="메모장 추가하기"
                     android:textColor="@android:color/black"
                     android:textSize="16sp"
-                    app:layout_constraintStart_toEndOf="@id/ic_sticky_note"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    android:layout_marginStart="8dp"/>
+                    app:layout_constraintStart_toEndOf="@id/ic_sticky_note"
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
