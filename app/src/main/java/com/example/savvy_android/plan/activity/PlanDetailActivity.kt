@@ -14,19 +14,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.savvy_android.R
-import com.example.savvy_android.databinding.ActivityDiaryDetailBinding
 import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
 import com.example.savvy_android.databinding.ActivityPlanDetialBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
-import com.example.savvy_android.diary.activity.DiaryCommentActivity
-import com.example.savvy_android.diary.dialog.DiaryDeleteDialogFragment
-import com.example.savvy_android.diary.dialog.DiaryModifyDialogFragment
-import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.plan.data.PlanDetailResponse
 import com.example.savvy_android.plan.data.Timetable
-import com.example.savvy_android.plan.data.remove.PlanRemoveResponse
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.plan.dialog.PlanDeleteDialogFragment
 import com.example.savvy_android.plan.service.PlanDetailService
 import com.example.savvy_android.plan.service.PlanListService
@@ -226,10 +221,10 @@ class PlanDetailActivity : AppCompatActivity() {
             plannerId = planId,
             plannerType = if (isMine) "0" else "1"
         )
-            .enqueue(object : Callback<PlanRemoveResponse> {
+            .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
-                    call: Call<PlanRemoveResponse>,
-                    response: Response<PlanRemoveResponse>,
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -262,7 +257,7 @@ class PlanDetailActivity : AppCompatActivity() {
                     }
                 }
 
-                override fun onFailure(call: Call<PlanRemoveResponse>, t: Throwable) {
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("PLAN", "[PLAN DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                     // 삭제 실패 시 토스트 메시지 표시
