@@ -1,6 +1,7 @@
 package com.example.savvy_android.diary.activity
 
 import android.animation.ValueAnimator
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -10,6 +11,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -19,7 +21,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -50,6 +51,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.io.FileOutputStream
 
 class DiaryMake3Activity : AppCompatActivity() {
     private lateinit var binding: ActivityDiaryStep3Binding
@@ -176,11 +178,7 @@ class DiaryMake3Activity : AppCompatActivity() {
 
     // 갤러리 권한 후 이미지 선택
     private fun selectGallery() {
-        val writePermission = ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-        val readPermission = when {
+        when {
             // API 33 이상인 경우 READ_MEDIA_IMAGES 사용
             Build.VERSION.SDK_INT >= 33 -> {
                 if (ContextCompat.checkSelfPermission(
@@ -194,38 +192,36 @@ class DiaryMake3Activity : AppCompatActivity() {
                     )
                     return
                 }
-                PackageManager.PERMISSION_GRANTED // 이미 권한이 있는 경우
             }
 
             else -> {
-                Log.e("TEST", "Version under 32")
-                // API 32 이하인 경우 READ_EXTERNAL_STORAGE 사용
-                ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE
-                )
-            }
-        }
-
-        if (writePermission == PackageManager.PERMISSION_DENIED ||
-            readPermission == PackageManager.PERMISSION_DENIED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
+                // API 32 이하인 경우 READ_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE 사용
+                val permissions = arrayOf(
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                1
-            )
-        } else {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.setDataAndType(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                "image/*"
-            )
-            addImage.launch(intent)
+                )
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        permissions[0]
+                    ) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        permissions[1]
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // 권한이 없는 경우 권한 요청
+                    ActivityCompat.requestPermissions(this, permissions, 1)
+                    return
+                }
+            }
         }
+        // 이미 권한이 있는 경우 이미지 선택 처리
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.setDataAndType(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            "image/*"
+        )
+        addImage.launch(intent)
     }
 
     // READ_MEDIA_IMAGES 권한 요청을 처리하기 위한 런처
@@ -266,23 +262,16 @@ class DiaryMake3Activity : AppCompatActivity() {
         }
     }
 
-    // 이미지 확장자 확인
-    private fun getMimeType(uri: Uri): String? {
-        val contentResolver = contentResolver
-        val mimeTypeMap = MimeTypeMap.getSingleton()
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri))
-    }
-
-    // 이미지 local uri를 절대 경로로 변환
-    private fun getPathFromUri(uri: Uri): String {
-        val proj =
-            arrayOf(MediaStore.Images.Media.DATA)
-        val c = contentResolver.query(uri, proj, null, null, null)
-        val index = c!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-
-        c.moveToFirst()
-
-        return c.getString(index)
+    // ContentResolver를 사용하여 Uri의 파일 이름 가져오기
+    private fun getDisplayName(contentResolver: ContentResolver, uri: Uri): String {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (displayNameIndex != -1 && it.moveToFirst()) {
+                return it.getString(displayNameIndex)
+            }
+        }
+        return uri.lastPathSegment ?: "image.jpg"
     }
 
     // 이미지 전송 API와 다이어리 전송 API 결합 함수
@@ -303,15 +292,23 @@ class DiaryMake3Activity : AppCompatActivity() {
         // 입력한 내용 중 이미지만 찾아서 파일화
         for (item in diaryDetailData) {
             if (item.type == "image") {
-                val imageFile = File(getPathFromUri(Uri.parse(item.content)))
+                val uri = Uri.parse(item.content)
+                val inputStream = contentResolver.openInputStream(uri)
+                val displayName = getDisplayName(contentResolver, uri)
+                val mimeType = contentResolver.getType(uri) ?: "image/*"
 
-                // MIME 타입을 따르기 위해 image/jpg로 변환하여 RequestBody 객체 생성
-                val mimeType = getMimeType(Uri.parse(item.content)) ?: "image/*"
-                val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                // RequestBody로 Multipart.Part 객체 생성
-                val imageBody =
-                    MultipartBody.Part.createFormData("image", imageFile.name, fileRequestBody)
-                imageFileList.add(imageBody)
+                inputStream?.use { input ->
+                    val imageFile = File(cacheDir, displayName)
+                    val outputStream = FileOutputStream(imageFile)
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+
+                    val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                    val imageBody =
+                        MultipartBody.Part.createFormData("image", displayName, fileRequestBody)
+                    imageFileList.add(imageBody)
+                }
             }
         }
 

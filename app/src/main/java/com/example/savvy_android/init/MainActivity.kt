@@ -1,6 +1,5 @@
 package com.example.savvy_android.init
 
-import android.content.Intent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -66,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.mypage -> {
-                    setFragment(MypageFragment())
+                    setFragment(MypageFragment(false, 0))
                     return@setOnItemSelectedListener true
                 }
 

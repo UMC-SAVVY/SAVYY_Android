@@ -1,6 +1,7 @@
 package com.example.savvy_android.utils.search.adapter
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemSearchUserBinding
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.utils.search.activity.SearchDetailUserActivity
 import com.example.savvy_android.utils.search.data.DeleteRecordResponse
 import com.example.savvy_android.utils.search.data.UserResult
 import com.example.savvy_android.utils.search.service.SearchService
@@ -71,6 +73,12 @@ class SearchUserAdapter(
         holder.deleteBtn.setOnClickListener {
             recordDeleteAPI(word = holder.name.text.toString(), position = position)
         }
+
+        holder.itemView.setOnClickListener {
+            val mIntent = Intent(holder.itemView.context, SearchDetailUserActivity::class.java)
+            mIntent.putExtra("userId", data.id)
+            holder.itemView.context.startActivity(mIntent)
+        }
     }
 
     // 리스트의 수 count
@@ -115,7 +123,7 @@ class SearchUserAdapter(
                     call: Call<DeleteRecordResponse>,
                     response: Response<DeleteRecordResponse>,
                 ) {
-                    Log.e("TEST","$word")
+                    Log.e("TEST", "$word")
                     if (response.isSuccessful) {
                         val recordDeleteResponse = response.body()
                         // 서버 응답 처리 로직 작성

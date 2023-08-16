@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.plan.adapter.DetailDateAdapter
@@ -165,6 +166,10 @@ class PlanDetailActivity : AppCompatActivity() {
                             binding.travelPlanViewTitleTv.text = planDetailResult.title
                             binding.travelPlanViewUserTv.text = planDetailResult.nickname
                             binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
+                            if (planDetailResult.pic_url != null)
+                                Glide.with(this@PlanDetailActivity)
+                                    .load(planDetailResult.pic_url)
+                                    .into(binding.profile)
 
                             viewDateAdapter.addAllItems(planDetailResult.timetable)
 

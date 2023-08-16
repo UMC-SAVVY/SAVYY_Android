@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +14,33 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypageBinding
+import com.example.savvy_android.diary.data.list.DiaryListResult
+import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.myPage.activity.MypageBlockActivity
 import com.example.savvy_android.myPage.activity.MypageConditionActivity
 import com.example.savvy_android.myPage.activity.MypagePlaceActivity
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
+import com.example.savvy_android.myPage.data.UserPageResponse
 import com.example.savvy_android.myPage.dialog.MypageLogoutDialogFragment
 import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
+import com.example.savvy_android.myPage.service.MyPageService
+import com.example.savvy_android.plan.data.list.PlanListResult
+import com.example.savvy_android.utils.search.activity.SearchDetailUserActivity
 import com.google.android.material.tabs.TabLayoutMediator
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-class MypageFragment : Fragment() {
+class MypageFragment(
+    private var isSearching: Boolean,
+    private var userId: Int,
+) : Fragment() {
     private lateinit var binding: FragmentMypageBinding
     private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private var diaryListData = arrayListOf<DiaryListResult>()
+    private var planListData = arrayListOf<PlanListResult>()
     private lateinit var sharedPreferences: SharedPreferences
     private var isSetting = false
 
@@ -34,69 +51,78 @@ class MypageFragment : Fragment() {
     ): View {
         binding = FragmentMypageBinding.inflate(inflater, container, false)
 
-        sharedPreferences = requireContext().getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
+        sharedPreferences =
+            requireContext().getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
 
-        // 뒤로 가기 버튼 클릭 이벤트
-        binding.mypageArrowIc.setOnClickListener {
-            // 설정 화면 -> 초기 화면
-            binding.mypageArrowIc.visibility = View.INVISIBLE
-            binding.mypageSettingIc.visibility = View.VISIBLE
-            binding.mypageDataLayout.visibility = View.VISIBLE
-            binding.mypageSettingLayout.visibility = View.INVISIBLE
-            isSetting = false
+        if (!isSearching) {
+            // 뒤로 가기 버튼 클릭 이벤트
+            binding.mypageArrowIc.setOnClickListener {
+                // 설정 화면 -> 초기 화면
+                binding.mypageArrowIc.visibility = View.INVISIBLE
+                binding.mypageSettingIc.visibility = View.VISIBLE
+                binding.mypageDataLayout.visibility = View.VISIBLE
+                binding.mypageSettingLayout.visibility = View.INVISIBLE
+                isSetting = false
+            }
 
-        }
+            // 설정 버튼 클릭 이벤트
+            binding.mypageSettingIc.setOnClickListener {
+                // 마이페이지 초기 화면 -> 설정 화면
+                binding.mypageArrowIc.visibility = View.VISIBLE
+                binding.mypageSettingIc.visibility = View.INVISIBLE
+                binding.mypageDataLayout.visibility = View.INVISIBLE
+                binding.mypageSettingLayout.visibility = View.VISIBLE
+                isSetting = true
+            }
 
-        // 설정 버튼 클릭 이벤트
-        binding.mypageSettingIc.setOnClickListener {
-            // 마이페이지 초기 화면 -> 설정 화면
+            // 프로필 편집 클릭 이벤트
+            binding.mypageSetting1.setOnClickListener {
+                val intent = Intent(context, ProfileSettingActivity::class.java)
+                intent.putExtra("isMyPage", true)
+                startActivity(intent)
+            }
+
+            // 장소 저장함 편집 클릭 이벤트
+            binding.mypageSetting2.setOnClickListener {
+                val intent = Intent(context, MypagePlaceActivity::class.java)
+                startActivity(intent)
+            }
+
+            // 차단 목록 관리 클릭 이벤트
+            binding.mypageSetting3.setOnClickListener {
+                val intent = Intent(context, MypageBlockActivity::class.java)
+                startActivity(intent)
+            }
+
+            // 이용약관 클릭 이벤트
+            binding.mypageSetting4.setOnClickListener {
+                val intent = Intent(context, MypageConditionActivity::class.java)
+                startActivity(intent)
+            }
+
+            // 회원탈퇴 클릭 이벤트
+            binding.mypageSetting5.setOnClickListener {
+                val dialog = MypageWithdrawalDialogFragment()
+                dialog.show(requireFragmentManager(), "withdrawalDialog")
+            }
+
+            // 로그아웃 클릭 이벤트
+            binding.mypageSetting6.setOnClickListener {
+                val editor = sharedPreferences.edit()
+                editor.putString("SERVER_TOKEN_KEY", null)
+                editor.putString("USER_NICKNAME", null)
+                editor.apply()
+                val dialog = MypageLogoutDialogFragment()
+                dialog.show(requireFragmentManager(), "logoutDialog")
+            }
+        } else {
             binding.mypageArrowIc.visibility = View.VISIBLE
             binding.mypageSettingIc.visibility = View.INVISIBLE
-            binding.mypageDataLayout.visibility = View.INVISIBLE
-            binding.mypageSettingLayout.visibility = View.VISIBLE
-            isSetting = true
-
-        }
-
-        // 프로필 편집 클릭 이벤트
-        binding.mypageSetting1.setOnClickListener {
-            val intent = Intent(context, ProfileSettingActivity::class.java)
-            intent.putExtra("isMyPage", true)
-            startActivity(intent)
-        }
-
-        // 장소 저장함 편집 클릭 이벤트
-        binding.mypageSetting2.setOnClickListener {
-            val intent = Intent(context, MypagePlaceActivity::class.java)
-            startActivity(intent)
-        }
-
-        // 차단 목록 관리 클릭 이벤트
-        binding.mypageSetting3.setOnClickListener {
-            val intent = Intent(context, MypageBlockActivity::class.java)
-            startActivity(intent)
-        }
-
-        // 이용약관 클릭 이벤트
-        binding.mypageSetting4.setOnClickListener {
-            val intent = Intent(context, MypageConditionActivity::class.java)
-            startActivity(intent)
-        }
-
-        // 회원탈퇴 클릭 이벤트
-        binding.mypageSetting5.setOnClickListener {
-            val dialog = MypageWithdrawalDialogFragment()
-            dialog.show(requireFragmentManager(), "withdrawalDialog")
-        }
-
-        // 로그아웃 클릭 이벤트
-        binding.mypageSetting6.setOnClickListener {
-            val editor = sharedPreferences.edit()
-            editor.putString("SERVER_TOKEN_KEY", null)
-            editor.putString("USER_NICKNAME", null)
-            editor.apply()
-            val dialog = MypageLogoutDialogFragment()
-            dialog.show(requireFragmentManager(), "logoutDialog")
+            // 뒤로 가기 버튼 클릭 이벤트
+            binding.mypageArrowIc.setOnClickListener {
+                Log.e("TEST", "눌령")
+                activity?.finish()
+            }
         }
 
         viewPagerAdapter = ViewPagerAdapter(requireActivity())
@@ -107,8 +133,8 @@ class MypageFragment : Fragment() {
             binding.mypageViewPager
         ) { tab, position ->
             when (position) {
-                0 -> tab.text = "다이어리"
-                1 -> tab.text = "계획서"
+                0 -> tab.text = "계획서"
+                1 -> tab.text = "다이어리"
             }
         }.attach()
 
@@ -117,37 +143,18 @@ class MypageFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        val profileData = R.drawable.ic_profile_default
-        val nameData = "닉네임"
-        val introData = "소개글입니다요"
 
-        // 프로필 사진
-        Glide.with(this)
-            .load(profileData)
-            .into(binding.mypageProfileIv)
-
-        // 프로필 닉네임
-        binding.mypageNicknameTv.text = nameData
-
-        // 각 내용 카운트
-        binding.mypageLikeCount.text = "100"    // 좋아요
-        binding.mypagePlanCount.text = "100"    // 계획서
-        binding.mypageDiaryCount.text = "100"    // 다이어리
-
-        // 소개글
-        if (introData.isNotEmpty()) {
-            binding.mypageIntroTv.visibility = View.VISIBLE
-            binding.mypageIntroTv.text = introData
-        } else {
-            binding.mypageIntroTv.visibility = View.GONE
-        }
+        if (isSearching)
+            otherUserPageAPI()
+        else
+            myPageAPI()
     }
 
     // TabLayout 관련
     inner class ViewPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
         private val fragmentList: Array<Fragment> = arrayOf(
-            MypageDiaryFragment(),
-            MypagePlanFragment(),
+            MypagePlanFragment(planListData, isSearching, userId),
+            MypageDiaryFragment(diaryListData, isSearching, userId),
         )
 
         // 전체 탭 개수 반환
@@ -159,5 +166,153 @@ class MypageFragment : Fragment() {
         override fun createFragment(position: Int): Fragment {
             return fragmentList[position]
         }
+    }
+
+    private fun myPageAPI() {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val myPageService = retrofit.create(MyPageService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        myPageService.myPageInfo(token = accessToken)
+            .enqueue(object : Callback<UserPageResponse> {
+                override fun onResponse(
+                    call: Call<UserPageResponse>,
+                    response: Response<UserPageResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val myPageResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (myPageResponse?.isSuccess == true && myPageResponse.code == 1000) {
+                            val result = myPageResponse.result
+                            binding.mypageNicknameTv.text = result.nickname
+                            binding.mypageLikeCount.text = result.likes.toString()
+                            binding.mypagePlanCount.text = result.amount_planner.toString()
+                            binding.mypageDiaryCount.text = result.amount_diary.toString()
+
+                            // 소개글
+                            if (result.intro.isNotEmpty()) {
+                                binding.mypageIntroTv.visibility = View.VISIBLE
+                                binding.mypageIntroTv.text = result.intro
+                            } else {
+                                binding.mypageIntroTv.visibility = View.GONE
+                            }
+
+                            // 프로필 사진
+                            if (result.pic_url != null) {
+                                Glide.with(this@MypageFragment)
+                                    .load(result.pic_url)
+                                    .into(binding.mypageProfileIv)
+                            } else {
+                                val profileData = R.drawable.ic_profile_default
+                                Glide.with(this@MypageFragment)
+                                    .load(profileData)
+                                    .into(binding.mypageProfileIv)
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            myPageResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "MYPAGE INFO",
+                                    detailType = "MINE",
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "MYPAGE INFO",
+                            "[MYPAGE INFO MINE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<UserPageResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("MYPAGE INFO", "[MYPAGE INFO MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
+    }
+
+    private fun otherUserPageAPI() {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val myPageService = retrofit.create(MyPageService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        myPageService.otherPageInfo(token = accessToken, userId = userId, isSearching = isSearching)
+            .enqueue(object : Callback<UserPageResponse> {
+                override fun onResponse(
+                    call: Call<UserPageResponse>,
+                    response: Response<UserPageResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val myPageResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (myPageResponse?.isSuccess == true && myPageResponse.code == 1000) {
+                            val result = myPageResponse.result
+                            binding.mypageNicknameTv.text = result.nickname
+                            binding.mypageLikeCount.text = result.likes.toString()
+                            binding.mypagePlanCount.text = result.amount_planner.toString()
+                            binding.mypageDiaryCount.text = result.amount_diary.toString()
+
+                            // 소개글
+                            if (result.intro.isNotEmpty()) {
+                                binding.mypageIntroTv.visibility = View.VISIBLE
+                                binding.mypageIntroTv.text = result.intro
+                            } else {
+                                binding.mypageIntroTv.visibility = View.GONE
+                            }
+
+                            // 프로필 사진
+                            if (result.pic_url != null) {
+                                Glide.with(this@MypageFragment)
+                                    .load(result.pic_url)
+                                    .into(binding.mypageProfileIv)
+                            } else {
+                                val profileData = R.drawable.ic_profile_default
+                                Glide.with(this@MypageFragment)
+                                    .load(profileData)
+                                    .into(binding.mypageProfileIv)
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            myPageResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "MYPAGE INFO",
+                                    detailType = "OTHER",
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "MYPAGE INFO",
+                            "[MYPAGE INFO OTHER] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<UserPageResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("MYPAGE INFO", "[MYPAGE INFO OTHER] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
     }
 }

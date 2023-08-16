@@ -11,20 +11,23 @@ import androidx.fragment.app.Fragment
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypagePlanBinding
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.myPage.data.UserPlannerResponse
+import com.example.savvy_android.myPage.service.MyPageService
 import com.example.savvy_android.plan.adapter.PlanListAdapter
-import com.example.savvy_android.plan.data.list.PlanListResponse
 import com.example.savvy_android.plan.data.list.PlanListResult
-import com.example.savvy_android.plan.service.PlanListService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class MypagePlanFragment : Fragment() {
+class MypagePlanFragment(
+    private var planListData: ArrayList<PlanListResult>,
+    private val isSearching: Boolean,
+    private val userId: Int,
+) : Fragment() {
     private lateinit var binding: FragmentMypagePlanBinding
     private lateinit var planListAdapter: PlanListAdapter
-    private var planListData = arrayListOf<PlanListResult>()
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var nickname: String
 
@@ -59,6 +62,13 @@ class MypagePlanFragment : Fragment() {
 
         planListAdapter.clearList() // 리스트 정보 초기화
 
+        if (isSearching)
+            otherPlannerAPI(userId)
+        else
+            myPlannerAPI()
+    }
+
+    private fun myPlannerAPI() {
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
         val retrofit = Retrofit.Builder()
@@ -67,37 +77,39 @@ class MypagePlanFragment : Fragment() {
             .build()
 
         // API interface instance 생성
-        val planListService = retrofit.create(PlanListService::class.java)
+        val myPageService = retrofit.create(MyPageService::class.java)
         val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
 
         // GET 요청
-        planListService.planListMine(token = accessToken)
-            .enqueue(object : Callback<PlanListResponse> {
+        myPageService.myPagePlanner(token = accessToken)
+            .enqueue(object : Callback<UserPlannerResponse> {
                 override fun onResponse(
-                    call: Call<PlanListResponse>,
-                    response: Response<PlanListResponse>,
+                    call: Call<UserPlannerResponse>,
+                    response: Response<UserPlannerResponse>,
                 ) {
                     if (response.isSuccessful) {
-                        val planResponse = response.body()
+                        val myPageResponse = response.body()
                         // 서버 응답 처리 로직 작성
-                        if (planResponse?.isSuccess == true) {
-                            for (result in planResponse.result) {
-                                planListAdapter.addPlan(
-                                    PlanListResult(
-                                        id = result.id,
-                                        title = result.title,
-                                        updated_at = result.updated_at,
-                                        nickname = null
+                        if (myPageResponse?.isSuccess == true) {
+                            if (myPageResponse.result.amount_planner > 0) {
+                                for (result in myPageResponse.result.planner) {
+                                    planListAdapter.addPlan(
+                                        PlanListResult(
+                                            id = result.id,
+                                            title = result.title,
+                                            updated_at = result.updated_at,
+                                            nickname = null
+                                        )
                                     )
-                                )
+                                }
                             }
                         } else {
                             // 응답 에러 코드 분류
-                            planResponse?.let {
+                            myPageResponse?.let {
                                 context?.errorCodeList(
                                     errorCode = it.code,
                                     message = it.message,
-                                    type = "DIARY",
+                                    type = "MYPAGE PLAN",
                                     detailType = "MINE",
                                     intentData = null
                                 )
@@ -105,15 +117,77 @@ class MypagePlanFragment : Fragment() {
                         }
                     } else {
                         Log.e(
-                            "PLAN",
-                            "[PLAN MINE] API 호출 실패 - 응답 코드: ${response.code()}"
+                            "MYPAGE PLAN",
+                            "[MYPAGE PLAN MINE] API 호출 실패 - 응답 코드: ${response.code()}"
                         )
                     }
                 }
 
-                override fun onFailure(call: Call<PlanListResponse>, t: Throwable) {
+                override fun onFailure(call: Call<UserPlannerResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
-                    Log.e("PLAN", "[PLAN MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    Log.e("MYPAGE PLAN", "[MYPAGE PLAN MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
+    }
+
+    private fun otherPlannerAPI(userId: Int) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val myPageService = retrofit.create(MyPageService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // GET 요청
+        myPageService.otherPagePlanner(token = accessToken, userId = userId)
+            .enqueue(object : Callback<UserPlannerResponse> {
+                override fun onResponse(
+                    call: Call<UserPlannerResponse>,
+                    response: Response<UserPlannerResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val userPageResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (userPageResponse?.isSuccess == true) {
+                            if (userPageResponse.result.amount_planner > 0) {
+                                for (result in userPageResponse.result.planner) {
+                                    planListAdapter.addPlan(
+                                        PlanListResult(
+                                            id = result.id,
+                                            title = result.title,
+                                            updated_at = result.updated_at,
+                                            nickname = null
+                                        )
+                                    )
+                                }
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            userPageResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "MYPAGE PLAN",
+                                    detailType = "OTHER",
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "MYPAGE PLAN",
+                            "[MYPAGE PLAN OTHER] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<UserPlannerResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("MYPAGE PLAN", "[MYPAGE PLAN OTHER] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                 }
             })
     }

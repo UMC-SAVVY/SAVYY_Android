@@ -1,13 +1,15 @@
 package com.example.savvy_android.diary.activity
 
+import java.io.FileOutputStream
 import android.animation.ValueAnimator
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -17,7 +19,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
-import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -119,23 +120,16 @@ class DiaryMake4Activity : AppCompatActivity() {
         dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 
-    // 이미지 확장자 확인
-    private fun getMimeType(uri: Uri): String? {
-        val contentResolver = contentResolver
-        val mimeTypeMap = MimeTypeMap.getSingleton()
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri))
-    }
-
-    // 이미지 local uri를 절대 경로로 변환
-    private fun getPathFromUri(uri: Uri): String {
-        val proj =
-            arrayOf(MediaStore.Images.Media.DATA)
-        val c = contentResolver.query(uri, proj, null, null, null)
-        val index = c!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-
-        c.moveToFirst()
-
-        return c.getString(index)
+    // ContentResolver를 사용하여 Uri의 파일 이름 가져오기
+    private fun getDisplayName(contentResolver: ContentResolver, uri: Uri): String {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (displayNameIndex != -1 && it.moveToFirst()) {
+                return it.getString(displayNameIndex)
+            }
+        }
+        return uri.lastPathSegment ?: "image.jpg"
     }
 
     // 다이어리 최종 작성 API
@@ -159,15 +153,23 @@ class DiaryMake4Activity : AppCompatActivity() {
         // 입력한 내용 중 이미지만 찾아서 파일화
         for (item in diaryDetailContent) {
             if (item.type == "image") {
-                val imageFile = File(getPathFromUri(Uri.parse(item.content)))
+                val uri = Uri.parse(item.content)
+                val inputStream = contentResolver.openInputStream(uri)
+                val displayName = getDisplayName(contentResolver, uri)
+                val mimeType = contentResolver.getType(uri) ?: "image/*"
 
-                // MIME 타입을 따르기 위해 image/jpg로 변환하여 RequestBody 객체 생성
-                val mimeType = getMimeType(Uri.parse(item.content)) ?: "image/*"
-                val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                // RequestBody로 Multipart.Part 객체 생성
-                val imageBody =
-                    MultipartBody.Part.createFormData("image", imageFile.name, fileRequestBody)
-                imageFileList.add(imageBody)
+                inputStream?.use { input ->
+                    val imageFile = File(cacheDir, displayName)
+                    val outputStream = FileOutputStream(imageFile)
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+
+                    val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                    val imageBody =
+                        MultipartBody.Part.createFormData("image", displayName, fileRequestBody)
+                    imageFileList.add(imageBody)
+                }
             }
         }
         if (imageFileList.isEmpty()) {
