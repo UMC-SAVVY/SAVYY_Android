@@ -39,8 +39,9 @@ import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
-import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.init.data.image.MultipleImageResponse
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
 import com.example.savvy_android.plan.activity.PlanDetailActivity
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -79,7 +80,6 @@ class DiaryMake3Activity : AppCompatActivity() {
         // 시작된 fragment 정보 받기
         isDiary = intent.getBooleanExtra("isDiary", true)
         plannerId = intent.getIntExtra("planID", -1)
-        Log.d("다이어리 작성 3 id 받기", "plannerId: $plannerId")
 
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
@@ -161,7 +161,6 @@ class DiaryMake3Activity : AppCompatActivity() {
             if (plannerId != -1) {
                 val intent = Intent(this, PlanDetailActivity::class.java)
                 intent.putExtra("planID", plannerId)
-                Log.d("다이어리 작성 3 id 보내기 test", "planID: $plannerId")
                 startActivity(intent)
             } else {
                 showToast("계획서 ID가 없습니다")
@@ -171,8 +170,18 @@ class DiaryMake3Activity : AppCompatActivity() {
 
     //뒤로가기 누르면 Dialog 띄우기
     override fun onBackPressed() {
-        diaryMakeTempAPI()
-        val dialog = DiarySaveDialogFragment(isDiary)
+        val dialog = DiarySaveDialogFragment()
+
+        dialog.setButtonClickListener(object :
+            DiarySaveDialogFragment.OnButtonClickListener {
+            override fun onDialogSaveBtnOClicked() {
+                diaryMakeTempAPI()
+            }
+
+            override fun onDialogCancelBtnXClicked() {
+
+            }
+        })
         dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 
@@ -312,66 +321,80 @@ class DiaryMake3Activity : AppCompatActivity() {
             }
         }
 
-        // 이미지 전송하고 이미지 서버 주소 response
-        diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
-            .enqueue(object : Callback<UploadImageResponse> {
-                override fun onResponse(
-                    call: Call<UploadImageResponse>,
-                    response: Response<UploadImageResponse>,
-                ) {
-                    if (response.isSuccessful) {
-                        val diaryImageResponse = response.body()
-                        // 서버 응답 처리 로직 작성
-                        if (diaryImageResponse?.isSuccess == true) {
-                            // 수신 받은 서버 이미지 주소를 알맞게 다시 넣어줌
-                            var imageCount = 0
-                            for (item in diaryDetailData) {
-                                if (item.type == "image") {
-                                    item.content = diaryImageResponse.result[imageCount].pic_url
-                                    imageCount++
+        if (imageFileList.isNotEmpty()) {
+            // 이미지 전송하고 이미지 서버 주소 response
+            diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
+                .enqueue(object : Callback<MultipleImageResponse> {
+                    override fun onResponse(
+                        call: Call<MultipleImageResponse>,
+                        response: Response<MultipleImageResponse>,
+                    ) {
+                        if (response.isSuccessful) {
+                            val diaryImageResponse = response.body()
+                            // 서버 응답 처리 로직 작성
+                            if (diaryImageResponse?.isSuccess == true) {
+                                // 수신 받은 서버 이미지 주소를 알맞게 다시 넣어줌
+                                var imageCount = 0
+                                for (item in diaryDetailData) {
+                                    if (item.type == "image") {
+                                        item.content = diaryImageResponse.result[imageCount].pic_url
+                                        imageCount++
+                                    }
+                                }
+
+                                // 다이어리 생성 API에 필요한 요청 내용 생성
+                                val diaryMakeRequest = DiaryMakeRequest(
+                                    title = if (binding.titleEdit.text.isEmpty()) "제목이 없습니다" else binding.titleEdit.text.toString(),
+                                    planner_id = null,
+                                    is_public = false,
+                                    is_temporary = true,
+                                    content = diaryDetailData,
+                                    hashtag = null,
+                                )
+
+                                // 뒤로가기 버튼 클릭으로 실행된 경우만, 다이어리 저장 API 실행
+                                diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+                            } else {
+                                // 응답 에러 코드 분류
+                                diaryImageResponse?.let {
+                                    errorCodeList(
+                                        errorCode = it.code,
+                                        message = it.message,
+                                        type = "DIARY",
+                                        detailType = "MAKE3 IMAGE",
+                                        intentData = null
+                                    )
                                 }
                             }
-
-                            // 다이어리 생성 API에 필요한 요청 내용 생성
-                            val diaryMakeRequest = DiaryMakeRequest(
-                                title = binding.titleEdit.text.toString(),
-                                planner_id = null,
-                                is_public = false,
-                                is_temporary = true,
-                                content = diaryDetailData,
-                                hashtag = null,
-                            )
-
-                            // 뒤로가기 버튼 클릭으로 실행된 경우만, 다이어리 저장 API 실행
-                            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
                         } else {
-                            // 응답 에러 코드 분류
-                            diaryImageResponse?.let {
-                                errorCodeList(
-                                    errorCode = it.code,
-                                    message = it.message,
-                                    type = "DIARY",
-                                    detailType = "MAKE3 IMAGE",
-                                    intentData = null
-                                )
-                            }
+                            Log.e(
+                                "DIARY",
+                                "[DIARY MAKE3 IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
+                            )
                         }
-                    } else {
+                    }
+
+                    override fun onFailure(call: Call<MultipleImageResponse>, t: Throwable) {
+                        // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                         Log.e(
                             "DIARY",
-                            "[DIARY MAKE3 IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
+                            "[DIARY MAKE3 IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                         )
                     }
-                }
-
-                override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
-                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
-                    Log.e(
-                        "DIARY",
-                        "[DIARY MAKE3 IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
-                    )
-                }
-            })
+                })
+        } else {
+            Log.e("TEST", "내용:${binding.titleEdit.text}\n여부${binding.titleEdit.text.isEmpty()}")
+            // 다이어리 생성 API에 필요한 요청 내용 생성
+            val diaryMakeRequest = DiaryMakeRequest(
+                title = if (binding.titleEdit.text.isEmpty()) "제목이 없습니다" else binding.titleEdit.text.toString(),
+                planner_id = null,
+                is_public = false,
+                is_temporary = true,
+                content = diaryDetailData,
+                hashtag = null,
+            )
+            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+        }
     }
 
     // 다이어리 작성 API

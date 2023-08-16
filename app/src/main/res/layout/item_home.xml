@@ -53,13 +53,15 @@
 
             <TextView
                 android:id="@+id/item_home_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
                 android:fontFamily="@font/pretendard_medium"
                 android:maxLines="1"
                 android:text="Title"
                 android:textColor="@color/black"
                 android:textSize="16sp"
+                app:layout_constraintEnd_toStartOf="@id/item_home_date"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -71,14 +73,16 @@
                 android:text="Date"
                 android:textColor="@color/black"
                 android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/item_home_title"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@id/item_home_title" />
 
             <TextView
                 android:id="@+id/item_home_tag"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
+                android:ellipsize="end"
                 android:fontFamily="@font/pretendard_medium"
                 android:maxLines="1"
                 android:text="# Tag1 # Tag2"

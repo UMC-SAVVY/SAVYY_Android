@@ -35,7 +35,7 @@ import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.dialog.DiarySaveDialogFragment
 import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
-import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.init.data.image.MultipleImageResponse
 import com.example.savvy_android.init.errorCodeList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -98,7 +98,7 @@ class DiaryMake4Activity : AppCompatActivity() {
 
         // 완료 버튼 클릭시
         binding.diaryNextBtn.setOnClickListener {
-            diaryMakeFinalAPI(diaryDetailContent, hashtagList)
+            diaryMakeCombineAPI(diaryDetailContent, hashtagList, isFinal = true)
         }
 
         // < 클릭 이벤트
@@ -116,7 +116,18 @@ class DiaryMake4Activity : AppCompatActivity() {
 
     //뒤로가기 누르면 Dialog 띄우기
     override fun onBackPressed() {
-        val dialog = DiarySaveDialogFragment(isDiary)
+        val dialog = DiarySaveDialogFragment()
+
+        dialog.setButtonClickListener(object :
+            DiarySaveDialogFragment.OnButtonClickListener {
+            override fun onDialogSaveBtnOClicked() {
+                diaryMakeCombineAPI(diaryDetailContent, hashtagList, isFinal = false)
+            }
+
+            override fun onDialogCancelBtnXClicked() {
+
+            }
+        })
         dialog.show(supportFragmentManager, "diarySaveDialog")
     }
 
@@ -133,9 +144,10 @@ class DiaryMake4Activity : AppCompatActivity() {
     }
 
     // 다이어리 최종 작성 API
-    private fun diaryMakeFinalAPI(
+    private fun diaryMakeCombineAPI(
         diaryDetailContent: ArrayList<DiaryContent>,
         hashtagList: ArrayList<DiaryHashtag>,
+        isFinal: Boolean,
     ) {
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)
@@ -177,21 +189,21 @@ class DiaryMake4Activity : AppCompatActivity() {
             val diaryMakeRequest = DiaryMakeRequest(
                 title = title,
                 planner_id = if (plannerId == -1) null else plannerId,
-                is_public = false,
-                is_temporary = false,
+                is_public = isFinal,
+                is_temporary = !isFinal,
                 content = diaryDetailContent,
                 hashtag = hashtagList,
             )
 
             // 다이어리 작성 API 실행
-            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+            diaryMakeAPI(diaryService, accessToken, diaryMakeRequest, isFinal)
         } else {
             // 이미지 전송하고 이미지 서버 주소 response
             diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
-                .enqueue(object : Callback<UploadImageResponse> {
+                .enqueue(object : Callback<MultipleImageResponse> {
                     override fun onResponse(
-                        call: Call<UploadImageResponse>,
-                        response: Response<UploadImageResponse>,
+                        call: Call<MultipleImageResponse>,
+                        response: Response<MultipleImageResponse>,
                     ) {
                         if (response.isSuccessful) {
                             val diaryImageResponse = response.body()
@@ -210,14 +222,14 @@ class DiaryMake4Activity : AppCompatActivity() {
                                 val diaryMakeRequest = DiaryMakeRequest(
                                     title = title,
                                     planner_id = if (plannerId == -1) null else plannerId,
-                                    is_public = true,
-                                    is_temporary = false,
+                                    is_public = isFinal,
+                                    is_temporary = !isFinal,
                                     content = diaryDetailContent,
                                     hashtag = hashtagList,
                                 )
 
                                 // 다이어리 작성 API 실행
-                                diaryMakeAPI(diaryService, accessToken, diaryMakeRequest)
+                                diaryMakeAPI(diaryService, accessToken, diaryMakeRequest, isFinal)
                             } else {
                                 // 응답 에러 코드 분류
                                 diaryImageResponse?.let {
@@ -240,7 +252,7 @@ class DiaryMake4Activity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
+                    override fun onFailure(call: Call<MultipleImageResponse>, t: Throwable) {
                         // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                         Log.e(
                             "DIARY",
@@ -257,6 +269,7 @@ class DiaryMake4Activity : AppCompatActivity() {
         diaryService: DiaryService,
         accessToken: String,
         diaryMakeRequest: DiaryMakeRequest,
+        isFinal: Boolean,
     ) {
         // POST 요청
         diaryService.diaryMake(token = accessToken, diaryMakeRequest = diaryMakeRequest)
@@ -269,7 +282,10 @@ class DiaryMake4Activity : AppCompatActivity() {
                         val planResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         if (planResponse?.isSuccess == true) {
-                            showToast("성공적으로 다이어리 작성이 완료되었습니다")
+                            if (isFinal)
+                                showToast("성공적으로 다이어리 작성이 완료되었습니다")
+                            else
+                                showToast("작성 중인 다이어리가 임시 저장되었습니다.")
 
                             // MainActivity로 이동하면서 실행된 Fragment로 이동
                             val intent = Intent(this@DiaryMake4Activity, MainActivity::class.java)

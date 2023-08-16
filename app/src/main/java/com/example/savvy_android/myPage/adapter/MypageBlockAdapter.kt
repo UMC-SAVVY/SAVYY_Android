@@ -7,9 +7,10 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.databinding.ItemBlockBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
+import com.example.savvy_android.myPage.data.MyPageBlockResult
 
 class MypageBlockAdapter(
-    private var blockList: ArrayList<MypageBlockItemData>,
+    private var blockList: ArrayList<MyPageBlockResult>,
 ) :
     RecyclerView.Adapter<MypageBlockAdapter.MypageBlockViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -34,12 +35,12 @@ class MypageBlockAdapter(
     // View에 내용이 작성되는 method, 스크롤을 올리거나 내릴 때마다 호출
     override fun onBindViewHolder(holder: MypageBlockViewHolder, position: Int) {
         // 계획서 연결 or 마이페이지 연결구분에 따라 삭제 레이아웃 시각화 설정
-        holder.name.text = blockList[position].name
+        holder.name.text = blockList[position].nickname
         holder.cancel.setOnClickListener {
             // 커스텀 Toast 메시지 생성
             val inflater = LayoutInflater.from(holder.itemView.context)
             val toastBinding = LayoutToastBinding.inflate(inflater)
-            toastBinding.toastMessage.text = "성공적으로 삭제가 완료되었습니다."
+            toastBinding.toastMessage.text = "성공적으로 차단이 해제되었습니다."
 
             val toast = Toast(holder.itemView.context)
             toast.duration = Toast.LENGTH_SHORT
@@ -55,7 +56,7 @@ class MypageBlockAdapter(
     override fun getItemCount(): Int = blockList.size
 
     // 데이터 추가
-    fun addStorage(blockData: MypageBlockItemData) {
+    fun addStorage(blockData: MyPageBlockResult) {
         blockList.add(blockData)
         notifyItemInserted(blockList.size)
     }

@@ -5,19 +5,24 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypageBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.data.list.DiaryListResult
+import com.example.savvy_android.init.SplashActivity
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.myPage.activity.MypageBlockActivity
 import com.example.savvy_android.myPage.activity.MypageConditionActivity
+import com.example.savvy_android.myPage.activity.MypageLikeActivity
 import com.example.savvy_android.myPage.activity.MypagePlaceActivity
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
 import com.example.savvy_android.myPage.data.UserPageResponse
@@ -25,8 +30,8 @@ import com.example.savvy_android.myPage.dialog.MypageLogoutDialogFragment
 import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
 import com.example.savvy_android.myPage.service.MyPageService
 import com.example.savvy_android.plan.data.list.PlanListResult
-import com.example.savvy_android.utils.search.activity.SearchDetailUserActivity
 import com.google.android.material.tabs.TabLayoutMediator
+import com.kakao.sdk.user.UserApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -76,38 +81,69 @@ class MypageFragment(
             }
 
             // 프로필 편집 클릭 이벤트
-            binding.mypageSetting1.setOnClickListener {
+            binding.mypageSettingProfile.setOnClickListener {
                 val intent = Intent(context, ProfileSettingActivity::class.java)
                 intent.putExtra("isMyPage", true)
                 startActivity(intent)
             }
 
             // 장소 저장함 편집 클릭 이벤트
-            binding.mypageSetting2.setOnClickListener {
+            binding.mypageSettingPlace.setOnClickListener {
                 val intent = Intent(context, MypagePlaceActivity::class.java)
                 startActivity(intent)
             }
 
+            // 다이어리 좋아요 목록 클릭 이벤트
+            binding.mypageSettingLike.setOnClickListener {
+                val intent = Intent(context, MypageLikeActivity::class.java)
+                startActivity(intent)
+            }
+
             // 차단 목록 관리 클릭 이벤트
-            binding.mypageSetting3.setOnClickListener {
+            binding.mypageSettingBlock.setOnClickListener {
                 val intent = Intent(context, MypageBlockActivity::class.java)
                 startActivity(intent)
             }
 
             // 이용약관 클릭 이벤트
-            binding.mypageSetting4.setOnClickListener {
+            binding.mypageSettingCondition.setOnClickListener {
                 val intent = Intent(context, MypageConditionActivity::class.java)
                 startActivity(intent)
             }
 
             // 회원탈퇴 클릭 이벤트
-            binding.mypageSetting5.setOnClickListener {
+            binding.mypageSettingWithdrawal.setOnClickListener {
                 val dialog = MypageWithdrawalDialogFragment()
+
+                dialog.setButtonClickListener(object :
+                    MypageWithdrawalDialogFragment.OnButtonClickListener {
+                    override fun onDialogPlanBtnOClicked() {
+                        // 연결 끊기
+                        UserApiClient.instance.unlink { error ->
+                            if (error != null) {
+                                showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
+                            } else {
+                                // 초기 화면으로 이동
+                                val intent = Intent(requireContext(), SplashActivity::class.java)
+                                // 이전에 존재하던 모든 acitivty 종료
+                                intent.flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                startActivity(intent)
+
+                                showToast("회원 탈퇴를 성공했습니다.")
+                            }
+                        }
+                    }
+
+                    override fun onDialogPlanBtnXClicked() {
+                    }
+                })
                 dialog.show(requireFragmentManager(), "withdrawalDialog")
+
             }
 
             // 로그아웃 클릭 이벤트
-            binding.mypageSetting6.setOnClickListener {
+            binding.mypageSettingLogout.setOnClickListener {
                 val editor = sharedPreferences.edit()
                 editor.putString("SERVER_TOKEN_KEY", null)
                 editor.putString("USER_NICKNAME", null)
@@ -314,5 +350,17 @@ class MypageFragment(
                     Log.e("MYPAGE INFO", "[MYPAGE INFO OTHER] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                 }
             })
+    }
+
+    // 토스트 메시지
+    private fun showToast(message: String) {
+        val toastBinding =
+            LayoutToastBinding.inflate(LayoutInflater.from(requireContext()))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(requireContext())
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
     }
 }

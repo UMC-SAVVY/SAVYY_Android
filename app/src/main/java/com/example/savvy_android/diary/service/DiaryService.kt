@@ -5,7 +5,7 @@ import com.example.savvy_android.diary.data.list.DiaryListResponse
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeRequest
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.data.make_modify.DiaryModifyRequest
-import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.init.data.image.MultipleImageResponse
 import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -66,7 +66,7 @@ interface DiaryService {
     fun diaryImage(
         @Header("Authorization") token: String,
         @Part imageFileList: ArrayList<MultipartBody.Part>,
-    ): Call<UploadImageResponse>
+    ): Call<MultipleImageResponse>
 
     @POST("diary/status")
     fun diaryStatus(

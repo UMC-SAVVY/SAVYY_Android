@@ -1,23 +1,26 @@
 package com.example.savvy_android.myPage.activity
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
-import android.webkit.MimeTypeMap
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
@@ -30,9 +33,10 @@ import com.example.savvy_android.databinding.ActivityProfileSettingBinding
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.init.data.SignupRequest
 import com.example.savvy_android.init.data.SignupResponse
-import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.init.data.image.SingleImageResponse
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.init.service.SignupService
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.utils.LoadingDialogFragment
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -43,6 +47,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.io.FileOutputStream
 import java.util.regex.Pattern
 
 
@@ -121,24 +126,7 @@ class ProfileSettingActivity : AppCompatActivity() {
 
         // 닉네임 중복 버튼 클릭 이벤트
         binding.profileNameDuplicateBtn.setOnClickListener {
-            duplicateState = !duplicateState    // 중복 여부 확인 저장 변수
-            signupState = duplicateState && introState  // 회원 가입 여부
-
-            // 중복 여부에 따른 테두리 변경
-            editTextStateBackground(duplicateState, binding.profileNameEdit)
-            // 중복 여부에 따른 안내 메시지 변경
-            textViewStateDescription(
-                duplicateState,
-                binding.profileNameDuplicateTv,
-                "사용 가능한 닉네임입니다",
-                "중복된 닉네임입니다",
-                R.color.green,
-                R.color.main
-            )
-
-            // 중복 여부에 따른 회원 가입 버튼 활성화 여부 & 배경 변경
-            binding.profileSignupBtn.isEnabled = signupState
-            btnStateBackground(signupState, binding.profileSignupBtn)
+            nicknameCheck(binding.profileNameEdit.text.toString())
         }
 
         // 소개글 EditText 입력 변화 이벤트 처리
@@ -182,55 +170,95 @@ class ProfileSettingActivity : AppCompatActivity() {
 
     // 갤러리 권한 후 이미지 선택
     private fun selectGallery() {
-        val writePermission = ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-        val readPermission = ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        )
+        when {
+            // API 33 이상인 경우 READ_MEDIA_IMAGES 사용
+            Build.VERSION.SDK_INT >= 33 -> {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        android.Manifest.permission.READ_MEDIA_IMAGES
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // 권한이 없는 경우 권한 요청
+                    requestReadMediaImagesPermissionLauncher.launch(
+                        android.Manifest.permission.READ_MEDIA_IMAGES
+                    )
+                    return
+                }
+            }
 
-        if (writePermission == PackageManager.PERMISSION_DENIED ||
-            readPermission == PackageManager.PERMISSION_DENIED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
+            else -> {
+                // API 32 이하인 경우 READ_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE 사용
+                val permissions = arrayOf(
                     android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     android.Manifest.permission.READ_EXTERNAL_STORAGE
-                ),
-                1
-            )
-        } else {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.setDataAndType(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                "image/*"
-            )
-            imageResult.launch(intent)
+                )
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        permissions[0]
+                    ) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        permissions[1]
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // 권한이 없는 경우 권한 요청
+                    ActivityCompat.requestPermissions(this, permissions, 1)
+                    return
+                }
+            }
         }
+        // 이미 권한이 있는 경우 이미지 선택 처리
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.setDataAndType(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            "image/*"
+        )
+        imageResult.launch(intent)
     }
 
+    // READ_MEDIA_IMAGES 권한 요청을 처리하기 위한 런처
+    private val requestReadMediaImagesPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // 권한이 허용된 경우에 대한 처리
+                val intent = Intent(Intent.ACTION_PICK)
+                intent.setDataAndType(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    "image/*"
+                )
+                imageResult.launch(intent)
+            } else {
+                // 권한이 거부된 경우에 대한 처리
+                // 예를 들어 권한이 거부되면 사용자에게 알림을 표시하거나 다른 조치를 취할 수 있습니다.
+            }
+        }
+
     // 갤러리에서 선택한 이미지 결과 가져오기
-    private val imageResult = registerForActivityResult(
+    private val imageResult: ActivityResultLauncher<Intent> = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            profileLocalUri = result.data?.data
-            profileLocalUri?.let {
-                val imageFile = File(getPathFromUri(profileLocalUri))
+    ) {
+        // 결과 코드 OK
+        if (it.resultCode == RESULT_OK) {
+            val uri = it.data?.data // 결과 값 저장
+            uri?.let {
+                val inputStream = contentResolver.openInputStream(uri)
+                val displayName = getDisplayName(contentResolver, uri)
+                val mimeType = contentResolver.getType(uri) ?: "image/*"
 
-                // MIME 타입을 따르기 위해 image/jpg로 변환하여 RequestBody 객체 생성
-                val mimeType = getMimeType(profileLocalUri!!) ?: "image/*"
-                val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
-                // RequestBody로 Multipart.Part 객체 생성
-                imageBody =
-                    MultipartBody.Part.createFormData("image", imageFile.name, fileRequestBody)
+                inputStream?.use { input ->
+                    val imageFile = File(cacheDir, displayName)
+                    val outputStream = FileOutputStream(imageFile)
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
 
+                    val fileRequestBody = imageFile.asRequestBody(mimeType.toMediaTypeOrNull())
+                    imageBody =
+                        MultipartBody.Part.createFormData("image", displayName, fileRequestBody)
+                }
                 // 선택한 이미지 profileImageIv에 보여주기
                 Glide.with(this)
-                    .load(profileLocalUri)
+                    .load(uri)
                     .into(binding.profileImgIv)
 
                 // 이미지 변경 여부 변경
@@ -239,23 +267,87 @@ class ProfileSettingActivity : AppCompatActivity() {
         }
     }
 
-    // 이미지 확장자 확인
-    private fun getMimeType(uri: Uri): String? {
-        val contentResolver = contentResolver
-        val mimeTypeMap = MimeTypeMap.getSingleton()
-        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri))
+    // ContentResolver를 사용하여 Uri의 파일 이름 가져오기
+    private fun getDisplayName(contentResolver: ContentResolver, uri: Uri): String {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val displayNameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (displayNameIndex != -1 && it.moveToFirst()) {
+                return it.getString(displayNameIndex)
+            }
+        }
+        return uri.lastPathSegment ?: "image.jpg"
     }
 
-    // 이미지 local uri를 절대 경로로 변환
-    private fun getPathFromUri(uri: Uri): String {
-        val proj =
-            arrayOf(MediaStore.Images.Media.DATA)
-        val c = contentResolver.query(uri, proj, null, null, null)
-        val index = c!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+    // 닉네임 중복 API
+    private fun nicknameCheck(nickname: String) {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-        c.moveToFirst()
+        // API interface instance 생성
+        val duplicateService = retrofit.create(SignupService::class.java)
 
-        return c.getString(index)
+        duplicateService.duplicate(nickname = nickname)
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val serverResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (serverResponse?.isSuccess == true && serverResponse.code == 1000) {
+                            Log.e("TEST", "정상")
+                            duplicateState = true   // 중복 여부 확인 저장 변수
+                        } else if (serverResponse?.code == 3201) {
+                            Log.e("TEST", "비정상")
+                            duplicateState = false  // 중복 여부 확인 저장 변수
+                        } else {
+                            // 응답 에러 코드 분류
+                            serverResponse?.let {
+                                errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PROFILE",
+                                    detailType = null,
+                                    intentData = null
+                                )
+                            }
+                        }
+                        signupState = duplicateState && introState  // 회원 가입 여부
+
+                        // 중복 여부에 따른 테두리 변경
+                        editTextStateBackground(duplicateState, binding.profileNameEdit)
+                        // 중복 여부에 따른 안내 메시지 변경
+                        textViewStateDescription(
+                            duplicateState,
+                            binding.profileNameDuplicateTv,
+                            "사용 가능한 닉네임입니다",
+                            "중복된 닉네임입니다",
+                            R.color.green,
+                            R.color.main
+                        )
+
+                        // 중복 여부에 따른 회원 가입 버튼 활성화 여부 & 배경 변경
+                        binding.profileSignupBtn.isEnabled = signupState
+                        btnStateBackground(signupState, binding.profileSignupBtn)
+                    } else {
+                        Log.e(
+                            "PROFILE",
+                            "[PROFILE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("PROFILE", "[PROFILE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
     }
 
     // 회원가입 API
@@ -286,8 +378,12 @@ class ProfileSettingActivity : AppCompatActivity() {
                                     "[SIGNUP] 회원가입 성공 - 서버에서 받은 토큰: $serverToken"
                                 )
 
-                                saveServerToken(serverToken) // 서버에서 받은 토큰 값
-                                saveNickname(nickname)
+                                // 서버 토큰, 닉네임을 SharedPreferences에 저장
+                                val editor = sharedPreferences.edit()
+                                editor.putString("SERVER_TOKEN_KEY", serverToken)
+                                editor.putString("USER_NICKNAME", nickname)
+                                editor.apply()
+
                                 val intent =
                                     Intent(
                                         this@ProfileSettingActivity,
@@ -377,15 +473,15 @@ class ProfileSettingActivity : AppCompatActivity() {
             if (isChange) {
                 // 프로필 사진을 추가했을 때
                 signupService.uploadProfile(imageBody)
-                    .enqueue(object : Callback<UploadImageResponse> {
+                    .enqueue(object : Callback<SingleImageResponse> {
                         override fun onResponse(
-                            call: Call<UploadImageResponse>,
-                            response: Response<UploadImageResponse>,
+                            call: Call<SingleImageResponse>,
+                            response: Response<SingleImageResponse>,
                         ) {
                             if (response.isSuccessful) {
                                 val uploadProfileResponse = response.body()
                                 if (uploadProfileResponse?.isSuccess == true) {
-                                    profileServerUrl = uploadProfileResponse.result[0].pic_url
+                                    profileServerUrl = uploadProfileResponse.result.pic_url
                                     signupAPI(signupService, dialog)
                                 }
                             } else {
@@ -403,7 +499,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                             }
                         }
 
-                        override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
+                        override fun onFailure(call: Call<SingleImageResponse>, t: Throwable) {
                             Log.e(
                                 "SIGNUP",
                                 "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
@@ -463,19 +559,4 @@ class ProfileSettingActivity : AppCompatActivity() {
             )
         }
     }
-
-    private fun saveServerToken(serverToken: String) {
-        // 서버 토큰을 SharedPreferences에 저장
-        val editor = sharedPreferences.edit()
-        editor.putString("SERVER_TOKEN_KEY", serverToken)
-        editor.apply()
-    }
-
-    private fun saveNickname(nickname: String) {
-        // 닉네임을 SharedPreferences에 저장
-        val editor = sharedPreferences.edit()
-        editor.putString("USER_NICKNAME", nickname)
-        editor.apply()
-    }
-
 }

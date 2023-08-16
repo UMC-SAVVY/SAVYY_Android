@@ -10,6 +10,12 @@
     app:cardUseCompatPadding="true">
 
     <!--카드뷰 내부-->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#xA;                    android:textAlignment=&quot;center&quot;" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/item_diary_in"
         android:layout_width="match_parent"
@@ -210,10 +216,10 @@
                     android:layout_marginStart="11dp"
                     android:layout_marginTop="7dp"
                     android:fontFamily="@font/pretendard_medium"
+                    android:maxLines="1"
                     android:text="Diary title"
                     android:textColor="@color/black"
                     android:textSize="17sp"
-                    android:maxLines="1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -221,15 +227,16 @@
                     android:id="@+id/item_diary_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="9dp"
+                    android:layout_marginStart="3dp"
                     android:fontFamily="@font/pretendard_medium"
                     android:minWidth="70dp"
                     android:text="Diary date"
+                    android:textAlignment="center"
                     android:textColor="@color/icon"
                     android:textSize="13sp"
-                    app:layout_constraintBottom_toBottomOf="@id/item_diary_title"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_title"
-                    app:layout_constraintTop_toTopOf="@id/item_diary_title" />
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_comment_tv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
 
                 <ImageView
                     android:id="@+id/item_diary_like_iv"
@@ -243,11 +250,12 @@
 
                 <TextView
                     android:id="@+id/item_diary_like_tv"
-                    android:layout_width="wrap_content"
+                    android:layout_width="25dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="100"
+                    android:text="0"
+                    android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="13sp"
                     app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
@@ -258,20 +266,21 @@
                     android:id="@+id/item_diary_comment_iv"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_marginStart="30dp"
+                    android:layout_marginStart="3dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_message"
                     app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_tv"
                     app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
 
                 <TextView
                     android:id="@+id/item_diary_comment_tv"
-                    android:layout_width="wrap_content"
+                    android:layout_width="25dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="100"
+                    android:text="0"
+                    android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="13sp"
                     app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"

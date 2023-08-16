@@ -188,7 +188,7 @@ class DiaryFragment : Fragment() {
                                 context?.errorCodeList(
                                     errorCode = it.code,
                                     message = it.message,
-                                    type = "PLAN",
+                                    type = "DIARY",
                                     detailType = "MINE",
                                     intentData = null
                                 )

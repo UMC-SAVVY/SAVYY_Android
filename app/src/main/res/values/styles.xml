@@ -7,7 +7,7 @@
         <item name="android:minHeight">0dp</item>
     </style>
 
-    <style name="tablayout_place_add">
+    <style name="tabLayout_place_add">
         <item name="fontFamily">@font/pretendard_medium</item>
         <item name="android:textSize">14sp</item>
 

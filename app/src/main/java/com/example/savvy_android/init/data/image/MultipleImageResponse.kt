@@ -1,8 +1,8 @@
 package com.example.savvy_android.init.data.image
 
-data class UploadImageResponse(
+data class MultipleImageResponse(
     val isSuccess: Boolean,
     val code: Int,
     val message: String,
-    val result: ArrayList<UploadImageResult>,
+    val result: ArrayList<UploadDiaryImageResult>,
 )

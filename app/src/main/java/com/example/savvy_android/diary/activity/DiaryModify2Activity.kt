@@ -33,7 +33,7 @@ import com.example.savvy_android.diary.data.detail.DiaryHashtag
 import com.example.savvy_android.diary.data.make_modify.DiaryMakeModifyResponse
 import com.example.savvy_android.diary.data.make_modify.DiaryModifyRequest
 import com.example.savvy_android.diary.service.DiaryService
-import com.example.savvy_android.init.data.image.UploadImageResponse
+import com.example.savvy_android.init.data.image.MultipleImageResponse
 import com.example.savvy_android.init.errorCodeList
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -185,10 +185,10 @@ class DiaryModify2Activity : AppCompatActivity() {
         } else {
             // 이미지 전송하고 이미지 서버 주소 response
             diaryService.diaryImage(token = accessToken, imageFileList = imageFileList)
-                .enqueue(object : Callback<UploadImageResponse> {
+                .enqueue(object : Callback<MultipleImageResponse> {
                     override fun onResponse(
-                        call: Call<UploadImageResponse>,
-                        response: Response<UploadImageResponse>,
+                        call: Call<MultipleImageResponse>,
+                        response: Response<MultipleImageResponse>,
                     ) {
                         if (response.isSuccessful) {
                             val diaryImageResponse = response.body()
@@ -235,7 +235,7 @@ class DiaryModify2Activity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: Call<UploadImageResponse>, t: Throwable) {
+                    override fun onFailure(call: Call<MultipleImageResponse>, t: Throwable) {
                         // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                         Log.e(
                             "DIARY",

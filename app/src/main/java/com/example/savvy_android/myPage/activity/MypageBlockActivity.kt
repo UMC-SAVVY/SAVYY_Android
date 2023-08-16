@@ -7,12 +7,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityMypageBlockBinding
 import com.example.savvy_android.myPage.adapter.MypageBlockAdapter
-import com.example.savvy_android.myPage.adapter.MypageBlockItemData
+import com.example.savvy_android.myPage.data.MyPageBlockResult
 
 class MypageBlockActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMypageBlockBinding
-    private lateinit var mypageBlockAdapter: MypageBlockAdapter
-    private var mypageBlockData = arrayListOf<MypageBlockItemData>()
+    private lateinit var myPageBlockAdapter: MypageBlockAdapter
+    private var myPageBlockData = arrayListOf<MyPageBlockResult>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -26,11 +26,9 @@ class MypageBlockActivity : AppCompatActivity() {
         // 뒤로 가기 버튼 클릭 이벤트
         binding.storagePlaceArrowIv.setOnClickListener {
             finish()
-
-            // SearchNewPlace Data & Adapter
-            mypageBlockAdapter = MypageBlockAdapter(mypageBlockData)
-            binding.storageRecycle.adapter = mypageBlockAdapter
-
         }
+        // SearchNewPlace Data & Adapter
+        myPageBlockAdapter = MypageBlockAdapter(myPageBlockData)
+        binding.storageRecycle.adapter = myPageBlockAdapter
     }
 }

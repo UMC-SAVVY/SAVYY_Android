@@ -1,6 +1,5 @@
 package com.example.savvy_android.myPage.dialog
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -9,8 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import com.example.savvy_android.databinding.DialogMypageWithdrawalBinding
-import com.example.savvy_android.init.SplashActivity
-
 
 class MypageWithdrawalDialogFragment : DialogFragment() {
     private var _binding: DialogMypageWithdrawalBinding? = null
@@ -20,7 +17,7 @@ class MypageWithdrawalDialogFragment : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = DialogMypageWithdrawalBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -34,19 +31,13 @@ class MypageWithdrawalDialogFragment : DialogFragment() {
 
         // 탈퇴 버튼 클릭 시
         binding.dialogWithdrawalBtnO.setOnClickListener {
-//            buttonClickListener.onDialogPlanBtnOClicked()
+            buttonClickListener.onDialogPlanBtnOClicked()
             dismiss()
-
-            // 초기 화면으로 이동
-            val intent = Intent(requireContext(), SplashActivity::class.java)
-            // 이전에 존재하던 모든 acitivty 종료
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
         }
 
         // 취소하기 버튼 클릭 시
         binding.dialogWithdrawalBtnX.setOnClickListener {
-//            buttonClickListener.onDialogPlanBtnXClicked()
+            buttonClickListener.onDialogPlanBtnXClicked()
             dismiss()
         }
     }

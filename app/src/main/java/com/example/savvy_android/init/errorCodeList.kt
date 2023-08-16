@@ -300,10 +300,11 @@ fun Context.errorCodeList(
         }
 
         3007 -> {       // 해다 여행계획서가 존재하지 않습니다.
-            Log.e(
-                type,
-                "[$type $detailType]: ($errorCode) $message"
-            )
+            // 비어있는 목록의 경우 여기에 해당
+//            Log.e(
+//                type,
+//                "[$type $detailType]: ($errorCode) $message"
+//            )
         }
 
         3008, 3010 -> {       // 해당 스크랩이 존재하지 않습니다.

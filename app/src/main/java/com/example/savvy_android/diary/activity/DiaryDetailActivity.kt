@@ -252,8 +252,6 @@ class DiaryDetailActivity : AppCompatActivity() {
                             // 다이어리와 연결된 계획서 연결
                             planID = result.planner_id
 
-                            Log.d("test", "planID: $planID")
-
                             // 여행계획서 보러가기
                             if (planID != null) {
                                 binding.diaryShowPlan.setOnClickListener {

@@ -1,21 +1,15 @@
 package com.example.savvy_android.diary.dialog
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.databinding.DialogDiarySaveBinding
-import com.example.savvy_android.databinding.LayoutToastBinding
 
-class DiarySaveDialogFragment(private val isDiary: Boolean) : DialogFragment() {
+class DiarySaveDialogFragment : DialogFragment() {
     private var _binding: DialogDiarySaveBinding? = null
     private val binding get() = _binding!!
 
@@ -23,53 +17,30 @@ class DiarySaveDialogFragment(private val isDiary: Boolean) : DialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View? {
+    ): View {
         _binding = DialogDiarySaveBinding.inflate(inflater, container, false)
-        val view = binding.root
-
-        // 레이아웃 배경을 투명하게 해줌, 필수 아님
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-
-        dialog?.window?.setLayout(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT
-        )
-        dialog?.setCancelable(true)
-
-
-        binding.btnSave.setOnClickListener {
-            dismiss()
-
-            // 커스텀 Toast 메시지 생성
-            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "작성 중인 다이어리가 임시저장되었습니다"
-
-            val toast = Toast(requireContext())
-            toast.duration = Toast.LENGTH_SHORT
-            toast.view = toastBinding.root
-
-            toast.setGravity(Gravity.TOP, 0, 120)  //toast 위치 설정
-
-            toast.show()
-
-            // MainActivity로 이동하면서 실행된 Fragment로 이동
-            val intent = Intent(activity, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            if(isDiary)
-                intent.putExtra("SHOW_DIARY_FRAGMENT", true) // DiaryFragment를 보여주도록 추가 데이터 전달
-            else
-                intent.putExtra("SHOW_HOME_FRAGMENT", true) // HomeFragment를 보여주도록 추가 데이터 전달
-            startActivity(intent)
-
-        }
-
-
-        binding.cancelBtn.setOnClickListener {
-            dismiss()
-        }
-        return view
+        return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // 다이얼로그 배경을 투명하게 설정
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.setCancelable(false)
+
+        // 임사 저장 버튼 클릭 시
+        binding.btnSave.setOnClickListener {
+            buttonClickListener.onDialogSaveBtnOClicked()
+            dismiss()
+        }
+
+        // 취소하기 버튼 클릭 시
+        binding.cancelBtn.setOnClickListener {
+            buttonClickListener.onDialogCancelBtnXClicked()
+            dismiss()
+        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -84,4 +55,18 @@ class DiarySaveDialogFragment(private val isDiary: Boolean) : DialogFragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    // 인터페이스
+    interface OnButtonClickListener {
+        fun onDialogSaveBtnOClicked()
+        fun onDialogCancelBtnXClicked()
+    }
+
+    // 클릭 이벤트 설정
+    fun setButtonClickListener(buttonClickListener: OnButtonClickListener) {
+        this.buttonClickListener = buttonClickListener
+    }
+
+    // 클릭 이벤트 실행
+    private lateinit var buttonClickListener: OnButtonClickListener
 }
