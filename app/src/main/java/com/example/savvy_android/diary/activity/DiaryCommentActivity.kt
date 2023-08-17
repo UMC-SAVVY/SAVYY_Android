@@ -179,7 +179,7 @@ class DiaryCommentActivity : AppCompatActivity(),
                         // 수정하기 버튼 클릭 시
                         override fun onDialogModifyBtnClicked() {
                             dialog.dismiss() // 다이얼로그 닫기
-                           // commentAdapter.showNestedCommentEditText(commentPosition, nestedCommentPosition)
+                            commentAdapter.showNestedCommentEditText(commentPosition, nestedCommentPosition)
                         }
 
                         // 취소하기 버튼 클릭 시
