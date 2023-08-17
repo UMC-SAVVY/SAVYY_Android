@@ -227,7 +227,7 @@
                     android:id="@+id/item_diary_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="3dp"
+                    android:layout_marginStart="10dp"
                     android:fontFamily="@font/pretendard_medium"
                     android:minWidth="70dp"
                     android:text="Diary date"

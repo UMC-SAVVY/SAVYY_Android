@@ -142,7 +142,7 @@ class DiaryFragment : Fragment() {
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isFinish) {
-                dialog.show(requireFragmentManager(), "LoadingDialog")
+                dialog.show(this.requireFragmentManager(), "LoadingDialog")
                 isLoading = true
             }
         }, 500)

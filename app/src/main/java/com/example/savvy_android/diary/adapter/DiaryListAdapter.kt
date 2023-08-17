@@ -203,6 +203,7 @@ class DiaryListAdapter(
             val changeHolder =
                 recyclerView.findViewHolderForAdapterPosition(position) as? DiaryViewHolder
             if (changeHolder != null) {
+                changeHolder.itemView.tag = false // 스와이프로 고정된 상태 해제
                 changeHolder.hideODelete.isClickable = false // 클릭 불가능
                 changeHolder.hideODelete.isClickable = false // 클릭 불가능
                 // 애니메이션 추가

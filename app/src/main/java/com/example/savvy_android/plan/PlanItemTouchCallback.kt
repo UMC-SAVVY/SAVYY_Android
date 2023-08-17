@@ -127,7 +127,7 @@ class PlanItemTouchCallback : ItemTouchHelper.SimpleCallback(
     // 스와이프 될 가로(수평) 길이
     private fun clampViewPositionHorizontal(
         view: View,
-        dX: Float,  //
+        dX: Float,
         isClamped: Boolean,
         isCurrentlyActive: Boolean,
     ): Float {

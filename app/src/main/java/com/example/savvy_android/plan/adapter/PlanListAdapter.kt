@@ -156,6 +156,16 @@ class PlanListAdapter(
     }
 
     fun clearList() {
+        if (hasSwipe) {
+            val changeHolder =
+                recyclerView.findViewHolderForAdapterPosition(hasSwipePosition) as? PlanViewHolder
+            if (changeHolder != null) {
+                changeHolder.itemView.tag = false // 스와이프로 고정된 상태 해제
+                changeHolder.hideO.isClickable = false // 클릭 불가능
+                changeHolder.hideX.translationX = 0f // 위치 값 0
+                hasSwipe = false
+            }
+        }
         planList.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
@@ -172,6 +182,7 @@ class PlanListAdapter(
             val changeHolder =
                 recyclerView.findViewHolderForAdapterPosition(position) as? PlanViewHolder
             if (changeHolder != null) {
+                changeHolder.itemView.tag = false // 스와이프로 고정된 상태 해제
                 changeHolder.hideO.isClickable = false // 클릭 불가능
                 // 애니메이션 추가
                 val animator = ObjectAnimator.ofFloat(
