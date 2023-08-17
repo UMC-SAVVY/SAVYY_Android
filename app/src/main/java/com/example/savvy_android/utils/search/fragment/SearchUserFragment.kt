@@ -226,7 +226,7 @@ class SearchUserFragment : Fragment() {
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isFinish) {
-                dialog.show(requireFragmentManager(), "LoadingDialog")
+                dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }
         }, 500)

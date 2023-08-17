@@ -48,6 +48,7 @@ class MypageFragment(
     private var planListData = arrayListOf<PlanListResult>()
     private lateinit var sharedPreferences: SharedPreferences
     private var isSetting = false
+    private var isPause = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -138,7 +139,7 @@ class MypageFragment(
                     override fun onDialogPlanBtnXClicked() {
                     }
                 })
-                dialog.show(requireFragmentManager(), "withdrawalDialog")
+                dialog.show(childFragmentManager, "withdrawalDialog")
 
             }
 
@@ -149,7 +150,7 @@ class MypageFragment(
                 editor.putString("USER_NICKNAME", null)
                 editor.apply()
                 val dialog = MypageLogoutDialogFragment()
-                dialog.show(requireFragmentManager(), "logoutDialog")
+                dialog.show(childFragmentManager, "logoutDialog")
             }
         } else {
             binding.mypageArrowIc.visibility = View.VISIBLE
@@ -179,11 +180,17 @@ class MypageFragment(
 
     override fun onResume() {
         super.onResume()
+        isPause = false
 
         if (isSearching)
             otherUserPageAPI()
         else
             myPageAPI()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isPause = true
     }
 
     // TabLayout 관련
@@ -226,30 +233,32 @@ class MypageFragment(
                         val myPageResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         if (myPageResponse?.isSuccess == true && myPageResponse.code == 1000) {
-                            val result = myPageResponse.result
-                            binding.mypageNicknameTv.text = result.nickname
-                            binding.mypageLikeCount.text = result.likes.toString()
-                            binding.mypagePlanCount.text = result.amount_planner.toString()
-                            binding.mypageDiaryCount.text = result.amount_diary.toString()
+                            if (!isPause) {
+                                val result = myPageResponse.result
+                                binding.mypageNicknameTv.text = result.nickname
+                                binding.mypageLikeCount.text = result.likes.toString()
+                                binding.mypagePlanCount.text = result.amount_planner.toString()
+                                binding.mypageDiaryCount.text = result.amount_diary.toString()
 
-                            // 소개글
-                            if (result.intro.isNotEmpty()) {
-                                binding.mypageIntroTv.visibility = View.VISIBLE
-                                binding.mypageIntroTv.text = result.intro
-                            } else {
-                                binding.mypageIntroTv.visibility = View.GONE
-                            }
+                                // 소개글
+                                if (result.intro.isNotEmpty()) {
+                                    binding.mypageIntroTv.visibility = View.VISIBLE
+                                    binding.mypageIntroTv.text = result.intro
+                                } else {
+                                    binding.mypageIntroTv.visibility = View.GONE
+                                }
 
-                            // 프로필 사진
-                            if (result.pic_url != null) {
-                                Glide.with(this@MypageFragment)
-                                    .load(result.pic_url)
-                                    .into(binding.mypageProfileIv)
-                            } else {
-                                val profileData = R.drawable.ic_profile_default
-                                Glide.with(this@MypageFragment)
-                                    .load(profileData)
-                                    .into(binding.mypageProfileIv)
+                                // 프로필 사진
+                                if (result.pic_url != null && result.pic_url != "") {
+                                    Glide.with(this@MypageFragment)
+                                        .load(result.pic_url)
+                                        .into(binding.mypageProfileIv)
+                                } else {
+                                    val profileData = R.drawable.ic_profile_default
+                                    Glide.with(this@MypageFragment)
+                                        .load(profileData)
+                                        .into(binding.mypageProfileIv)
+                                }
                             }
                         } else {
                             // 응답 에러 코드 분류

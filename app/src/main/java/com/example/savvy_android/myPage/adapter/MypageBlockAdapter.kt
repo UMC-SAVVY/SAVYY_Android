@@ -56,8 +56,13 @@ class MypageBlockAdapter(
     override fun getItemCount(): Int = blockList.size
 
     // 데이터 추가
-    fun addStorage(blockData: MyPageBlockResult) {
+    fun addBlock(blockData: MyPageBlockResult) {
         blockList.add(blockData)
         notifyItemInserted(blockList.size)
+    }
+
+    fun clearList() {
+        blockList.clear() // 데이터 리스트를 비움
+        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
 }

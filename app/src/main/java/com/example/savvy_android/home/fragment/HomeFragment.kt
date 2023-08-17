@@ -37,6 +37,7 @@ class HomeFragment : Fragment() {
     private var homeData = arrayListOf<HomeListResult>()
     private var isPaging = false // 페이징 요청 중인지 여부를 나타내는 플래그 변수
     private var isLastPage = false // 마지막 페이지까지 로딩되었는지 여부를 나타내는 플래그 변수
+    private var isPause = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,6 +88,7 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        isPause = false
 
         val hasAlarm = true
         if (hasAlarm)
@@ -119,6 +121,11 @@ class HomeFragment : Fragment() {
         })
     }
 
+    override fun onPause() {
+        super.onPause()
+        isPause = true
+    }
+
     // 홈 목록 조회 (처음)
     private fun homeListFirst() {
         isPaging = false
@@ -126,8 +133,8 @@ class HomeFragment : Fragment() {
         var isLoading = false
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isFinish) {
-                dialog.show(requireFragmentManager(), "LoadingDialog")
+            if (!isFinish && isPause) {
+                dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }
         }, 500)

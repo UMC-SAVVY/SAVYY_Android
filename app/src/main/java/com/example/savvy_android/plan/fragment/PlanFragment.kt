@@ -45,6 +45,7 @@ class PlanFragment : Fragment() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var nickname: String
     private var currentType = 1
+    private var isPause = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,6 +105,7 @@ class PlanFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        isPause = false
 
         // 생성될 때 목록 불러오기
         planListAdapter.clearList() // 리스트 정보 초기화
@@ -154,6 +156,11 @@ class PlanFragment : Fragment() {
 
     }
 
+    override fun onPause() {
+        super.onPause()
+        isPause = true
+    }
+
     // 클릭 가능 여부에 따른 button 배경 변경 함수
     private fun btnStateBackground(able: Boolean, button: AppCompatButton) {
         val context: Context = requireContext()
@@ -195,8 +202,8 @@ class PlanFragment : Fragment() {
         var isLoading = false
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isFinish) {
-                dialog.show(requireFragmentManager(), "LoadingDialog")
+            if (!isFinish && !isPause) {
+                dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }
         }, 500)

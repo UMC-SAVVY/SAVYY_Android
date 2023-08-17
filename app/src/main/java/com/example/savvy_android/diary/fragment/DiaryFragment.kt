@@ -41,6 +41,7 @@ class DiaryFragment : Fragment() {
     private val diaryTouchSimpleCallback = DiaryItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(diaryTouchSimpleCallback)
     private lateinit var sharedPreferences: SharedPreferences
+    private var isPause = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -98,6 +99,7 @@ class DiaryFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        isPause = false
 
         // 알람 존재 여부에 따른 알람 버튼 형태
         val hasAlarm = true
@@ -115,6 +117,11 @@ class DiaryFragment : Fragment() {
         // 목록 (나의 다이어리) 다시 불러오기
         diaryListAdapter.clearList() // 리스트 정보 초기화
         diaryListAPI()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isPause = true
     }
 
     // 클릭 가능 여부에 따른 button 배경 변경 함수
@@ -141,8 +148,8 @@ class DiaryFragment : Fragment() {
         var isLoading = false
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isFinish) {
-                dialog.show(this.requireFragmentManager(), "LoadingDialog")
+            if (!isFinish && !isPause) {
+                dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }
         }, 500)

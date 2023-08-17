@@ -42,6 +42,7 @@ class SearchWordFragment : Fragment() {
     private var recordData = arrayListOf<WordRecordResult>()
     private lateinit var searchAdapter: HomeAdapter
     private var searchData = arrayListOf<HomeListResult>()
+    private var isPause = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -237,7 +238,7 @@ class SearchWordFragment : Fragment() {
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isFinish) {
-                dialog.show(requireFragmentManager(), "LoadingDialog")
+                dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }
         }, 500)

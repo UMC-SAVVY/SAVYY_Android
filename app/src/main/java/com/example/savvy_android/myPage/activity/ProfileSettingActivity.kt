@@ -58,7 +58,6 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var signupState = false // 회원 가입 가능 여부
     private var isChange = false // 프로필 사진 변경 여부
     private var isMypage = true // 연결 페이지 구분 (true: 마이페이지, false: 회원가입)
-    private var profileLocalUri = Uri.EMPTY // 프로필 사진 (local)
     private var profileServerUrl = "" // 프로필 사진 (sever)
     private lateinit var imageBody: MultipartBody.Part
     private lateinit var sharedPreferences: SharedPreferences
