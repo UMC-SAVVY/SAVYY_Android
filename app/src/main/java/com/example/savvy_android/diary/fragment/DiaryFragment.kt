@@ -67,6 +67,12 @@ class DiaryFragment : Fragment() {
                 val isEnableState = binding.diarySearchEdit.length() != 0
                 binding.diarySearchBtn.isEnabled = isEnableState
                 btnStateBackground(isEnableState, binding.diarySearchBtn)
+
+                if (!isEnableState) {   // editText에 아무것도 없을 때
+                    // 다이어리 목록 불러오기
+                    diaryListAdapter.clearList()
+                    diaryListAPI()
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -110,8 +116,10 @@ class DiaryFragment : Fragment() {
 
         // 검색 기능
         binding.diarySearchBtn.setOnClickListener {
-            Log.e("TEST", "검색 버튼 눌림")
-            searchDiaryList(binding.diarySearchEdit.text.toString())
+            if (binding.diarySearchEdit.text.isNotEmpty()) {
+                diaryListAdapter.clearList() // 리스트 정보 초기화
+                searchDiaryList(binding.diarySearchEdit.text.toString())
+            }
         }
 
         // 목록 (나의 다이어리) 다시 불러오기
@@ -137,9 +145,90 @@ class DiaryFragment : Fragment() {
 
     // 목록 검색 API
     private fun searchDiaryList(searchText: String) {
-        Log.e("TEST", "$searchText")
-        // 검색 단어를 포함하는지 확인
-        // 검색 API
+        var isFinish = false
+        var isLoading = false
+        val dialog = LoadingDialogFragment()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isFinish && !isPause) {
+                dialog.show(childFragmentManager, "LoadingDialog")
+                isLoading = true
+            }
+        }, 500)
+
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val diaryListService = retrofit.create(DiaryService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        diaryListService.diaryListSearch(token = accessToken, word = searchText)
+            .enqueue(object : Callback<DiaryListResponse> {
+                override fun onResponse(
+                    call: Call<DiaryListResponse>,
+                    response: Response<DiaryListResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val planResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                            for (result in planResponse.result) {
+                                diaryListAdapter.addPlan(
+                                    DiaryListResult(
+                                        id = result.id,
+                                        title = result.title,
+                                        updated_at = result.updated_at,
+                                        likes_count = result.likes_count,
+                                        comments_count = result.comments_count,
+                                        thumbnail = result.thumbnail,
+                                        img_count = result.img_count,
+                                        is_public = result.is_public,
+                                    )
+                                )
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            planResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "DIARY",
+                                    detailType = "MINE",
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "DIARY",
+                            "[DIARY MINE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
+                }
+
+                override fun onFailure(call: Call<DiaryListResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("DIARY", "[DIARY MINE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
+                }
+            })
     }
 
     // 다이어리 목록(나의 다이어리) API
@@ -228,5 +317,10 @@ class DiaryFragment : Fragment() {
                     }
                 }
             })
+    }
+
+    // 다이어리 검색 (나의 다이어리) API
+    private fun diarySearchAPI(searchWord: String) {
+
     }
 }

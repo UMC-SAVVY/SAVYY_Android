@@ -72,6 +72,11 @@ class PlanFragment : Fragment() {
                 val isEnableState = binding.planSearchEdit.length() != 0
                 binding.planSearchBtn.isEnabled = isEnableState
                 btnStateBackground(isEnableState, binding.planSearchBtn)
+
+                if (!isEnableState) {   // editText에 아무것도 없을 때
+                    planListAdapter.clearList() // 리스트 정보 초기화
+                    planListAPI(currentType, null)
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
@@ -218,6 +223,7 @@ class PlanFragment : Fragment() {
         // API interface instance 생성
         val planListService = retrofit.create(PlanListService::class.java)
         val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+        val myNickname = sharedPreferences.getString("USER_NICKNAME", null)!!
 
         // GET 요청
         when (type) {
@@ -420,14 +426,49 @@ class PlanFragment : Fragment() {
                                 // 서버 응답 처리 로직 작성
                                 if (planResponse?.isSuccess == true) {
                                     for (result in planResponse.result) {
-                                        planListAdapter.addPlan(
-                                            PlanListResult(
-                                                id = result.id,
-                                                title = result.title,
-                                                updated_at = result.updated_at,
-                                                nickname = result.nickname
-                                            )
-                                        )
+                                        when (currentType) {
+                                            // 전체 보기 상태
+                                            1 -> {
+                                                planListAdapter.addPlan(
+                                                    PlanListResult(
+                                                        id = result.id,
+                                                        title = result.title,
+                                                        updated_at = result.updated_at,
+                                                        nickname = result.nickname
+                                                    )
+                                                )
+                                            }
+
+                                            // 나의 계획서
+                                            2 -> {
+                                                if (result.nickname == myNickname) {
+                                                    planListAdapter.addPlan(
+                                                        PlanListResult(
+                                                            id = result.id,
+                                                            title = result.title,
+                                                            updated_at = result.updated_at,
+                                                            nickname = result.nickname
+                                                        )
+                                                    )
+                                                } else
+                                                    continue
+                                            }
+
+                                            // 스크랩
+                                            3 -> {
+                                                if (result.nickname != myNickname) {
+                                                    planListAdapter.addPlan(
+                                                        PlanListResult(
+                                                            id = result.id,
+                                                            title = result.title,
+                                                            updated_at = result.updated_at,
+                                                            nickname = result.nickname
+                                                        )
+                                                    )
+                                                } else
+                                                    continue
+                                            }
+                                        }
                                     }
                                 } else {
                                     // 응답 에러 코드 분류

@@ -83,6 +83,10 @@ class HomeFragment : Fragment() {
             startActivity(intent)
         }
 
+        // 생성될 때 목록 불러오기
+        homeAdapter.clearList() // 리스트 정보 초기화
+        homeListFirst()
+
         return binding.root
     }
 
@@ -96,23 +100,15 @@ class HomeFragment : Fragment() {
         else
             binding.homeAlarm.setImageResource(R.drawable.ic_alarm_x)
 
-        // 생성될 때 목록 불러오기
-        homeAdapter.clearList() // 리스트 정보 초기화
-        homeListFirst()
-
         // 리사이클러뷰 스크롤의 마지막 감지 후 다음 페이징 API 호출
         val layoutManager = binding.homeRecycle.layoutManager as LinearLayoutManager
         binding.homeRecycle.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                val visibleItemCount = layoutManager.childCount
-                val totalItemCount = layoutManager.itemCount
-                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
-
                 if (!isPaging && !isLastPage) {
-                    if (visibleItemCount + firstVisibleItemPosition >= totalItemCount && firstVisibleItemPosition >= 0) {
+                    val totalItemCount = homeAdapter.itemCount
+                    if (layoutManager.findLastCompletelyVisibleItemPosition() == totalItemCount - 1) {
                         val lastDiaryId = homeAdapter.getLastItemId()
                         homePagingAPI(lastDiaryId)
                     }
@@ -129,11 +125,12 @@ class HomeFragment : Fragment() {
     // 홈 목록 조회 (처음)
     private fun homeListFirst() {
         isPaging = false
+        isLastPage = false
         var isFinish = false
         var isLoading = false
         val dialog = LoadingDialogFragment()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isFinish && isPause) {
+            if (!isFinish && !isPause) {
                 dialog.show(childFragmentManager, "LoadingDialog")
                 isLoading = true
             }

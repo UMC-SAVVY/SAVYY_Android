@@ -21,17 +21,12 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DiaryService {
-    @GET("")
-    fun diaryListAll(
-        @Header("Authorization") token: String,
-    ): Call<DiaryListResponse>
-
     @GET("diary/list/mydiary")
     fun diaryListMine(
         @Header("Authorization") token: String,
     ): Call<DiaryListResponse>
 
-    @GET("planner/search")
+    @GET("diary/search")
     fun diaryListSearch(
         @Header("Authorization") token: String,
         @Query("searchWord") word: String,

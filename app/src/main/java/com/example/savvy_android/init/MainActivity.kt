@@ -3,7 +3,6 @@ package com.example.savvy_android.init
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.savvy_android.R
@@ -15,6 +14,7 @@ import com.example.savvy_android.plan.fragment.PlanFragment
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
+    private var currentId = R.id.home
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen() // splash screen 설정, 관리 API 함수
@@ -47,30 +47,37 @@ class MainActivity : AppCompatActivity() {
         // menu.bottom_navi.xml 의 item 들의 id 값에 따라 변경 되도록
         // 'setOnItemSelectedListener' 는 item 이 선택 되었을 때
         binding.mainBottomNavi.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.home -> {
-                    setFragment(HomeFragment())
-                    // setOnItemSelectedListener 선택을 boolean 형식으로 반환
-                    return@setOnItemSelectedListener true
-                }
+            if (currentId != item.itemId) {
+                when (item.itemId) {
+                    R.id.home -> {
+                        currentId = item.itemId
+                        setFragment(HomeFragment())
+                        // setOnItemSelectedListener 선택을 boolean 형식으로 반환
+                        return@setOnItemSelectedListener true
+                    }
 
-                R.id.plan -> {
-                    setFragment(PlanFragment())
-                    return@setOnItemSelectedListener true
-                }
+                    R.id.plan -> {
+                        currentId = item.itemId
+                        setFragment(PlanFragment())
+                        return@setOnItemSelectedListener true
+                    }
 
-                R.id.diary -> {
-                    setFragment(DiaryFragment())
-                    return@setOnItemSelectedListener true
-                }
+                    R.id.diary -> {
+                        currentId = item.itemId
+                        setFragment(DiaryFragment())
+                        return@setOnItemSelectedListener true
+                    }
 
-                R.id.mypage -> {
-                    setFragment(MypageFragment(false, 0))
-                    return@setOnItemSelectedListener true
-                }
+                    R.id.mypage -> {
+                        currentId = item.itemId
+                        setFragment(MypageFragment(false, 0))
+                        return@setOnItemSelectedListener true
+                    }
 
-                else -> false
-            }
+                    else -> false
+                }
+            } else
+                return@setOnItemSelectedListener false
         }
     }
 

@@ -124,6 +124,11 @@ class MypageFragment(
                             if (error != null) {
                                 showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
                             } else {
+                                val editor = sharedPreferences.edit()
+                                editor.putString("SERVER_TOKEN_KEY", null)
+                                editor.putString("USER_NICKNAME", null)
+                                editor.apply()
+
                                 // 초기 화면으로 이동
                                 val intent = Intent(requireContext(), SplashActivity::class.java)
                                 // 이전에 존재하던 모든 acitivty 종료
@@ -140,7 +145,6 @@ class MypageFragment(
                     }
                 })
                 dialog.show(childFragmentManager, "withdrawalDialog")
-
             }
 
             // 로그아웃 클릭 이벤트
@@ -182,10 +186,12 @@ class MypageFragment(
         super.onResume()
         isPause = false
 
-        if (isSearching)
-            otherUserPageAPI()
-        else
-            myPageAPI()
+        if (!isSetting) {
+            if (isSearching)
+                otherUserPageAPI()
+            else
+                myPageAPI()
+        }
     }
 
     override fun onPause() {

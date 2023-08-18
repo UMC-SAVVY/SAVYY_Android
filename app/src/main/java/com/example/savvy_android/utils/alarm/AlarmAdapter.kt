@@ -11,7 +11,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemAlarmBinding
 
 class AlarmAdapter(
-    private var alarmList: ArrayList<AlarmItemData>,
+    private var alarmList: ArrayList<AlarmResult>,
 ) :
     RecyclerView.Adapter<AlarmAdapter.MypageBlockViewHolder>() {
     // 각 뷰들을 binding 사용하여 View 연결
@@ -40,29 +40,22 @@ class AlarmAdapter(
         val data = alarmList[position]
 
         // 알림 타입에 맞게 구분
-        val type = data.type
-        when (type) {
-            1 -> {
+        when (data.type) {
+            "like" -> {
                 holder.img.setImageResource(R.drawable.ic_alarm_heart)
-                holder.comment.text = "${data.name} 님이 회원님의 게시글을 좋아합니다."
             }
 
-            2 -> {
+            "comment", "reply" -> {
                 holder.img.setImageResource(R.drawable.ic_alarm_comment)
-                holder.comment.text = "${data.name} 님이 회원님의 게시글에 댓글을 남겼습니다."
-            }
-
-            3 -> {
-                holder.img.setImageResource(R.drawable.ic_alarm_comment)
-                holder.comment.text = "${data.name} 님이 회원님의 댓글에 답글을 남겼습니다."
             }
         }
-        holder.date.text = "${data.date}일 전"
+        holder.date.text = data.updated_at
+        holder.comment.text = data.body
 
-        // 특정 문자 bolde
+        // 특정 문자 bold
         val textData: String = holder.comment.text.toString()
         val builder = SpannableStringBuilder(textData)
-        var nameLength = data.name.length
+        val nameLength = data.nickname.length
         val boldSpan = StyleSpan(Typeface.BOLD)
         builder.setSpan(boldSpan, 0, nameLength, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
@@ -71,7 +64,7 @@ class AlarmAdapter(
     override fun getItemCount(): Int = alarmList.size
 
     // 데이터 추가
-    fun addalarm(blockData: AlarmItemData) {
+    fun addAlarm(blockData: AlarmResult) {
         alarmList.add(blockData)
         notifyItemInserted(alarmList.size)
     }
