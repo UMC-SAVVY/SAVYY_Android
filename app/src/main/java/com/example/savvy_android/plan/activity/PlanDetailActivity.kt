@@ -57,10 +57,10 @@ class PlanDetailActivity : AppCompatActivity() {
 
         planID = intent.getIntExtra("planID", 0)
 
-        Log.d("test", "planID: $planID")
+        Log.d("PlanDetailActivity", "planID: $planID")
 
         val timetableList: MutableList<Timetable> = mutableListOf()
-        viewDateAdapter = DetailDateAdapter(timetableList)
+        viewDateAdapter = DetailDateAdapter(timetableList, true)
         binding.recyclerviewViewDate.adapter = viewDateAdapter
         binding.recyclerviewViewDate.layoutManager = LinearLayoutManager(this)
 
