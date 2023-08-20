@@ -197,7 +197,7 @@ class DiaryDetailActivity : AppCompatActivity() {
                             binding.diaryTitleTv.text = result.title
 
                             // 다이어리 작성자 프로필 사진
-                            if (result.pic_url != null)
+                            if (!result.pic_url.isNullOrEmpty())
                                 Glide.with(this@DiaryDetailActivity)
                                     .load(result.pic_url)
                                     .into(binding.diaryUserImg)

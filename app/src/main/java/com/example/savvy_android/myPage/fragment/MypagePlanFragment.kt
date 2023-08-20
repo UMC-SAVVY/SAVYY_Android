@@ -22,7 +22,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MypagePlanFragment(
-    private var planListData: ArrayList<PlanListResult>,
     private val isSearching: Boolean,
     private val userId: Int,
 ) : Fragment() {
@@ -47,7 +46,6 @@ class MypagePlanFragment(
             PlanListAdapter(
                 requireContext(),
                 binding.planRecycle,
-                planListData,
                 nickname,
                 requireActivity().supportFragmentManager,
                 false
@@ -60,7 +58,7 @@ class MypagePlanFragment(
     override fun onResume() {
         super.onResume()
 
-        planListAdapter.clearList() // 리스트 정보 초기화
+        planListAdapter.clearSwipe() // 스와이프 고정 상태 해제
 
         if (isSearching)
             otherPlannerAPI(userId)
@@ -92,8 +90,9 @@ class MypagePlanFragment(
                         // 서버 응답 처리 로직 작성
                         if (myPageResponse?.isSuccess == true) {
                             if (myPageResponse.result.amount_planner > 0) {
+                                val tempList = arrayListOf<PlanListResult>()
                                 for (result in myPageResponse.result.planner) {
-                                    planListAdapter.addPlan(
+                                    tempList.add(
                                         PlanListResult(
                                             id = result.id,
                                             title = result.title,
@@ -102,6 +101,7 @@ class MypagePlanFragment(
                                         )
                                     )
                                 }
+                                planListAdapter.submitList(tempList)
                             }
                         } else {
                             // 응답 에러 코드 분류
@@ -154,8 +154,9 @@ class MypagePlanFragment(
                         // 서버 응답 처리 로직 작성
                         if (userPageResponse?.isSuccess == true) {
                             if (userPageResponse.result.amount_planner > 0) {
+                                val tempList = arrayListOf<PlanListResult>()
                                 for (result in userPageResponse.result.planner) {
-                                    planListAdapter.addPlan(
+                                    tempList.add(
                                         PlanListResult(
                                             id = result.id,
                                             title = result.title,
@@ -164,6 +165,7 @@ class MypagePlanFragment(
                                         )
                                     )
                                 }
+                                planListAdapter.submitList(tempList)
                             }
                         } else {
                             // 응답 에러 코드 분류

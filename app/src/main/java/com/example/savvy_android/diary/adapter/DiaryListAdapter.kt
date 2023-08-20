@@ -14,6 +14,8 @@ import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.savvy_android.R
@@ -30,35 +32,112 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.properties.Delegates
 
 
 class DiaryListAdapter(
     private val context: Context,
     private val recyclerView: RecyclerView,
-    private var diaryList: ArrayList<DiaryListResult>,
     private val fragmentManager: FragmentManager,
     private val isDiary: Boolean,
 ) :
-    RecyclerView.Adapter<DiaryListAdapter.DiaryViewHolder>() {
+    ListAdapter<DiaryListResult, DiaryListAdapter.DiaryViewHolder>(diffUtil) {
 
     // 각 뷰들을 binding 사용하여 View 연결
-    inner class DiaryViewHolder(binding: ItemDiaryBinding) :
+    inner class DiaryViewHolder(var binding: ItemDiaryBinding) :
         RecyclerView.ViewHolder(binding.root) {
         var item = binding.itemDiaryIn
         var title = binding.itemDiaryTitle
         var date = binding.itemDiaryDate
-        var like = binding.itemDiaryLikeTv
+        private var like = binding.itemDiaryLikeTv
         var comment = binding.itemDiaryCommentTv
         var hideX = binding.itemDiaryHideX
-        var photoCard = binding.itemDiaryPhotoCv
-        var photoImg = binding.itemDiaryPhotoIv
-        var photoCount = binding.itemDiaryPhotoTv
+        private var photoCard = binding.itemDiaryPhotoCv
+        private var photoImg = binding.itemDiaryPhotoIv
+        private var photoCount = binding.itemDiaryPhotoTv
         var hideODelete = binding.itemDiaryHideODelete
         var hideOShow = binding.itemDiaryHideOShow
         var showImg = binding.itemDiaryShowIv
         var showText = binding.itemDiaryShowTv
         var scrollHolder = binding.itemDiaryArrow
+
+        fun bind(data: DiaryListResult, position: Int) {
+            val holder = this
+            binding.apply {
+                binding.itemDiaryTitle.text = data.title
+                binding.itemDiaryDate.text = data.updated_at
+                like.text = data.likes_count.toString()
+                comment.text = data.comments_count.toString()
+                if (data.img_count > 0) {
+                    photoCard.isVisible = true
+                    photoCount.setBackgroundResource(if (data.img_count == 1) 0 else R.color.gray50)
+                    photoCount.text = if (data.img_count == 1) "" else "+${data.img_count}"
+                    Glide.with(itemView)
+                        .load(data.thumbnail)
+                        .into(photoImg)
+                } else {
+                    photoCard.isVisible = false
+                }
+                showResource(data.is_public, holder)
+
+                // 숨겨진 공개 여부 버튼 클릭 이벤트
+                hideOShow.setOnClickListener {
+                    publicAPI(diaryId = data.id, position = position, holder = holder)
+                }
+
+                // 숨겨진 삭제 버튼 클릭 이벤트
+                hideODelete.setOnClickListener {
+                    val dialog = DiaryDeleteDialogFragment()
+
+                    // 다이얼로그 버튼 클릭 이벤트 설정
+                    dialog.setButtonClickListener(object :
+                        DiaryDeleteDialogFragment.OnButtonClickListener {
+                        override fun onDialogBtnOClicked() {
+                            diaryRemoveAPI(
+                                diaryId = data.id.toString(),
+                                position = adapterPosition
+                            )
+                        }
+
+                        override fun onDialogBtnXClicked() {
+                            resetHideX(adapterPosition, recyclerView)
+                        }
+                    })
+                    dialog.show(fragmentManager, "DiaryDeleteDialog")
+                }
+
+                // 아이템 클릭 이벤트 (다이어리 상세보기)
+                itemView.setOnClickListener {
+                    if (hasSwipe) {
+                        resetHideX(hasSwipePosition, recyclerView)
+                    } else {
+                        val mIntent =
+                            Intent(itemView.context, DiaryDetailActivity::class.java)
+                        mIntent.putExtra("diaryID", data.id)
+                        itemView.context.startActivity(mIntent)
+                    }
+                }
+
+                hideODelete.isClickable = false // 초기 클릭 가능 상태 설정
+                hideOShow.isClickable = false // 초기 클릭 가능 상태 설정
+
+
+                // 계획서 title scroll
+                title.viewTreeObserver.addOnPreDrawListener(object :
+                    ViewTreeObserver.OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        title.viewTreeObserver.removeOnPreDrawListener(this)
+
+                        title.apply {
+                            setSingleLine()
+                            marqueeRepeatLimit = -1
+                            ellipsize = TextUtils.TruncateAt.MARQUEE
+                            isSelected = true
+                        }
+                        return true
+                    }
+                })
+            }
+        }
     }
 
     // View 생성될 때 호출되는 method
@@ -81,101 +160,31 @@ class DiaryListAdapter(
         else
             holder.scrollHolder.visibility = View.GONE
 
-        val data = diaryList[holder.adapterPosition]
-        holder.title.text = data.title
-        holder.date.text = data.updated_at
-        holder.like.text = data.likes_count.toString()
-        holder.comment.text = data.comments_count.toString()
-        if (data.img_count > 0) {
-            holder.photoCard.isVisible = true
-            holder.photoCount.setBackgroundResource(if (data.img_count == 1) 0 else R.color.gray50)
-            holder.photoCount.text = if (data.img_count == 1) "" else "+${data.img_count}"
-            Glide.with(holder.itemView)
-                .load(data.thumbnail)
-                .into(holder.photoImg)
-        } else {
-            holder.photoCard.isVisible = false
-        }
-        showResource(data.is_public, holder)
-
-        // 숨겨진 공개 여부 버튼 클릭 이벤트
-        holder.hideOShow.setOnClickListener {
-            publicAPI(diaryId = data.id, position = position, holder = holder)
-        }
-
-        // 숨겨진 삭제 버튼 클릭 이벤트
-        holder.hideODelete.setOnClickListener {
-            val dialog = DiaryDeleteDialogFragment()
-
-            // 다이얼로그 버튼 클릭 이벤트 설정
-            dialog.setButtonClickListener(object :
-                DiaryDeleteDialogFragment.OnButtonClickListener {
-                override fun onDialogBtnOClicked() {
-                    diaryRemoveAPI(
-                        diaryId = data.id.toString(),
-                        position = holder.adapterPosition
-                    )
-                }
-
-                override fun onDialogBtnXClicked() {
-                    resetHideX(holder.adapterPosition, recyclerView)
-                }
-            })
-            dialog.show(fragmentManager, "DiaryDeleteDialog")
-        }
-
-        // 아이템 클릭 이벤트 (다이어리 상세보기)
-        holder.itemView.setOnClickListener {
-            if (hasSwipe) {
-                resetHideX(hasSwipePosition, recyclerView)
-            } else {
-                val mIntent = Intent(holder.itemView.context, DiaryDetailActivity::class.java)
-                mIntent.putExtra("diaryID", data.id)
-                holder.itemView.context.startActivity(mIntent)
-            }
-        }
-
-        holder.hideODelete.isClickable = false // 초기 클릭 가능 상태 설정
-        holder.hideOShow.isClickable = false // 초기 클릭 가능 상태 설정
-
-
-        // 계획서 title scroll
-        holder.title.viewTreeObserver.addOnPreDrawListener(object :
-            ViewTreeObserver.OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                holder.title.viewTreeObserver.removeOnPreDrawListener(this)
-
-                holder.title.apply {
-                    setSingleLine()
-                    marqueeRepeatLimit = -1
-                    ellipsize = TextUtils.TruncateAt.MARQUEE
-                    isSelected = true
-                }
-                return true
-            }
-        })
-    }
-
-    // 리스트의 수 count
-    override fun getItemCount(): Int = diaryList.size
-
-    // 데이터 추가
-    fun addPlan(insertData: DiaryListResult) {
-        diaryList.add(insertData)
-        notifyItemInserted(diaryList.size)
+        holder.bind(currentList[position], position)
     }
 
     // 데이터 삭제
     private fun removePlan(position: Int) {
-        if (position >= 0 && position < diaryList.size) {
-            diaryList.removeAt(position)
-            notifyItemRemoved(position)
+        if (position in 0 until currentList.size) {
+            val updatedList = currentList.toMutableList()
+            updatedList.removeAt(position)
+            submitList(updatedList)
         }
     }
 
+    // 스와이프로 고정된 상태 해제
     fun clearList() {
-        diaryList.clear() // 데이터 리스트를 비움
-        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
+        if (hasSwipe) {
+            val changeHolder =
+                recyclerView.findViewHolderForAdapterPosition(hasSwipePosition) as? DiaryViewHolder
+            if (changeHolder != null) {
+                changeHolder.itemView.tag = false // 스와이프로 고정된 상태 해제
+                changeHolder.hideODelete.isClickable = false // 클릭 불가능
+                changeHolder.hideODelete.isClickable = false // 클릭 불가능
+                changeHolder.hideX.translationX = 0f // 위치 값 0
+                hasSwipe = false
+            }
+        }
     }
 
     // 공개 비공개 여부에 따른 리소스
@@ -216,6 +225,22 @@ class DiaryListAdapter(
                 animator.duration = 400 // 애니메이션 지속 시간 (밀리초)
                 animator.start()
                 hasSwipe = false    // swipe된 아이템 없음
+            }
+        }
+
+        val diffUtil = object : DiffUtil.ItemCallback<DiaryListResult>() {
+            override fun areItemsTheSame(
+                oldItem: DiaryListResult,
+                newItem: DiaryListResult,
+            ): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(
+                oldItem: DiaryListResult,
+                newItem: DiaryListResult,
+            ): Boolean {
+                return oldItem == newItem
             }
         }
     }
@@ -306,7 +331,7 @@ class DiaryListAdapter(
         diaryStatusService.diaryStatus(
             token = accessToken,
             type = "public",
-            value = (!(diaryList[position].is_public)).toString(),
+            value = (!(currentList[position].is_public)).toString(),
             diaryID = diaryId
         )
             .enqueue(object : Callback<ServerDefaultResponse> {
@@ -319,8 +344,8 @@ class DiaryListAdapter(
                         // 서버 응답 처리 로직 작성
                         if (deleteResponse?.isSuccess == true) {
                             // 공개 여부 전환 성공
-                            diaryList[position].is_public = !(diaryList[position].is_public)
-                            showResource(diaryList[position].is_public, holder)
+                            currentList[position].is_public = !(currentList[position].is_public)
+                            showResource(currentList[position].is_public, holder)
                         } else {
                             // 응답 에러 코드 분류
                             deleteResponse?.let {

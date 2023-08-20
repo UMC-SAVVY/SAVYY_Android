@@ -39,7 +39,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 class PlanFragment : Fragment() {
     private lateinit var binding: FragmentPlanBinding
     private lateinit var planListAdapter: PlanListAdapter
-    private var planListData = arrayListOf<PlanListResult>()
     private val planTouchSimpleCallback = PlanItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(planTouchSimpleCallback)
     private lateinit var sharedPreferences: SharedPreferences
@@ -74,7 +73,7 @@ class PlanFragment : Fragment() {
                 btnStateBackground(isEnableState, binding.planSearchBtn)
 
                 if (!isEnableState) {   // editText에 아무것도 없을 때
-                    planListAdapter.clearList() // 리스트 정보 초기화
+                    planListAdapter.clearSwipe() // 스와이프 고정 상태 해제
                     planListAPI(currentType, null)
                 }
             }
@@ -88,7 +87,6 @@ class PlanFragment : Fragment() {
             PlanListAdapter(
                 requireContext(),
                 binding.planRecycle,
-                planListData,
                 nickname,
                 requireActivity().supportFragmentManager,
                 true
@@ -113,7 +111,7 @@ class PlanFragment : Fragment() {
         isPause = false
 
         // 생성될 때 목록 불러오기
-        planListAdapter.clearList() // 리스트 정보 초기화
+        planListAdapter.clearSwipe() // 스와이프 고정 상태 해제
         planListAPI(currentType, null)
 
         val hasAlarm = true
@@ -125,7 +123,7 @@ class PlanFragment : Fragment() {
 
         // 검색 기능
         binding.planSearchBtn.setOnClickListener {
-            planListAdapter.clearList() // 리스트 정보 초기화
+            planListAdapter.clearSwipe() // 스와이프 고정 상태 해제
             planListAPI(4, binding.planSearchEdit.text.toString())
         }
 
@@ -134,7 +132,6 @@ class PlanFragment : Fragment() {
             btnClickColors(true, binding.planFilterBtn1)
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
-            planListAdapter.clearList() // 리스트 정보 초기화
             currentType = 1
             planListAPI(currentType, null)
         }
@@ -144,7 +141,6 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn1)
             btnClickColors(true, binding.planFilterBtn2)
             btnClickColors(false, binding.planFilterBtn3)
-            planListAdapter.clearList() // 리스트 정보 초기화
             currentType = 2
             planListAPI(currentType, null)
         }
@@ -154,7 +150,6 @@ class PlanFragment : Fragment() {
             btnClickColors(false, binding.planFilterBtn1)
             btnClickColors(false, binding.planFilterBtn2)
             btnClickColors(true, binding.planFilterBtn3)
-            planListAdapter.clearList() // 리스트 정보 초기화
             currentType = 3
             planListAPI(currentType, null)
         }
@@ -239,8 +234,9 @@ class PlanFragment : Fragment() {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
                                 if (planResponse?.isSuccess == true) {
+                                    val tempList = arrayListOf<PlanListResult>()
                                     for (result in planResponse.result) {
-                                        planListAdapter.addPlan(
+                                        tempList.add(
                                             PlanListResult(
                                                 id = result.id,
                                                 title = result.title,
@@ -249,6 +245,9 @@ class PlanFragment : Fragment() {
                                             )
                                         )
                                     }
+                                    planListAdapter.submitList(tempList)
+                                } else if (planResponse?.code == 3007) {
+                                    planListAdapter.submitList(arrayListOf<PlanListResult>())
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
@@ -301,8 +300,9 @@ class PlanFragment : Fragment() {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
                                 if (planResponse?.isSuccess == true) {
+                                    val tempList = arrayListOf<PlanListResult>()
                                     for (result in planResponse.result) {
-                                        planListAdapter.addPlan(
+                                        tempList.add(
                                             PlanListResult(
                                                 id = result.id,
                                                 title = result.title,
@@ -311,6 +311,9 @@ class PlanFragment : Fragment() {
                                             )
                                         )
                                     }
+                                    planListAdapter.submitList(tempList)
+                                } else if (planResponse?.code == 3007) {
+                                    planListAdapter.submitList(arrayListOf<PlanListResult>())
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
@@ -363,8 +366,9 @@ class PlanFragment : Fragment() {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
                                 if (planResponse?.isSuccess == true) {
+                                    val tempList = arrayListOf<PlanListResult>()
                                     for (result in planResponse.result) {
-                                        planListAdapter.addPlan(
+                                        tempList.add(
                                             PlanListResult(
                                                 id = result.id,
                                                 title = result.title,
@@ -373,6 +377,9 @@ class PlanFragment : Fragment() {
                                             )
                                         )
                                     }
+                                    planListAdapter.submitList(tempList)
+                                } else if (planResponse?.code == 3007) {
+                                    planListAdapter.submitList(arrayListOf<PlanListResult>())
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {
@@ -425,11 +432,12 @@ class PlanFragment : Fragment() {
                                 val planResponse = response.body()
                                 // 서버 응답 처리 로직 작성
                                 if (planResponse?.isSuccess == true) {
+                                    val tempList = arrayListOf<PlanListResult>()
                                     for (result in planResponse.result) {
                                         when (currentType) {
                                             // 전체 보기 상태
                                             1 -> {
-                                                planListAdapter.addPlan(
+                                                tempList.add(
                                                     PlanListResult(
                                                         id = result.id,
                                                         title = result.title,
@@ -442,7 +450,7 @@ class PlanFragment : Fragment() {
                                             // 나의 계획서
                                             2 -> {
                                                 if (result.nickname == myNickname) {
-                                                    planListAdapter.addPlan(
+                                                    tempList.add(
                                                         PlanListResult(
                                                             id = result.id,
                                                             title = result.title,
@@ -457,7 +465,7 @@ class PlanFragment : Fragment() {
                                             // 스크랩
                                             3 -> {
                                                 if (result.nickname != myNickname) {
-                                                    planListAdapter.addPlan(
+                                                    tempList.add(
                                                         PlanListResult(
                                                             id = result.id,
                                                             title = result.title,
@@ -470,6 +478,9 @@ class PlanFragment : Fragment() {
                                             }
                                         }
                                     }
+                                    planListAdapter.submitList(tempList)
+                                } else if (planResponse?.code == 3007) {
+                                    planListAdapter.submitList(arrayListOf<PlanListResult>())
                                 } else {
                                     // 응답 에러 코드 분류
                                     planResponse?.let {

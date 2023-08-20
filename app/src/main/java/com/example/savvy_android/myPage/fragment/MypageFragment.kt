@@ -17,7 +17,6 @@ import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.FragmentMypageBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
-import com.example.savvy_android.diary.data.list.DiaryListResult
 import com.example.savvy_android.init.SplashActivity
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.myPage.activity.MypageBlockActivity
@@ -29,7 +28,6 @@ import com.example.savvy_android.myPage.data.UserPageResponse
 import com.example.savvy_android.myPage.dialog.MypageLogoutDialogFragment
 import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
 import com.example.savvy_android.myPage.service.MyPageService
-import com.example.savvy_android.plan.data.list.PlanListResult
 import com.google.android.material.tabs.TabLayoutMediator
 import com.kakao.sdk.user.UserApiClient
 import retrofit2.Call
@@ -44,8 +42,6 @@ class MypageFragment(
 ) : Fragment() {
     private lateinit var binding: FragmentMypageBinding
     private lateinit var viewPagerAdapter: ViewPagerAdapter
-    private var diaryListData = arrayListOf<DiaryListResult>()
-    private var planListData = arrayListOf<PlanListResult>()
     private lateinit var sharedPreferences: SharedPreferences
     private var isSetting = false
     private var isPause = false
@@ -202,8 +198,8 @@ class MypageFragment(
     // TabLayout 관련
     inner class ViewPagerAdapter(fragment: FragmentActivity) : FragmentStateAdapter(fragment) {
         private val fragmentList: Array<Fragment> = arrayOf(
-            MypagePlanFragment(planListData, isSearching, userId),
-            MypageDiaryFragment(diaryListData, isSearching, userId),
+            MypagePlanFragment(isSearching, userId),
+            MypageDiaryFragment(isSearching, userId),
         )
 
         // 전체 탭 개수 반환

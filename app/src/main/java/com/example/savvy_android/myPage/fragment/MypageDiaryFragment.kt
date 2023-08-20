@@ -22,7 +22,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class MypageDiaryFragment(
-    private var diaryListData: ArrayList<DiaryListResult>,
     private val isSearching: Boolean,
     private val userId: Int,
 ) : Fragment() {
@@ -45,7 +44,6 @@ class MypageDiaryFragment(
             DiaryListAdapter(
                 requireContext(),
                 binding.diaryRecycle,
-                diaryListData,
                 requireActivity().supportFragmentManager,
                 false
             )
@@ -89,8 +87,9 @@ class MypageDiaryFragment(
                         // 서버 응답 처리 로직 작성
                         if (myPageResponse?.isSuccess == true) {
                             if (myPageResponse.result.amount_diary > 0) {
+                                val tempList = arrayListOf<DiaryListResult>()
                                 for (result in myPageResponse.result.diary) {
-                                    diaryListAdapter.addPlan(
+                                    tempList.add(
                                         DiaryListResult(
                                             id = result.id,
                                             title = result.title,
@@ -103,6 +102,7 @@ class MypageDiaryFragment(
                                         )
                                     )
                                 }
+                                diaryListAdapter.submitList(tempList)
                             }
                         } else {
                             // 응답 에러 코드 분류
@@ -157,8 +157,9 @@ class MypageDiaryFragment(
                         // 서버 응답 처리 로직 작성
                         if (userPageResponse?.isSuccess == true) {
                             if (userPageResponse.result.amount_diary > 0) {
+                                val tempList = arrayListOf<DiaryListResult>()
                                 for (result in userPageResponse.result.diary) {
-                                    diaryListAdapter.addPlan(
+                                    tempList.add(
                                         DiaryListResult(
                                             id = result.id,
                                             title = result.title,
@@ -171,6 +172,7 @@ class MypageDiaryFragment(
                                         )
                                     )
                                 }
+                                diaryListAdapter.submitList(tempList)
                             }
                         } else {
                             // 응답 에러 코드 분류

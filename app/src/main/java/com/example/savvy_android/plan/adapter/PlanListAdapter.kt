@@ -13,6 +13,8 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.R
 import com.example.savvy_android.plan.activity.PlanDetailActivity
@@ -30,18 +32,17 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-
 class PlanListAdapter(
     private val context: Context,
     private val recyclerView: RecyclerView,
-    private var planList: ArrayList<PlanListResult>,
     private val myName: String,
     private val fragmentManager: FragmentManager,
     private val isPlan: Boolean,
 ) :
-    RecyclerView.Adapter<PlanListAdapter.PlanViewHolder>() {
+    ListAdapter<PlanListResult, PlanListAdapter.PlanViewHolder>(diffUtil) {
+
     // 각 뷰들을 binding 사용하여 View 연결
-    inner class PlanViewHolder(binding: ItemPlanBinding) :
+    inner class PlanViewHolder(var binding: ItemPlanBinding) :
         RecyclerView.ViewHolder(binding.root) {
         var item = binding.itemPlanIn
         var title = binding.itemPlanTitle
@@ -50,6 +51,76 @@ class PlanListAdapter(
         var hideX = binding.itemPlanHideX
         var hideO = binding.itemPlanHideO
         var scrollHolder = binding.itemPlanArrow
+
+        fun bind(data: PlanListResult, position: Int) {
+            binding.apply {
+                binding.itemPlanTitle.text = data.title
+                binding.itemPlanDate.text = data.updated_at
+                binding.itemPlanUser.text = if (data.nickname == myName) "" else data.nickname
+
+                // 숨겨진 삭제 버튼 클릭 이벤트
+                binding.itemPlanHideO.setOnClickListener {
+                    val dialog = PlanDeleteDialogFragment()
+
+                    // 다이얼로그 버튼 클릭 이벤트 설정
+                    dialog.setButtonClickListener(object :
+                        PlanDeleteDialogFragment.OnButtonClickListener {
+                        override fun onDialogPlanBtnOClicked() {
+                            planRemoveAPI(
+                                plannerId = data.id.toString(),
+                                plannerType = if (binding.itemPlanUser.text == "") "0" else "1",
+                                position = position
+                            )
+                        }
+
+                        override fun onDialogPlanBtnXClicked() {
+                            resetHideX(position, recyclerView)
+                        }
+                    })
+                    dialog.show(fragmentManager, "PlanDeleteDialog")
+                }
+
+                // 아이템 클릭 이벤트 (여행 계획서 보기)
+                itemView.setOnClickListener {
+                    if (hasSwipe) {
+                        resetHideX(hasSwipePosition, recyclerView)
+                    } else {
+                        // 자신의 여행 계획서 경우
+                        if (data.nickname == myName || data.nickname == null) {
+                            val mIntent =
+                                Intent(itemView.context, PlanDetailActivity::class.java)
+                            mIntent.putExtra("planID", data.id)
+                            itemView.context.startActivity(mIntent)
+                        }
+                        // 타인의 여행 계획서 경우
+                        else {
+                            val mIntent =
+                                Intent(itemView.context, PlanDetailVisitActivity::class.java)
+                            mIntent.putExtra("planID", data.id)
+                            itemView.context.startActivity(mIntent)
+                        }
+                    }
+                }
+
+                binding.itemPlanHideO.isClickable = false // 초기 클릭 가능 상태 설정
+
+                // 계획서 title scroll
+                binding.itemPlanTitle.viewTreeObserver.addOnPreDrawListener(object :
+                    ViewTreeObserver.OnPreDrawListener {
+                    override fun onPreDraw(): Boolean {
+                        binding.itemPlanTitle.viewTreeObserver.removeOnPreDrawListener(this)
+
+                        binding.itemPlanTitle.apply {
+                            setSingleLine()
+                            marqueeRepeatLimit = -1
+                            ellipsize = TextUtils.TruncateAt.MARQUEE
+                            isSelected = true
+                        }
+                        return true
+                    }
+                })
+            }
+        }
     }
 
     // View 생성될 때 호출되는 method
@@ -72,90 +143,20 @@ class PlanListAdapter(
         else
             holder.scrollHolder.visibility = View.GONE
 
-        val data = planList[holder.adapterPosition]
-        holder.title.text = data.title
-        holder.date.text = data.updated_at
-        holder.user.text = if (data.nickname == myName) "" else data.nickname
-
-        // 숨겨진 삭제 버튼 클릭 이벤트
-        holder.hideO.setOnClickListener {
-            val dialog = PlanDeleteDialogFragment()
-
-            // 다이얼로그 버튼 클릭 이벤트 설정
-            dialog.setButtonClickListener(object :
-                PlanDeleteDialogFragment.OnButtonClickListener {
-                override fun onDialogPlanBtnOClicked() {
-                    planRemoveAPI(
-                        plannerId = data.id.toString(),
-                        plannerType = if (holder.user.text == "") "0" else "1",
-                        position = holder.adapterPosition,
-                    )
-                }
-
-                override fun onDialogPlanBtnXClicked() {
-                    resetHideX(holder.adapterPosition, recyclerView)
-                }
-            })
-            dialog.show(fragmentManager, "PlanDeleteDialog")
-        }
-
-        // 아이템 클릭 이벤트 (여행 계획서 보기)
-        holder.itemView.setOnClickListener {
-            if (hasSwipe) {
-                resetHideX(hasSwipePosition, recyclerView)
-            } else {
-                // 자신의 여행 계획서 경우
-                if (data.nickname == myName || data.nickname == null) {
-                    val mIntent = Intent(holder.itemView.context, PlanDetailActivity::class.java)
-                    mIntent.putExtra("planID", data.id)
-                    holder.itemView.context.startActivity(mIntent)
-                }
-                // 타인의 여행 계획서 경우
-                else {
-                    val mIntent =
-                        Intent(holder.itemView.context, PlanDetailVisitActivity::class.java)
-                    mIntent.putExtra("planID", data.id)
-                    holder.itemView.context.startActivity(mIntent)
-                }
-            }
-        }
-
-        holder.hideO.isClickable = false // 초기 클릭 가능 상태 설정
-
-        // 계획서 title scroll
-        holder.title.viewTreeObserver.addOnPreDrawListener(object :
-            ViewTreeObserver.OnPreDrawListener {
-            override fun onPreDraw(): Boolean {
-                holder.title.viewTreeObserver.removeOnPreDrawListener(this)
-
-                holder.title.apply {
-                    setSingleLine()
-                    marqueeRepeatLimit = -1
-                    ellipsize = TextUtils.TruncateAt.MARQUEE
-                    isSelected = true
-                }
-                return true
-            }
-        })
-
-    }
-
-    // 리스트의 수 count
-    override fun getItemCount(): Int = planList.size
-
-    // 데이터 추가
-    fun addPlan(insertData: PlanListResult) {
-        planList.add(insertData)
-        notifyItemInserted(planList.size)
+        holder.bind(currentList[position], position)
     }
 
     // 데이터 삭제
     private fun removePlan(position: Int) {
-        planList.removeAt(position)
-        notifyDataSetChanged()
+        if (position in 0 until currentList.size) {
+            val updatedList = currentList.toMutableList()
+            updatedList.removeAt(position)
+            submitList(updatedList)
+        }
     }
 
-    fun clearList() {
+    // 스와이프로 고정된 상태 해제
+    fun clearSwipe() {
         if (hasSwipe) {
             val changeHolder =
                 recyclerView.findViewHolderForAdapterPosition(hasSwipePosition) as? PlanViewHolder
@@ -166,8 +167,6 @@ class PlanListAdapter(
                 hasSwipe = false
             }
         }
-        planList.clear() // 데이터 리스트를 비움
-        notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
     }
 
 
@@ -194,6 +193,22 @@ class PlanListAdapter(
                 animator.duration = 200 // 애니메이션 지속 시간 (밀리초)
                 animator.start()
                 hasSwipe = false    // swipe된 아이템 없음
+            }
+        }
+
+        val diffUtil = object : DiffUtil.ItemCallback<PlanListResult>() {
+            override fun areItemsTheSame(
+                oldItem: PlanListResult,
+                newItem: PlanListResult,
+            ): Boolean {
+                return oldItem.id == newItem.id
+            }
+
+            override fun areContentsTheSame(
+                oldItem: PlanListResult,
+                newItem: PlanListResult,
+            ): Boolean {
+                return oldItem == newItem
             }
         }
     }

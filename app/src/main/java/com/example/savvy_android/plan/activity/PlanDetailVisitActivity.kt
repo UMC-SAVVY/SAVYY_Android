@@ -146,7 +146,7 @@ class PlanDetailVisitActivity : AppCompatActivity() {
                         binding.travelPlanViewTitleTv.text = planDetailResult.title
                         binding.travelPlanViewUserTv.text = planDetailResult.nickname
                         binding.travelPlanViewUpdateTv.text = planDetailResult.updated_at
-                        if (planDetailResult.pic_url != null)
+                        if (!planDetailResult.pic_url.isNullOrEmpty())
                             Glide.with(this@PlanDetailVisitActivity)
                                 .load(planDetailResult.pic_url)
                                 .into(binding.profile)

@@ -37,7 +37,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 class DiaryFragment : Fragment() {
     private lateinit var binding: FragmentDiaryBinding
     private lateinit var diaryListAdapter: DiaryListAdapter
-    private var diaryListData = arrayListOf<DiaryListResult>()
     private val diaryTouchSimpleCallback = DiaryItemTouchCallback()
     private val itemTouchHelper = ItemTouchHelper(diaryTouchSimpleCallback)
     private lateinit var sharedPreferences: SharedPreferences
@@ -83,7 +82,6 @@ class DiaryFragment : Fragment() {
             DiaryListAdapter(
                 requireContext(),
                 binding.diaryRecycle,
-                diaryListData,
                 requireActivity().supportFragmentManager,
                 true
             )
@@ -107,6 +105,10 @@ class DiaryFragment : Fragment() {
         super.onResume()
         isPause = false
 
+        // 목록 (나의 다이어리) 불러오기
+        diaryListAdapter.clearList() // 스와이프 고정 상태 해제
+        diaryListAPI()
+
         // 알람 존재 여부에 따른 알람 버튼 형태
         val hasAlarm = true
         if (hasAlarm)
@@ -121,10 +123,6 @@ class DiaryFragment : Fragment() {
                 searchDiaryList(binding.diarySearchEdit.text.toString())
             }
         }
-
-        // 목록 (나의 다이어리) 다시 불러오기
-        diaryListAdapter.clearList() // 리스트 정보 초기화
-        diaryListAPI()
     }
 
     override fun onPause() {
@@ -176,8 +174,9 @@ class DiaryFragment : Fragment() {
                         val planResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                            val tempList = arrayListOf<DiaryListResult>()
                             for (result in planResponse.result) {
-                                diaryListAdapter.addPlan(
+                                tempList.add(
                                     DiaryListResult(
                                         id = result.id,
                                         title = result.title,
@@ -190,6 +189,7 @@ class DiaryFragment : Fragment() {
                                     )
                                 )
                             }
+                            diaryListAdapter.submitList(tempList)
                         } else {
                             // 응답 에러 코드 분류
                             planResponse?.let {
@@ -264,8 +264,9 @@ class DiaryFragment : Fragment() {
                         val planResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         if (planResponse?.isSuccess == true && planResponse.code == 1000) {
+                            val tempList = arrayListOf<DiaryListResult>()
                             for (result in planResponse.result) {
-                                diaryListAdapter.addPlan(
+                                tempList.add(
                                     DiaryListResult(
                                         id = result.id,
                                         title = result.title,
@@ -278,6 +279,7 @@ class DiaryFragment : Fragment() {
                                     )
                                 )
                             }
+                            diaryListAdapter.submitList(tempList)
                         } else {
                             // 응답 에러 코드 분류
                             planResponse?.let {
@@ -317,10 +319,5 @@ class DiaryFragment : Fragment() {
                     }
                 }
             })
-    }
-
-    // 다이어리 검색 (나의 다이어리) API
-    private fun diarySearchAPI(searchWord: String) {
-
     }
 }
