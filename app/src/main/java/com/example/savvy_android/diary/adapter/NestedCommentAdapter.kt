@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemNestedCommentBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
@@ -48,6 +49,12 @@ class NestedCommentAdapter(
                 binding.nestedCommentContentTv.text = item.content
                 binding.diaryNestedCommentName.text = item.nickname
                 binding.nestedCommentUpdateDate.text = item.updated_at
+
+                if(!item.pic_url.isNullOrEmpty()){
+                    Glide.with(itemView.context)
+                        .load(item.pic_url)
+                        .into(binding.nestedCommentProfile)
+                }
             }
 
 

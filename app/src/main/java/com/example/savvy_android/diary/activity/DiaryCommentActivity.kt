@@ -276,7 +276,8 @@ class DiaryCommentActivity : AppCompatActivity(),
                         commentAdapter.clearItems() // 댓글 목록 초기화
                         commentAdapter.addAllItems(commentCheckResult) // 새로운 댓글 목록 추가
 
-                        isMine = nickname == commentCheckResult[0].nickname
+                        if(!commentCheckResult.isNullOrEmpty())
+                            isMine = nickname == commentCheckResult[0].nickname
 
                         Log.d("test", "diaryID: $diaryID")
 

@@ -15,6 +15,7 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemCommentBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
@@ -42,7 +43,7 @@ class CommentAdapter(
     private val context: Context,
     private val items: MutableList<Any>,
     private val optionClickListener: OnOptionClickListener,
-    private val nestedOptionClickListener: NestedCommentAdapter.OnNestedOptionClickListener
+    private val nestedOptionClickListener: NestedCommentAdapter.OnNestedOptionClickListener,
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     private val nestedCommentMap: MutableMap<Int, NestedCommentAdapter> = mutableMapOf()
@@ -63,7 +64,12 @@ class CommentAdapter(
 
 //            val nestedComments: MutableList<NestedCommentRequest> = mutableListOf()
 
-            nestedCommentAdapter = NestedCommentAdapter(context ,mutableListOf(), nestedOptionClickListener, adapterPosition)
+            nestedCommentAdapter = NestedCommentAdapter(
+                context,
+                mutableListOf(),
+                nestedOptionClickListener,
+                adapterPosition
+            )
             nestedCommentMap[adapterPosition] = nestedCommentAdapter
             binding.recyclerviewNestedComment.adapter = nestedCommentAdapter
             binding.recyclerviewNestedComment.layoutManager = LinearLayoutManager(itemView.context)
@@ -77,6 +83,11 @@ class CommentAdapter(
                 binding.commentNum.text = item.reply_count
                 binding.diaryCommentName.text = item.nickname
                 binding.commentUpdateDate.text = item.updated_at
+                if (item.pic_url.isNotEmpty()) {
+                    Glide.with(itemView.context)
+                        .load(item.pic_url)
+                        .into(binding.commentProfile)
+                }
 
                 setNestedComments(item.reply_List)
             }
@@ -122,7 +133,6 @@ class CommentAdapter(
             }
 
 
-
             // 옵션 버튼에 클릭 리스너 설정
             binding.option.setOnClickListener {
                 optionClickListener.onOptionClick(adapterPosition)
@@ -130,20 +140,32 @@ class CommentAdapter(
 
             // 댓글 edit 버튼 활성화
             binding.commentEdit.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) {
+                }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                     val isEnableState = binding.commentEdit.length() != 0
                     binding.commentBtn.isEnabled = isEnableState
                     btnStateBackground(isEnableState, binding.commentBtn)
                 }
+
                 override fun afterTextChanged(s: Editable?) {}
             })
 
 
             //댓글 수정 입력 변화 이벤트 처리
             binding.commentModifyEdit.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) {
                     // 이전 텍스트 변경 전 동작
                 }
 
@@ -153,10 +175,12 @@ class CommentAdapter(
 
                     //한글자라도 입력하면 'check'버튼의 색이 바뀜
                     if (textLength > 0) {
-                        binding.borderCircleGray.background = itemView.context.getDrawable(R.drawable.ic_circle_main)
+                        binding.borderCircleGray.background =
+                            itemView.context.getDrawable(R.drawable.ic_circle_main)
                         binding.checkmarkGray.setImageDrawable(itemView.context.getDrawable(R.drawable.ic_checkmark_white))
                     } else {
-                        binding.borderCircleGray.background = itemView.context.getDrawable(R.drawable.ic_circle_gray)
+                        binding.borderCircleGray.background =
+                            itemView.context.getDrawable(R.drawable.ic_circle_gray)
                         binding.checkmarkGray.setImageDrawable(itemView.context.getDrawable(R.drawable.ic_checkmark_white))
                     }
                 }
@@ -233,7 +257,10 @@ class CommentAdapter(
     }
 
     // 새로운 뷰 홀더 생성
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentAdapter.CommentViewHolder {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): CommentAdapter.CommentViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ItemCommentBinding.inflate(inflater, parent, false)
         return CommentViewHolder(binding)
@@ -256,6 +283,7 @@ class CommentAdapter(
         nestedCommentCounts.add(0) // 새로운 댓글 아이템에 대댓글 개수 0으로 초기화
         notifyDataSetChanged() // 모든 아이템을 갱신
     }
+
     fun clearItems() {
         items.clear()
         notifyDataSetChanged()
@@ -269,7 +297,6 @@ class CommentAdapter(
         }
         button.backgroundTintList = ColorStateList.valueOf(buttonColor)
     }
-
 
 
     fun removeCommentAtPosition(position: Int) {
@@ -400,7 +427,10 @@ class CommentAdapter(
         // 서버에 데이터 전송
         nestedCommentService.nestedCommentMake(serverToken, nestedCommentRequest).enqueue(object :
             Callback<NestedCommentResponse> {
-            override fun onResponse(call: Call<NestedCommentResponse>, response: Response<NestedCommentResponse>) {
+            override fun onResponse(
+                call: Call<NestedCommentResponse>,
+                response: Response<NestedCommentResponse>,
+            ) {
                 if (response.isSuccessful) {
                     val nestedCommentMakeResponse = response.body()
                     val isSuccess = nestedCommentMakeResponse?.isSuccess
@@ -408,10 +438,16 @@ class CommentAdapter(
                     val message = nestedCommentMakeResponse?.message
                     if (nestedCommentMakeResponse != null && nestedCommentMakeResponse.isSuccess) {
                         // 전송 성공
-                        Log.d("DiaryCommentActivity - 답글 전송", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+                        Log.d(
+                            "DiaryCommentActivity - 답글 전송",
+                            "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message"
+                        )
                     } else {
                         // 전송 실패
-                        Log.d("DiaryCommentActivity - 답글 전송", "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message")
+                        Log.d(
+                            "DiaryCommentActivity - 답글 전송",
+                            "API 연동 실패 - isSuccess: $isSuccess, code: $code, message: $message"
+                        )
                     }
                 } else {
                     // 서버 오류
@@ -451,7 +487,7 @@ class CommentAdapter(
             .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
                     call: Call<ServerDefaultResponse>,
-                    response: Response<ServerDefaultResponse>
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -496,7 +532,10 @@ class CommentAdapter(
     }
 
     // 서버로 수정 데이터 전송하는 함수
-    private fun commentModifyAPI(commentModifyRequest: CommentModifyRequest, binding: ItemCommentBinding) {
+    private fun commentModifyAPI(
+        commentModifyRequest: CommentModifyRequest,
+        binding: ItemCommentBinding,
+    ) {
         // 서버 주소
         val sharedPreferences: SharedPreferences =
             context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
@@ -516,14 +555,20 @@ class CommentAdapter(
         // 서버에 데이터 전송
         commentModifyService.commentModify(serverToken, commentModifyRequest).enqueue(object :
             Callback<CommentModifyResponse> {
-            override fun onResponse(call: Call<CommentModifyResponse>, response: Response<CommentModifyResponse>) {
+            override fun onResponse(
+                call: Call<CommentModifyResponse>,
+                response: Response<CommentModifyResponse>,
+            ) {
                 if (response.isSuccessful) {
                     val commentModifyResponse = response.body()
                     val isSuccess = commentModifyResponse?.isSuccess
                     val code = commentModifyResponse?.code
                     val message = commentModifyResponse?.message
                     if (commentModifyResponse != null && commentModifyResponse.isSuccess) {
-                        Log.d("DiaryCommentAdapter - 댓글 수정", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+                        Log.d(
+                            "DiaryCommentAdapter - 댓글 수정",
+                            "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message"
+                        )
 
                         // 수정 성공 시 토스트 메시지 표시
                         showToast("성공적으로 댓글을 수정했습니다")
@@ -583,7 +628,7 @@ class CommentAdapter(
             .enqueue(object : Callback<ServerDefaultResponse> {
                 override fun onResponse(
                     call: Call<ServerDefaultResponse>,
-                    response: Response<ServerDefaultResponse>
+                    response: Response<ServerDefaultResponse>,
                 ) {
                     if (response.isSuccessful) {
                         val deleteResponse = response.body()
@@ -619,7 +664,10 @@ class CommentAdapter(
 
                 override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
-                    Log.e("NESTED COMMENT", "[NESTED COMMENT DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    Log.e(
+                        "NESTED COMMENT",
+                        "[NESTED COMMENT DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                    )
 
                     // 삭제 성공 시 토스트 메시지 표시
                     showToast("답글 삭제를 실패했습니다")
