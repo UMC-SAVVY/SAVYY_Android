@@ -62,7 +62,7 @@ class DetailPlaceAdapter(private val data: MutableList<Schedule>,
                 } else {
                     // checklist가 null인 경우 처리 방법
                     // 예를 들어, 빈 checklist를 생성하여 NullPointerException을 피할 수 있음
-                    viewChecklistAdapter = DetailChecklistAdapter(item.checklist, itemView.context, true)
+                    viewChecklistAdapter = DetailChecklistAdapter(arrayListOf(), itemView.context, true)
                     binding.recyclerviewViewChecklist.adapter = viewChecklistAdapter
                     binding.recyclerviewViewChecklist.layoutManager = LinearLayoutManager(itemView.context)
                 }
@@ -76,7 +76,7 @@ class DetailPlaceAdapter(private val data: MutableList<Schedule>,
                 } else {
                     // checklist가 null인 경우 처리 방법
                     // 예를 들어, 빈 checklist를 생성하여 NullPointerException을 피할 수 있음
-                    viewChecklistAdapter = DetailChecklistAdapter(item.checklist, itemView.context, false)
+                    viewChecklistAdapter = DetailChecklistAdapter(arrayListOf(), itemView.context, false)
                     binding.recyclerviewViewChecklist.adapter = viewChecklistAdapter
                     binding.recyclerviewViewChecklist.layoutManager = LinearLayoutManager(itemView.context)
                 }

@@ -274,7 +274,7 @@
             android:fontFamily="@font/pretendard_medium"
             android:lineSpacingExtra="3sp"
             android:paddingVertical="2.5sp"
-            android:text="Introduce"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"

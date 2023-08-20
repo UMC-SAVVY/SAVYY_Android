@@ -65,7 +65,7 @@ class SearchUserAdapter(
         holder.likeCount.text = data.likes.toString()
         holder.planCount.text = data.amount_planner.toString()
         holder.diaryCount.text = data.amount_diary.toString()
-        if (data.pic_url != null) {
+        if (!data.pic_url.isNullOrEmpty()) {
             Glide.with(holder.itemView)
                 .load(data.pic_url)
                 .into(holder.img)

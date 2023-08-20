@@ -31,11 +31,12 @@ import com.bumptech.glide.Glide
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityProfileSettingBinding
 import com.example.savvy_android.init.MainActivity
+import com.example.savvy_android.init.data.EditProfileRequest
 import com.example.savvy_android.init.data.SignupRequest
 import com.example.savvy_android.init.data.SignupResponse
 import com.example.savvy_android.init.data.image.SingleImageResponse
 import com.example.savvy_android.init.errorCodeList
-import com.example.savvy_android.init.service.SignupService
+import com.example.savvy_android.init.service.ProfileService
 import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import com.example.savvy_android.utils.LoadingDialogFragment
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -58,6 +59,7 @@ class ProfileSettingActivity : AppCompatActivity() {
     private var signupState = false // 회원 가입 가능 여부
     private var isChange = false // 프로필 사진 변경 여부
     private var isMypage = true // 연결 페이지 구분 (true: 마이페이지, false: 회원가입)
+    private lateinit var originalName: String
     private var profileServerUrl = "" // 프로필 사진 (sever)
     private lateinit var imageBody: MultipartBody.Part
     private lateinit var sharedPreferences: SharedPreferences
@@ -73,11 +75,25 @@ class ProfileSettingActivity : AppCompatActivity() {
         // 배경 색 지정
         window.decorView.setBackgroundColor(ContextCompat.getColor(this, R.color.white))
 
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
         // 처음 회원가입으로 연결인지, 마이페이지 연결인지 구분
         isMypage = intent.getBooleanExtra("isMyPage", true)
         if (isMypage) { // 마이페이지에서 연결 경우 (프로필 편집 경우)
+            if (intent.getStringExtra("pic_url")!!.isNotEmpty()) {
+                profileServerUrl = intent.getStringExtra("pic_url").toString()
+                Glide.with(this)
+                    .load(intent.getStringExtra("pic_url").toString())
+                    .into(binding.profileImgIv)
+            }
+            originalName = sharedPreferences.getString("USER_NICKNAME", null)!!
+            binding.profileNameEdit.setText(intent.getStringExtra("nickname").toString())
+            binding.profileIntroEdit.setText(intent.getStringExtra("intro").toString())
             binding.profileEditMode.visibility = View.VISIBLE
             binding.profileSignupBtn.text = "저장하기"
+            binding.profileSignupBtn.isEnabled = true
+            duplicateState = true
+            btnStateBackground(true, binding.profileSignupBtn)
         } else { // 로그인페이지에서 연결 경우 (회원가입의 경우)
             binding.profileEditMode.visibility = View.GONE
             binding.profileSignupBtn.text = "회원가입"
@@ -117,6 +133,18 @@ class ProfileSettingActivity : AppCompatActivity() {
                 val isEnableState = binding.profileNameEdit.length() != 0
                 binding.profileNameDuplicateBtn.isEnabled = isEnableState
                 btnStateBackground(isEnableState, binding.profileNameDuplicateBtn)
+
+                if (isMypage && originalName == binding.profileNameEdit.text.toString()) {
+                    binding.profileNameDuplicateBtn.isEnabled = false
+                    btnStateBackground(false, binding.profileNameDuplicateBtn)
+                    binding.profileSignupBtn.isEnabled = true
+                    btnStateBackground(true, binding.profileSignupBtn)
+                    duplicateState = true
+                } else {
+                    binding.profileSignupBtn.isEnabled = false
+                    btnStateBackground(false, binding.profileSignupBtn)
+                    duplicateState = false
+                }
             }
 
             // 텍스트 입력 후
@@ -135,7 +163,7 @@ class ProfileSettingActivity : AppCompatActivity() {
 
             // 텍스트 입력 중
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                val introLength = binding.profileIntroEdit.length()
+                val introLength = binding.profileIntroEdit.text.length
                 introState = introLength < 100 // 문자열 길이 허용 여부
                 signupState = duplicateState && introState  // 회원 가입 여부
 
@@ -288,7 +316,7 @@ class ProfileSettingActivity : AppCompatActivity() {
             .build()
 
         // API interface instance 생성
-        val duplicateService = retrofit.create(SignupService::class.java)
+        val duplicateService = retrofit.create(ProfileService::class.java)
 
         duplicateService.duplicate(nickname = nickname)
             .enqueue(object : Callback<ServerDefaultResponse> {
@@ -300,10 +328,8 @@ class ProfileSettingActivity : AppCompatActivity() {
                         val serverResponse = response.body()
                         // 서버 응답 처리 로직 작성
                         if (serverResponse?.isSuccess == true && serverResponse.code == 1000) {
-                            Log.e("TEST", "정상")
                             duplicateState = true   // 중복 여부 확인 저장 변수
                         } else if (serverResponse?.code == 3201) {
-                            Log.e("TEST", "비정상")
                             duplicateState = false  // 중복 여부 확인 저장 변수
                         } else {
                             // 응답 에러 코드 분류
@@ -350,7 +376,7 @@ class ProfileSettingActivity : AppCompatActivity() {
     }
 
     // 회원가입 API
-    private fun signupAPI(signupService: SignupService, dialog: LoadingDialogFragment) {
+    private fun signupAPI(profileService: ProfileService, dialog: LoadingDialogFragment) {
         val kakaoToken = intent.getStringExtra("kakaoToken")
         if (kakaoToken != null) {
             val nickname = binding.profileNameEdit.text.toString()
@@ -361,7 +387,7 @@ class ProfileSettingActivity : AppCompatActivity() {
                 SignupRequest(kakaoToken, picUrl, nickname, intro)
 
             // 회원가입 API 호출
-            signupService.signup(signupRequest)
+            profileService.signup(signupRequest)
                 .enqueue(object : Callback<SignupResponse> {
                     override fun onResponse(
                         call: Call<SignupResponse>,
@@ -440,7 +466,75 @@ class ProfileSettingActivity : AppCompatActivity() {
         }
     }
 
-    // 이미지 API와 회원가입 API 결합
+    // 프로필 편집 API
+    private fun profileEditAPI(profileService: ProfileService, dialog: LoadingDialogFragment) {
+        val nickname = binding.profileNameEdit.text.toString()
+        val picUrl = profileServerUrl
+        val intro = binding.profileIntroEdit.text.toString()
+
+        val editProfileRequest = EditProfileRequest(picUrl, nickname, intro)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        profileService.editProfile(token = accessToken, editProfileRequest = editProfileRequest)
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val signupResponse = response.body()
+                        if (signupResponse?.isSuccess == true) {
+                            // 닉네임을 SharedPreferences에 저장
+                            val editor = sharedPreferences.edit()
+                            editor.putString("USER_NICKNAME", nickname)
+                            editor.apply()
+                            finish()
+                        } else {
+                            signupResponse?.let {
+                                errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PROFILE",
+                                    detailType = null,
+                                    intentData = null
+                                )
+                            }
+                        }
+                    } else {
+                        Log.e(
+                            "PROFILE",
+                            "[PROFILE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                    }
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
+                }
+
+                override fun onFailure(
+                    call: Call<ServerDefaultResponse>,
+                    t: Throwable,
+                ) {
+                    Log.e(
+                        "PROFILE",
+                        "[PROFILE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                    )
+
+                    // 로딩 다이얼로그 실행 여부 판단
+                    if (isLoading) {
+                        dialog.dismiss()
+                    } else {
+                        isFinish = true
+                    }
+                }
+            })
+    }
+
+    // 이미지 API와 회원가입 API 또는 프로필 수정 API 결합
     private fun profileCombineAPI() {
         var isFinish = false
         var isLoading = false
@@ -462,59 +556,60 @@ class ProfileSettingActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        val signupService = retrofit.create(SignupService::class.java)
-        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
+        val profileService = retrofit.create(ProfileService::class.java)
 
-        if (isMypage) {
-            // 프로필 편집 경우
-        } else {
-            // 회원 가입 경우
-            if (isChange) {
-                // 프로필 사진을 추가했을 때
-                signupService.uploadProfile(imageBody)
-                    .enqueue(object : Callback<SingleImageResponse> {
-                        override fun onResponse(
-                            call: Call<SingleImageResponse>,
-                            response: Response<SingleImageResponse>,
-                        ) {
-                            if (response.isSuccessful) {
-                                val uploadProfileResponse = response.body()
-                                if (uploadProfileResponse?.isSuccess == true) {
-                                    profileServerUrl = uploadProfileResponse.result.pic_url
-                                    signupAPI(signupService, dialog)
+        if (isChange) {
+            // 프로필 사진을 추가했을 때
+            profileService.uploadProfile(imageBody)
+                .enqueue(object : Callback<SingleImageResponse> {
+                    override fun onResponse(
+                        call: Call<SingleImageResponse>,
+                        response: Response<SingleImageResponse>,
+                    ) {
+                        if (response.isSuccessful) {
+                            val uploadProfileResponse = response.body()
+                            if (uploadProfileResponse?.isSuccess == true) {
+                                profileServerUrl = uploadProfileResponse.result.pic_url
+                                if (isMypage) {
+                                    profileEditAPI(profileService, dialog)
+                                } else {
+                                    signupAPI(profileService, dialog)
                                 }
-                            } else {
-                                Log.e(
-                                    "SIGNUP",
-                                    "[IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
-                                )
                             }
-
-                            // 로딩 다이얼로그 실행 여부 판단
-                            if (isLoading) {
-                                dialog.dismiss()
-                            } else {
-                                isFinish = true
-                            }
-                        }
-
-                        override fun onFailure(call: Call<SingleImageResponse>, t: Throwable) {
+                        } else {
                             Log.e(
-                                "SIGNUP",
-                                "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                                "PROFILE",
+                                "[IMAGE] API 호출 실패 - 응답 코드: ${response.code()}"
                             )
-
-                            // 로딩 다이얼로그 실행 여부 판단
-                            if (isLoading) {
-                                dialog.dismiss()
-                            } else {
-                                isFinish = true
-                            }
                         }
-                    })
+
+                        // 로딩 다이얼로그 실행 여부 판단
+                        if (isLoading) {
+                            dialog.dismiss()
+                        } else {
+                            isFinish = true
+                        }
+                    }
+
+                    override fun onFailure(call: Call<SingleImageResponse>, t: Throwable) {
+                        Log.e(
+                            "PROFILE",
+                            "[IMAGE] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
+                        )
+
+                        // 로딩 다이얼로그 실행 여부 판단
+                        if (isLoading) {
+                            dialog.dismiss()
+                        } else {
+                            isFinish = true
+                        }
+                    }
+                })
+        } else {
+            if (isMypage) {
+                profileEditAPI(profileService, dialog)
             } else {
-                // 프로필 사진을 추가 안했을 경우
-                signupAPI(signupService, dialog)
+                signupAPI(profileService, dialog)
             }
         }
     }

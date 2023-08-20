@@ -7,6 +7,12 @@ data class SignupRequest(
     val intro: String,
 )
 
+data class EditProfileRequest(
+    val pic_url: String,
+    val nickname: String,
+    val intro: String
+)
+
 data class SignupResponse(
     val isSuccess: Boolean,
     val code: Int,

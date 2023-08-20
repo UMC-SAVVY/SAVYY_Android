@@ -43,8 +43,8 @@ class MypageFragment(
     private lateinit var binding: FragmentMypageBinding
     private lateinit var viewPagerAdapter: ViewPagerAdapter
     private lateinit var sharedPreferences: SharedPreferences
-    private var isSetting = false
     private var isPause = false
+    private var profileResource: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,7 +64,6 @@ class MypageFragment(
                 binding.mypageSettingIc.visibility = View.VISIBLE
                 binding.mypageDataLayout.visibility = View.VISIBLE
                 binding.mypageSettingLayout.visibility = View.INVISIBLE
-                isSetting = false
             }
 
             // 설정 버튼 클릭 이벤트
@@ -74,13 +73,15 @@ class MypageFragment(
                 binding.mypageSettingIc.visibility = View.INVISIBLE
                 binding.mypageDataLayout.visibility = View.INVISIBLE
                 binding.mypageSettingLayout.visibility = View.VISIBLE
-                isSetting = true
             }
 
             // 프로필 편집 클릭 이벤트
             binding.mypageSettingProfile.setOnClickListener {
                 val intent = Intent(context, ProfileSettingActivity::class.java)
                 intent.putExtra("isMyPage", true)
+                intent.putExtra("pic_url", profileResource.ifEmpty { "" })
+                intent.putExtra("nickname", binding.mypageNicknameTv.text.toString())
+                intent.putExtra("intro", binding.mypageIntroTv.text.ifEmpty { "" })
                 startActivity(intent)
             }
 
@@ -157,7 +158,6 @@ class MypageFragment(
             binding.mypageSettingIc.visibility = View.INVISIBLE
             // 뒤로 가기 버튼 클릭 이벤트
             binding.mypageArrowIc.setOnClickListener {
-                Log.e("TEST", "눌령")
                 activity?.finish()
             }
         }
@@ -182,11 +182,14 @@ class MypageFragment(
         super.onResume()
         isPause = false
 
-        if (!isSetting) {
-            if (isSearching)
-                otherUserPageAPI()
-            else
-                myPageAPI()
+        Log.e("TEST", "onResume")
+
+        if (isSearching) {
+            Log.e("TEST", "isSearching=true")
+            otherUserPageAPI()
+        } else {
+            myPageAPI()
+            Log.e("TEST", "isSearching=false")
         }
     }
 
@@ -248,14 +251,17 @@ class MypageFragment(
                                     binding.mypageIntroTv.text = result.intro
                                 } else {
                                     binding.mypageIntroTv.visibility = View.GONE
+                                    binding.mypageIntroTv.text = ""
                                 }
 
                                 // 프로필 사진
-                                if (result.pic_url != null && result.pic_url != "") {
+                                if (!result.pic_url.isNullOrEmpty()) {
+                                    profileResource = result.pic_url
                                     Glide.with(this@MypageFragment)
                                         .load(result.pic_url)
                                         .into(binding.mypageProfileIv)
                                 } else {
+                                    profileResource = ""
                                     val profileData = R.drawable.ic_profile_default
                                     Glide.with(this@MypageFragment)
                                         .load(profileData)
@@ -316,7 +322,6 @@ class MypageFragment(
                             binding.mypageLikeCount.text = result.likes.toString()
                             binding.mypagePlanCount.text = result.amount_planner.toString()
                             binding.mypageDiaryCount.text = result.amount_diary.toString()
-
                             // 소개글
                             if (result.intro.isNotEmpty()) {
                                 binding.mypageIntroTv.visibility = View.VISIBLE
@@ -326,7 +331,7 @@ class MypageFragment(
                             }
 
                             // 프로필 사진
-                            if (result.pic_url != null) {
+                            if (!result.pic_url.isNullOrEmpty()) {
                                 Glide.with(this@MypageFragment)
                                     .load(result.pic_url)
                                     .into(binding.mypageProfileIv)
