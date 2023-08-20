@@ -54,10 +54,10 @@ class PlanDetailVisitActivity : AppCompatActivity() {
 
         planID = intent.getIntExtra("planID", 0)
 
-        Log.d("test", "planID: $planID")
+        Log.d("PlanDetailVisitActivity", "planID: $planID")
 
         val timetableList: MutableList<Timetable> = mutableListOf()
-        viewDateAdapter = DetailDateAdapter(timetableList)
+        viewDateAdapter = DetailDateAdapter(timetableList, false)
         binding.recyclerviewViewDate.adapter = viewDateAdapter
         binding.recyclerviewViewDate.layoutManager = LinearLayoutManager(this)
 
@@ -103,6 +103,7 @@ class PlanDetailVisitActivity : AppCompatActivity() {
             BottomSheetOtherDialogFragment.OnButtonClickListener {
             override fun onDialogReportClicked() {
                 val intent = Intent(this@PlanDetailVisitActivity, ReportActivity::class.java)
+                intent.putExtra("planID", planID)
                 startActivity(intent)
             }
         })

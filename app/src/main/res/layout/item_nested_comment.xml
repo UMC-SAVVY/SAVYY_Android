@@ -41,6 +41,41 @@
             android:layout_marginEnd="7dp"
             />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:id="@+id/border_circle_gray"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/ic_circle_gray"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/checkmark_gray"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:background="@drawable/ic_checkmark_white"
+                app:layout_constraintBottom_toBottomOf="@+id/border_circle_gray"
+                app:layout_constraintEnd_toEndOf="@+id/border_circle_gray"
+                app:layout_constraintStart_toStartOf="@+id/border_circle_gray"
+                app:layout_constraintTop_toTopOf="@+id/border_circle_gray" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         <TextView
             android:id="@+id/diary_nested_comment_name"
             android:layout_width="wrap_content"

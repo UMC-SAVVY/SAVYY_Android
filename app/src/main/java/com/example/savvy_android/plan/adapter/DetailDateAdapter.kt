@@ -9,7 +9,8 @@ import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemPlanDateBinding
 import com.example.savvy_android.plan.data.Timetable
 
-class DetailDateAdapter(private val items: MutableList<Timetable>) :
+class DetailDateAdapter(private val items: MutableList<Timetable>,
+                        private val isMine: Boolean) :
     RecyclerView.Adapter<DetailDateAdapter.ViewDateViewHolder>() {
     private val placeMap: MutableMap<Int, DetailPlaceAdapter> = mutableMapOf()
     private var expandedPosition = 0 // 첫 번째 아이템의 인덱스
@@ -31,12 +32,21 @@ class DetailDateAdapter(private val items: MutableList<Timetable>) :
 
             binding.travelPlanViewDateTv.text = item.date
 
+            if(isMine){
+                // placeAdd RecyclerView 설정
+                viewplaceAdapter = DetailPlaceAdapter(item.schedule, true)
+                placeMap[adapterPosition] = viewplaceAdapter // adapterPosition 사용
+                binding.recyclerviewViewPlace.adapter = viewplaceAdapter
+                binding.recyclerviewViewPlace.layoutManager = LinearLayoutManager(itemView.context)
 
-            // placeAdd RecyclerView 설정
-            viewplaceAdapter = DetailPlaceAdapter(item.schedule)
-            placeMap[adapterPosition] = viewplaceAdapter // adapterPosition 사용
-            binding.recyclerviewViewPlace.adapter = viewplaceAdapter
-            binding.recyclerviewViewPlace.layoutManager = LinearLayoutManager(itemView.context)
+            }else{
+                // placeAdd RecyclerView 설정
+                viewplaceAdapter = DetailPlaceAdapter(item.schedule, false)
+                placeMap[adapterPosition] = viewplaceAdapter // adapterPosition 사용
+                binding.recyclerviewViewPlace.adapter = viewplaceAdapter
+                binding.recyclerviewViewPlace.layoutManager = LinearLayoutManager(itemView.context)
+
+            }
 
             // 초기 상태 설정
             if (adapterPosition == expandedPosition) {

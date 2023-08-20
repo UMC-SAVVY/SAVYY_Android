@@ -133,6 +133,7 @@ class DiaryDetailActivity : AppCompatActivity() {
             BottomSheetOtherDialogFragment.OnButtonClickListener {
             override fun onDialogReportClicked() {
                 val intent = Intent(this@DiaryDetailActivity, ReportActivity::class.java)
+                intent.putExtra("diaryID", diaryID)
                 startActivity(intent)
             }
         })

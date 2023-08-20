@@ -6,22 +6,32 @@ import android.content.res.ColorStateList
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemCommentBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.diary.activity.DiaryCommentActivity
+import com.example.savvy_android.diary.data.comment.CommentModifyRequest
+import com.example.savvy_android.diary.data.comment.CommentModifyResponse
 import com.example.savvy_android.diary.data.comment.CommentRequest
 import com.example.savvy_android.diary.data.comment.CommentResult
 import com.example.savvy_android.diary.data.comment.NestedCommentRequest
 import com.example.savvy_android.diary.data.comment.NestedCommentResponse
 import com.example.savvy_android.diary.data.comment.NestedCommentResult
+import com.example.savvy_android.diary.service.CommentDeleteService
+import com.example.savvy_android.diary.service.CommentModifyService
+import com.example.savvy_android.diary.service.NestedCommentDeleteService
 import com.example.savvy_android.diary.service.NestedCommentService
+import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -35,7 +45,7 @@ class CommentAdapter(
     private val nestedOptionClickListener: NestedCommentAdapter.OnNestedOptionClickListener
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
-    private val nestedCommentMap: MutableMap<Int, MutableList<NestedCommentRequest>> = mutableMapOf()
+    private val nestedCommentMap: MutableMap<Int, NestedCommentAdapter> = mutableMapOf()
     private val nestedCommentCounts: MutableList<Int> = mutableListOf()
     private lateinit var recyclerView: RecyclerView // RecyclerView 변수를 추가
     private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
@@ -43,7 +53,7 @@ class CommentAdapter(
 
     // 아직 commentID 안 받아옴
 
-    inner class CommentViewHolder(private val binding: ItemCommentBinding) :
+    inner class CommentViewHolder(val binding: ItemCommentBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         private lateinit var nestedCommentAdapter: NestedCommentAdapter
@@ -51,10 +61,10 @@ class CommentAdapter(
         // 뷰 홀더에 데이터를 바인딩하는 함수
         fun bind(item: Any) {
 
-            val nestedComments: MutableList<NestedCommentRequest> = mutableListOf()
+//            val nestedComments: MutableList<NestedCommentRequest> = mutableListOf()
 
-            nestedCommentAdapter = NestedCommentAdapter(mutableListOf(), nestedOptionClickListener, adapterPosition)
-            nestedCommentMap[adapterPosition] = nestedComments
+            nestedCommentAdapter = NestedCommentAdapter(context ,mutableListOf(), nestedOptionClickListener, adapterPosition)
+            nestedCommentMap[adapterPosition] = nestedCommentAdapter
             binding.recyclerviewNestedComment.adapter = nestedCommentAdapter
             binding.recyclerviewNestedComment.layoutManager = LinearLayoutManager(itemView.context)
 
@@ -129,6 +139,53 @@ class CommentAdapter(
                 }
                 override fun afterTextChanged(s: Editable?) {}
             })
+
+
+            //댓글 수정 입력 변화 이벤트 처리
+            binding.commentModifyEdit.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                    // 이전 텍스트 변경 전 동작
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    // 텍스트 변경 중 동작
+                    val textLength = s?.length ?: 0
+
+                    //한글자라도 입력하면 'check'버튼의 색이 바뀜
+                    if (textLength > 0) {
+                        binding.borderCircleGray.background = itemView.context.getDrawable(R.drawable.ic_circle_main)
+                        binding.checkmarkGray.setImageDrawable(itemView.context.getDrawable(R.drawable.ic_checkmark_white))
+                    } else {
+                        binding.borderCircleGray.background = itemView.context.getDrawable(R.drawable.ic_circle_gray)
+                        binding.checkmarkGray.setImageDrawable(itemView.context.getDrawable(R.drawable.ic_checkmark_white))
+                    }
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+
+                }
+            })
+
+            // 버튼 클릭 리스너 설정
+            binding.check.setOnClickListener {
+                // 버튼을 눌렀을 때 처리할 로직 추가
+                val commentText = binding.commentModifyEdit.text.toString()
+                if (commentText.isNotEmpty()) {
+                    // 버튼을 눌렀을 때 한 글자 이상 입력되었을 때
+                    // 수정 api 호출
+
+                    val commentModifyRequest = CommentModifyRequest(
+                        comment_id = if (item is CommentResult) item.id else -1, // 여기서 수정
+                        content = commentText
+                    )
+
+                    commentModifyAPI(commentModifyRequest, binding)
+
+                    showTextView()
+
+                }
+            }
+
         }
 
         private fun setNestedComments(nestedComments: MutableList<NestedCommentResult>) {
@@ -161,6 +218,9 @@ class CommentAdapter(
             binding.commentModifyEdit.visibility = View.VISIBLE
             binding.commentModifyEdit.setText(binding.commentContentTv.text)
             binding.commentModifyEdit.requestFocus() // EditText에 포커스를 주어 키보드가 나타나도록 함
+            binding.option.visibility = View.GONE
+            binding.check.visibility = View.VISIBLE
+
         }
 
         fun showTextView() {
@@ -210,31 +270,57 @@ class CommentAdapter(
         button.backgroundTintList = ColorStateList.valueOf(buttonColor)
     }
 
-    // 댓글 삭제
+
+
     fun removeCommentAtPosition(position: Int) {
         if (position in 0 until items.size) {
+            val removedItem = items[position]
             items.removeAt(position)
+
             // nestedCommentCounts 리스트도 해당 인덱스 제거
             if (position in 0 until nestedCommentCounts.size) {
                 nestedCommentCounts.removeAt(position)
             }
+
             notifyItemRemoved(position)
+
+            // 만약 삭제된 아이템이 CommentResult 타입이면 삭제 API 호출
+            if (removedItem is CommentResult) {
+                val commentId = removedItem.id.toString()
+                commentRemoveAPI(commentId = commentId)
+                Log.d("CommentDelete", "commentId: $commentId, position: $position")
+            }
         }
     }
 
 
-    // 대댓글 삭제
     fun removeNestedComment(commentPosition: Int, nestedCommentPosition: Int) {
         val comment = items[commentPosition]
         if (comment is CommentResult) {
             val nestedComments: MutableList<NestedCommentResult> = comment.reply_List
             if (nestedCommentPosition in 0 until nestedComments.size) {
-                nestedComments.removeAt(nestedCommentPosition)
+                val removedNestedComment = nestedComments.removeAt(nestedCommentPosition)
+                notifyItemChanged(commentPosition)
+
+                // 새로 추가한 코드. 안되면 삭제할 것
+                // 삭제한 아이템을 notifyItemRemoved로 알려줌
+                items[commentPosition] = comment
                 notifyItemChanged(commentPosition)
 
                 // 대댓글이 삭제되었으므로 댓글의 대댓글 개수를 감소시킴
                 val viewHolder = getCommentViewHolder(commentPosition)
                 viewHolder?.decrementCommentNum(commentPosition)
+
+                // 삭제한 대댓글의 id를 가져옴
+                val removedNestedCommentId = removedNestedComment.id.toString()
+
+                // 대댓글 삭제 API 호출
+                nestedCommentRemoveAPI(removedNestedCommentId)
+
+                // commentNum이 아무리 해도 감소를 안해서 일단 대댓글 삭제하면 댓글 조회 api 호출
+                // 대댓글 삭제 후 댓글 목록을 갱신하는 함수를 호출
+                val activity = context as DiaryCommentActivity
+                activity.refreshCommentList(activity.getDiaryId())
             }
         }
     }
@@ -247,11 +333,17 @@ class CommentAdapter(
     }
 
 
-   // // Nested Comment 수정하기 (text->editText)
-   // fun showNestedCommentEditText(commentPosition: Int, nestedCommentPosition: Int) {
-   //     val nestedCommentAdapter = nestedCommentMap[commentPosition]
-   //     nestedCommentAdapter?.showEditText(nestedCommentPosition)
-   // }
+    // CommentAdapter 내의 함수
+    fun showNestedCommentEditText(commentPosition: Int, nestedCommentPosition: Int) {
+        val nestedCommentAdapter = nestedCommentMap[commentPosition]
+        nestedCommentAdapter?.nestedShowEditText(nestedCommentPosition)
+    }
+
+    // NestedCommentAdapter의 아이템을 가져오기 위한 중개 함수
+    fun getNestedCommentItem(commentPosition: Int, nestedCommentPosition: Int): Any? {
+        val nestedCommentAdapter = nestedCommentMap[commentPosition]
+        return nestedCommentAdapter?.getNestedItem(nestedCommentPosition)
+    }
 
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -260,7 +352,7 @@ class CommentAdapter(
     }
 
     // 댓글 아이템을 position에 해당하는 뷰 홀더를 반환하는 함수
-    private fun getCommentViewHolder(position: Int): CommentViewHolder? {
+    fun getCommentViewHolder(position: Int): CommentViewHolder? {
         if (position in 0 until itemCount) {
             val viewHolder = recyclerView.findViewHolderForAdapterPosition(position)
             if (viewHolder is CommentViewHolder) {
@@ -280,6 +372,13 @@ class CommentAdapter(
         notifyDataSetChanged()
     }
 
+    fun getItem(position: Int): Any? {
+        return if (position in 0 until items.size) {
+            items[position]
+        } else {
+            null
+        }
+    }
 
     // 서버로 작성 데이터 전송하는 함수
     private fun nestedCommentMakeAPI(nestedCommentRequest: NestedCommentRequest) {
@@ -328,5 +427,215 @@ class CommentAdapter(
         })
     }
 
+    // 다이어리 댓글 삭제 API
+    fun commentRemoveAPI(commentId: String) {
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val commentDeleteService = retrofit.create(CommentDeleteService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // Delete 요청
+        commentDeleteService.commentDelete(
+            token = accessToken,
+            commentId = commentId
+        )
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("성공적으로 삭제가 완료되었습니다")
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                context.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "Comment",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("댓글 삭제를 실패했습니다")
+                        }
+                    } else {
+                        Log.e(
+                            "Comment",
+                            "[COMMENT DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+
+                        // 삭제 성공 시 토스트 메시지 표시
+                        showToast("댓글 삭제를 실패했습니다")
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("Comment", "[COMMENT DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+
+                    // 삭제 성공 시 토스트 메시지 표시
+                    showToast("댓글 삭제를 실패했습니다")
+                }
+            })
+    }
+
+    // 서버로 수정 데이터 전송하는 함수
+    private fun commentModifyAPI(commentModifyRequest: CommentModifyRequest, binding: ItemCommentBinding) {
+        // 서버 주소
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val commentModifyService = retrofit.create(CommentModifyService::class.java)
+
+        val serverToken = sharedPreferences.getString("SERVER_TOKEN_KEY", "")!!
+
+        // 서버에 데이터 전송
+        commentModifyService.commentModify(serverToken, commentModifyRequest).enqueue(object :
+            Callback<CommentModifyResponse> {
+            override fun onResponse(call: Call<CommentModifyResponse>, response: Response<CommentModifyResponse>) {
+                if (response.isSuccessful) {
+                    val commentModifyResponse = response.body()
+                    val isSuccess = commentModifyResponse?.isSuccess
+                    val code = commentModifyResponse?.code
+                    val message = commentModifyResponse?.message
+                    if (commentModifyResponse != null && commentModifyResponse.isSuccess) {
+                        Log.d("DiaryCommentAdapter - 댓글 수정", "API 연동 성공 - isSuccess: $isSuccess, code: $code, message: $message")
+
+                        // 수정 성공 시 토스트 메시지 표시
+                        showToast("성공적으로 댓글을 수정했습니다")
+
+                        binding.check.visibility = View.GONE
+                        binding.option.visibility = View.VISIBLE
+
+                    } else {
+                        // 응답 에러 코드 분류
+                        commentModifyResponse?.let {
+                            context.errorCodeList(
+                                errorCode = it.code,
+                                message = it.message,
+                                type = "Comment",
+                                detailType = "MODIFY",
+                                intentData = null
+                            )
+                        }
+
+                        // 수정 실패 시 토스트 메시지 표시
+                        showToast("댓글 수정에 실패했습니다")
+                    }
+                } else {
+                    // 서버 오류
+                    val errorCode = response.code()
+                    Log.d("DiaryCommentAdapter - 댓글 수정", "서버 오류 - $errorCode")
+                }
+            }
+
+            override fun onFailure(call: Call<CommentModifyResponse>, t: Throwable) {
+                // 통신 실패
+                Log.d("DiaryCommentAdapter - 댓글 수정", "통신 실패 - ${t.message}")
+            }
+        })
+    }
+
+    fun nestedCommentRemoveAPI(replyId: String) {
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val nestedCommentDeleteService = retrofit.create(NestedCommentDeleteService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // Delete 요청
+        nestedCommentDeleteService.nestedCommentDelete(
+            token = accessToken,
+            replyId = replyId
+        )
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("성공적으로 삭제가 완료되었습니다")
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                context.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "NestedComment",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+
+                            // 삭제 성공 시 토스트 메시지 표시
+                            showToast("답글 삭제를 실패했습니다")
+                        }
+                    } else {
+                        Log.e(
+                            "NESTED COMMENT",
+                            "[NESTED COMMENT DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+
+                        // 삭제 성공 시 토스트 메시지 표시
+                        showToast("답글 삭제를 실패했습니다")
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("NESTED COMMENT", "[NESTED COMMENT DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+
+                    // 삭제 성공 시 토스트 메시지 표시
+                    showToast("답글 삭제를 실패했습니다")
+                }
+            })
+    }
+
+    // 토스트 메시지 표시 함수 추가
+    private fun showToast(message: String) {
+        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(context))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(context)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
 
 }

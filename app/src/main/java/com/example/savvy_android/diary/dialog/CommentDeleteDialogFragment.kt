@@ -38,17 +38,6 @@ class CommentDeleteDialogFragment : DialogFragment() {
             buttonClickListener.onDialogDeleteBtnClicked()
             dismiss()
 
-            // 커스텀 Toast 메시지 생성
-            val toastBinding = LayoutToastBinding.inflate(layoutInflater)
-            toastBinding.toastMessage.text = "성공적으로 삭제가 완료되었습니다."
-
-            val toast = Toast(requireContext())
-            toast.duration = Toast.LENGTH_SHORT
-            toast.view = toastBinding.root
-
-            toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
-
-            toast.show()
         }
 
         // 취소하기 버튼 클릭 시
