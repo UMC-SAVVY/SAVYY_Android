@@ -339,6 +339,12 @@ class CommentAdapter(
         nestedCommentAdapter?.nestedShowEditText(nestedCommentPosition)
     }
 
+    // NestedCommentAdapter의 아이템을 가져오기 위한 중개 함수
+    fun getNestedCommentItem(commentPosition: Int, nestedCommentPosition: Int): Any? {
+        val nestedCommentAdapter = nestedCommentMap[commentPosition]
+        return nestedCommentAdapter?.getNestedItem(nestedCommentPosition)
+    }
+
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -366,6 +372,13 @@ class CommentAdapter(
         notifyDataSetChanged()
     }
 
+    fun getItem(position: Int): Any? {
+        return if (position in 0 until items.size) {
+            items[position]
+        } else {
+            null
+        }
+    }
 
     // 서버로 작성 데이터 전송하는 함수
     private fun nestedCommentMakeAPI(nestedCommentRequest: NestedCommentRequest) {

@@ -180,6 +180,15 @@ class NestedCommentAdapter(
         notifyDataSetChanged()
     }
 
+    fun getNestedItem(position: Int): Any? {
+        return if (position in 0 until items.size) {
+            items[position]
+        } else {
+            null
+        }
+    }
+
+
     // 서버로 수정 데이터 전송하는 함수
     private fun nestedCommentModifyAPI(nestedCommentModifyRequest: NestedCommentModifyRequest, binding: ItemNestedCommentBinding) {
         // 서버 주소

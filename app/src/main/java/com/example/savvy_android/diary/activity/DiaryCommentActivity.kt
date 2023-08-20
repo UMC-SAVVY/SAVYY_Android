@@ -20,6 +20,8 @@ import com.example.savvy_android.diary.adapter.NestedCommentAdapter
 import com.example.savvy_android.diary.data.comment.CommentCheckResponse
 import com.example.savvy_android.diary.data.comment.CommentRequest
 import com.example.savvy_android.diary.data.comment.CommentResponse
+import com.example.savvy_android.diary.data.comment.CommentResult
+import com.example.savvy_android.diary.data.comment.NestedCommentResult
 import com.example.savvy_android.diary.dialog.CommentDeleteDialogFragment
 import com.example.savvy_android.diary.dialog.CommentModifyDialogFragment
 import com.example.savvy_android.diary.service.CommentCheckService
@@ -156,8 +158,12 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.setButtonClickListener(object :
                 BottomSheetOtherDialogFragment.OnButtonClickListener {
                 override fun onDialogReportClicked() {
-                    val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-                    startActivity(intent)
+                    val clickedItem = commentAdapter.getItem(position)
+                    if (clickedItem is CommentResult) {
+                        val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
+                        intent.putExtra("commentID", clickedItem.id) // comment_id를 intent에 추가
+                        startActivity(intent)
+                    }
                 }
             })
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
@@ -216,8 +222,14 @@ class DiaryCommentActivity : AppCompatActivity(),
             bottomSheetOther.setButtonClickListener(object :
                 BottomSheetOtherDialogFragment.OnButtonClickListener {
                 override fun onDialogReportClicked() {
-                    val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-                    startActivity(intent)
+                    val nestedCommentItem = commentAdapter.getNestedCommentItem(commentPosition, nestedCommentPosition)
+                    if (nestedCommentItem is NestedCommentResult) {
+                        val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
+                        intent.putExtra("nestedCommentID", nestedCommentItem.id) // id를 intent에 추가
+                        startActivity(intent)
+                    }
+//                    val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
+//                    startActivity(intent)
                 }
             })
             bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
@@ -264,7 +276,7 @@ class DiaryCommentActivity : AppCompatActivity(),
                         commentAdapter.clearItems() // 댓글 목록 초기화
                         commentAdapter.addAllItems(commentCheckResult) // 새로운 댓글 목록 추가
 
-
+                        isMine = nickname == commentCheckResult[0].nickname
 
                         Log.d("test", "diaryID: $diaryID")
 

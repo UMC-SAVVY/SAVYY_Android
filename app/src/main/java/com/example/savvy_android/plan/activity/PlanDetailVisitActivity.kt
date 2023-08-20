@@ -76,6 +76,7 @@ class PlanDetailVisitActivity : AppCompatActivity() {
             BottomSheetOtherDialogFragment.OnButtonClickListener {
             override fun onDialogReportClicked() {
                 val intent = Intent(this@PlanDetailVisitActivity, ReportActivity::class.java)
+                intent.putExtra("planID", planID)
                 startActivity(intent)
             }
         })
