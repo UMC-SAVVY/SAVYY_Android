@@ -8,6 +8,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -16,6 +19,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.utils.memo.MemoActivity
 import com.example.savvy_android.plan.adapter.MakeDateAddAdapter
 import com.example.savvy_android.databinding.ActivityPlanMakeBinding
+import com.example.savvy_android.databinding.LayoutToastBinding
 import com.example.savvy_android.plan.data.Checklist
 import com.example.savvy_android.plan.data.PlanMakeRequest
 import com.example.savvy_android.plan.data.PlanMakeResponse
@@ -102,8 +106,10 @@ class PlanMakeActivity : AppCompatActivity() {
                     timetableList, titleText, currentTime)
 
                 planMakeAPI(planMakeRequest)
+                finish()
+            }else{
+                showToast("제목을 입력해주세요")
             }
-            finish()
         }
 
         // 메모 추가하기 버튼 클릭 이벤트
@@ -174,4 +180,17 @@ class PlanMakeActivity : AppCompatActivity() {
             intent.putExtra("memoText", memoText)
         }
     }
+
+    // 토스트 메시지
+    private fun showToast(message: String) {
+        val toastBinding =
+            LayoutToastBinding.inflate(LayoutInflater.from(this@PlanMakeActivity))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(this@PlanMakeActivity)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
+
 }

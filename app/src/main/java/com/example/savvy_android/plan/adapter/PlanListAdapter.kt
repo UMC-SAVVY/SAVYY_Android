@@ -38,6 +38,7 @@ class PlanListAdapter(
     private val myName: String,
     private val fragmentManager: FragmentManager,
     private val isPlan: Boolean,
+    private val optionVisible: Boolean
 ) :
     ListAdapter<PlanListResult, PlanListAdapter.PlanViewHolder>(diffUtil) {
 
@@ -87,10 +88,23 @@ class PlanListAdapter(
                     } else {
                         // 자신의 여행 계획서 경우
                         if (data.nickname == myName || data.nickname == null) {
-                            val mIntent =
-                                Intent(itemView.context, PlanDetailActivity::class.java)
-                            mIntent.putExtra("planID", data.id)
-                            itemView.context.startActivity(mIntent)
+                            // 여행계획서 리스트에서 option visible
+                            if(optionVisible == true){
+                                val mIntent =
+                                    Intent(itemView.context, PlanDetailActivity::class.java)
+                                mIntent.putExtra("planID", data.id)
+                                mIntent.putExtra("visibleOption", true)
+                                itemView.context.startActivity(mIntent)
+                            }
+                            else{
+                                // 마이페이지 계획서 리스트에서 option visible
+                                val mIntent =
+                                    Intent(itemView.context, PlanDetailActivity::class.java)
+                                mIntent.putExtra("planID", data.id)
+                                mIntent.putExtra("visibleOption", false)
+                                itemView.context.startActivity(mIntent)
+
+                            }
                         }
                         // 타인의 여행 계획서 경우
                         else {

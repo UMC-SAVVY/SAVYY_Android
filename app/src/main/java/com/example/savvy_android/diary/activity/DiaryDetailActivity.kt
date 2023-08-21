@@ -265,6 +265,7 @@ class DiaryDetailActivity : AppCompatActivity() {
                                         PlanDetailVisitActivity::class.java
                                     )
                                     intent.putExtra("planID", planID)
+                                    intent.putExtra("visibleOption", false)
                                     startActivity(intent)
                                 }
                             } else {

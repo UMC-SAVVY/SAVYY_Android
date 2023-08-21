@@ -161,6 +161,7 @@ class DiaryMake3Activity : AppCompatActivity() {
             if (plannerId != -1) {
                 val intent = Intent(this, PlanDetailActivity::class.java)
                 intent.putExtra("planID", plannerId)
+                intent.putExtra("visibleOption", false)
                 startActivity(intent)
             } else {
                 showToast("계획서 ID가 없습니다")
@@ -345,7 +346,7 @@ class DiaryMake3Activity : AppCompatActivity() {
                                 // 다이어리 생성 API에 필요한 요청 내용 생성
                                 val diaryMakeRequest = DiaryMakeRequest(
                                     title = if (binding.titleEdit.text.isEmpty()) "제목이 없습니다" else binding.titleEdit.text.toString(),
-                                    planner_id = null,
+                                    planner_id = plannerId,
                                     is_public = false,
                                     is_temporary = true,
                                     content = diaryDetailData,
@@ -387,7 +388,7 @@ class DiaryMake3Activity : AppCompatActivity() {
             // 다이어리 생성 API에 필요한 요청 내용 생성
             val diaryMakeRequest = DiaryMakeRequest(
                 title = if (binding.titleEdit.text.isEmpty()) "제목이 없습니다" else binding.titleEdit.text.toString(),
-                planner_id = null,
+                planner_id = plannerId,
                 is_public = false,
                 is_temporary = true,
                 content = diaryDetailData,

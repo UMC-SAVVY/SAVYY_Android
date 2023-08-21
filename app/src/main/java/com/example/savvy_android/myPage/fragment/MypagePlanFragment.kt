@@ -48,6 +48,7 @@ class MypagePlanFragment(
                 binding.planRecycle,
                 nickname,
                 requireActivity().supportFragmentManager,
+                false,
                 false
             )
         binding.planRecycle.adapter = planListAdapter

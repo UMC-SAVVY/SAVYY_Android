@@ -29,7 +29,7 @@
         android:fontFamily="@font/pretendard_bold"
         android:paddingHorizontal="45dp"
         android:paddingVertical="14dp"
-        android:text="수정하기"
+        android:text="저장하기"
         android:textColor="@color/white"
         android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
