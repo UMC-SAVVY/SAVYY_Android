@@ -24,6 +24,7 @@ import com.example.savvy_android.myPage.activity.MypageConditionActivity
 import com.example.savvy_android.myPage.activity.MypageLikeActivity
 import com.example.savvy_android.myPage.activity.MypagePlaceActivity
 import com.example.savvy_android.myPage.activity.ProfileSettingActivity
+import com.example.savvy_android.myPage.data.UserDeleteResponse
 import com.example.savvy_android.myPage.data.UserPageResponse
 import com.example.savvy_android.myPage.dialog.MypageLogoutDialogFragment
 import com.example.savvy_android.myPage.dialog.MypageWithdrawalDialogFragment
@@ -116,26 +117,7 @@ class MypageFragment(
                 dialog.setButtonClickListener(object :
                     MypageWithdrawalDialogFragment.OnButtonClickListener {
                     override fun onDialogPlanBtnOClicked() {
-                        // 연결 끊기
-                        UserApiClient.instance.unlink { error ->
-                            if (error != null) {
-                                showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
-                            } else {
-                                val editor = sharedPreferences.edit()
-                                editor.putString("SERVER_TOKEN_KEY", null)
-                                editor.putString("USER_NICKNAME", null)
-                                editor.apply()
-
-                                // 초기 화면으로 이동
-                                val intent = Intent(requireContext(), SplashActivity::class.java)
-                                // 이전에 존재하던 모든 acitivty 종료
-                                intent.flags =
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                startActivity(intent)
-
-                                showToast("회원 탈퇴를 성공했습니다.")
-                            }
-                        }
+                        userWithdrawalAPI()
                     }
 
                     override fun onDialogPlanBtnXClicked() {
@@ -181,16 +163,10 @@ class MypageFragment(
     override fun onResume() {
         super.onResume()
         isPause = false
-
-        Log.e("TEST", "onResume")
-
-        if (isSearching) {
-            Log.e("TEST", "isSearching=true")
+        if (isSearching)
             otherUserPageAPI()
-        } else {
+        else
             myPageAPI()
-            Log.e("TEST", "isSearching=false")
-        }
     }
 
     override fun onPause() {
@@ -364,6 +340,78 @@ class MypageFragment(
                 override fun onFailure(call: Call<UserPageResponse>, t: Throwable) {
                     // 네트워크 연결 실패 등 호출 실패 시 처리 로직
                     Log.e("MYPAGE INFO", "[MYPAGE INFO OTHER] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                }
+            })
+    }
+
+    private fun userWithdrawalAPI() {
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val myPageService = retrofit.create(MyPageService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        myPageService.userDelete(token = accessToken)
+            .enqueue(object : Callback<UserDeleteResponse> {
+                override fun onResponse(
+                    call: Call<UserDeleteResponse>,
+                    response: Response<UserDeleteResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val myPageResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (myPageResponse?.isSuccess == true && myPageResponse.code == 1000) {
+                            // 연결 끊기
+                            UserApiClient.instance.unlink { error ->
+                                if (error != null) {
+                                    showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
+                                } else {
+                                    val editor = sharedPreferences.edit()
+                                    editor.putString("SERVER_TOKEN_KEY", null)
+                                    editor.putString("USER_NICKNAME", null)
+                                    editor.apply()
+
+                                    // 초기 화면으로 이동
+                                    val intent =
+                                        Intent(requireContext(), SplashActivity::class.java)
+                                    // 이전에 존재하던 모든 acitivty 종료
+                                    intent.flags =
+                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    startActivity(intent)
+
+                                    showToast("회원 탈퇴를 성공했습니다.")
+                                }
+                            }
+                        } else {
+                            // 응답 에러 코드 분류
+                            myPageResponse?.let {
+                                context?.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "MYPAGE",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+                            showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
+                        }
+                    } else {
+                        Log.e(
+                            "MYPAGE",
+                            "[MYPAGE DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        showToast("회원 탈퇴를 실패했습니다. 다시 시도해주세요.")
+                    }
+                }
+
+                override fun onFailure(call: Call<UserDeleteResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("MYPAGE", "[MYPAGE DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
                 }
             })
     }

@@ -37,6 +37,8 @@ import com.example.savvy_android.diary.service.DiaryService
 import com.example.savvy_android.init.MainActivity
 import com.example.savvy_android.init.data.image.MultipleImageResponse
 import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.plan.data.remove.ServerDefaultResponse
+import com.example.savvy_android.plan.service.PlanListService
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -103,7 +105,7 @@ class DiaryMake4Activity : AppCompatActivity() {
 
         // < 클릭 이벤트
         binding.arrowLeftBtn.setOnClickListener {
-            finish()
+            planRemoveAPI(planId = plannerId.toString())
         }
 
         // 하나의 text에서 특정 글자 색 바꾸기
@@ -332,6 +334,71 @@ class DiaryMake4Activity : AppCompatActivity() {
                         "[DIARY MAKE4] API 호출 실패 - 네트워크 연결 실패: ${t.message}"
                     )
                     showToast("다이어리 작성을 실패했습니다")
+                }
+            })
+    }
+
+    // 다이어리 삭제 API
+    private fun planRemoveAPI(planId: String) {
+        sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+
+        // 서버 주소
+        val serverAddress = getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val planListService = retrofit.create(PlanListService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        // Delete 요청
+        planListService.planDelete(
+            token = accessToken,
+            plannerId = planId,
+            plannerType = "0"
+        )
+            .enqueue(object : Callback<ServerDefaultResponse> {
+                override fun onResponse(
+                    call: Call<ServerDefaultResponse>,
+                    response: Response<ServerDefaultResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val deleteResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (deleteResponse?.isSuccess == true) {
+                            // 삭제 성공 시 토스트 메시지 표시
+                            finish()
+                        } else {
+                            // 응답 에러 코드 분류
+                            deleteResponse?.let {
+                                errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "PLAN",
+                                    detailType = "DELETE",
+                                    intentData = null
+                                )
+                            }
+                            // 삭제 실패 시 토스트 메시지 표시
+                            showToast("다시 시도해주세요.")
+                        }
+                    } else {
+                        Log.e(
+                            "PLAN",
+                            "[PLAN DELETE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        // 삭제 실패 시 토스트 메시지 표시
+                        showToast("다시 시도해주세요.")
+                    }
+                }
+
+                override fun onFailure(call: Call<ServerDefaultResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("PLAN", "[PLAN DELETE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    // 삭제 실패 시 토스트 메시지 표시
+                    showToast("다시 시도해주세요.")
                 }
             })
     }

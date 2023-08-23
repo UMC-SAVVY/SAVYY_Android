@@ -11,15 +11,15 @@
 
     <!--카드뷰 내부-->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/item_diary_in"
+        android:id="@+id/item_diary_like_in"
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:background="@color/white">
 
         <!--이중 레이어-->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/item_diary_double"
-            android:layout_width="124dp"
+            android:id="@+id/item_diary_like_double"
+            android:layout_width="100dp"
             android:layout_height="62dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -27,108 +27,51 @@
 
             <!--숨겨진 레이어-->
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/item_diary_hide_o"
+                android:id="@+id/item_diary_like_hide_o"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@color/red"
+                android:clickable="false"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <!-- 숨겨진 레이어 비공개 결정 부분-->
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/item_diary_hide_o_show"
-                    android:layout_width="62dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/green"
-                    android:clickable="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
+                    <ImageView
+                        android:id="@+id/item_diary_like_delete_iv"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:background="@drawable/ic_heart_broken"
+                        android:backgroundTint="@color/white"
+                        android:importantForAccessibility="no"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <ImageView
-                            android:id="@+id/item_diary_show_iv"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:background="@drawable/ic_eye_on"
-                            android:backgroundTint="@color/white"
-                            android:importantForAccessibility="no"
-                            android:scaleType="centerCrop"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:id="@+id/item_diary_show_tv"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/pretendard_bold"
-                            android:text="공개"
-                            android:textColor="@color/white"
-                            android:textSize="13sp"
-                            app:layout_constraintEnd_toEndOf="@id/item_diary_show_iv"
-                            app:layout_constraintStart_toStartOf="@id/item_diary_show_iv"
-                            app:layout_constraintTop_toBottomOf="@id/item_diary_show_iv" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_bold"
+                        android:text="좋아요 해제"
+                        android:textColor="@color/white"
+                        android:textSize="13sp"
+                        app:layout_constraintEnd_toEndOf="@id/item_diary_like_delete_iv"
+                        app:layout_constraintStart_toStartOf="@id/item_diary_like_delete_iv"
+                        app:layout_constraintTop_toBottomOf="@id/item_diary_like_delete_iv" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- 숨겨진 레이어 삭제 부분-->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/item_diary_hide_o_delete"
-                    android:layout_width="62dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/red"
-                    android:clickable="false"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
-
-                        <ImageView
-                            android:id="@+id/item_diary_delete_iv"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:background="@drawable/ic_delete"
-                            android:backgroundTint="@color/white"
-                            android:importantForAccessibility="no"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/pretendard_bold"
-                            android:text="삭제"
-                            android:textColor="@color/white"
-                            android:textSize="13sp"
-                            app:layout_constraintEnd_toEndOf="@id/item_diary_delete_iv"
-                            app:layout_constraintStart_toStartOf="@id/item_diary_delete_iv"
-                            app:layout_constraintTop_toBottomOf="@id/item_diary_delete_iv" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
             <!-- 보이는 레이어 -->
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/item_diary_hide_x"
+                android:id="@+id/item_diary_like_hide_x"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/white"
@@ -138,7 +81,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:id="@+id/item_diary_arrow"
+                    android:id="@+id/item_diary_like_arrow"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:layout_marginEnd="2dp"
@@ -149,17 +92,17 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/item_diary_photo_cv"
+                    android:id="@+id/item_diary_like_photo_cv"
                     android:layout_width="62dp"
                     android:layout_height="match_parent"
                     android:elevation="0dp"
                     app:cardBackgroundColor="@color/white"
                     app:cardCornerRadius="10dp"
                     app:cardUseCompatPadding="true"
-                    app:layout_constraintEnd_toStartOf="@id/item_diary_arrow">
+                    app:layout_constraintEnd_toStartOf="@id/item_diary_like_arrow">
 
                     <ImageView
-                        android:id="@+id/item_diary_photo_iv"
+                        android:id="@+id/item_diary_like_photo_iv"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:importantForAccessibility="no"
@@ -167,7 +110,7 @@
                         android:src="@drawable/ic_heart" />
 
                     <TextView
-                        android:id="@+id/item_diary_photo_tv"
+                        android:id="@+id/item_diary_like_photo_tv"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@color/gray50"
@@ -184,12 +127,12 @@
 
         <!--항상 보이는 데이터-->
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/item_diary_always_layout"
+            android:id="@+id/item_diary_like_always_layout"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:background="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/item_diary_double"
+            app:layout_constraintEnd_toStartOf="@id/item_diary_like_double"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -204,7 +147,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
-                    android:id="@+id/item_diary_title"
+                    android:id="@+id/item_diary_like_title"
                     android:layout_width="wrap_content"
                     android:layout_height="26dp"
                     android:layout_marginStart="11dp"
@@ -218,7 +161,7 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/item_diary_date"
+                    android:id="@+id/item_diary_like_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
@@ -228,22 +171,22 @@
                     android:textAlignment="center"
                     android:textColor="@color/icon"
                     android:textSize="13sp"
-                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_comment_tv"
-                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_comment_tv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_like_iv" />
 
                 <ImageView
-                    android:id="@+id/item_diary_like_iv"
+                    android:id="@+id/item_diary_like_like_iv"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginTop="4dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_heart"
-                    app:layout_constraintStart_toStartOf="@id/item_diary_title"
-                    app:layout_constraintTop_toBottomOf="@id/item_diary_title" />
+                    app:layout_constraintStart_toStartOf="@id/item_diary_like_title"
+                    app:layout_constraintTop_toBottomOf="@id/item_diary_like_title" />
 
                 <TextView
-                    android:id="@+id/item_diary_like_tv"
+                    android:id="@+id/item_diary_like_like_tv"
                     android:layout_width="25dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
@@ -252,23 +195,23 @@
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="13sp"
-                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_like_iv"
-                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_like_iv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_like_iv" />
 
                 <ImageView
-                    android:id="@+id/item_diary_comment_iv"
+                    android:id="@+id/item_diary_like_comment_iv"
                     android:layout_width="15dp"
                     android:layout_height="15dp"
                     android:layout_marginStart="3dp"
                     android:importantForAccessibility="no"
                     android:src="@drawable/ic_message"
-                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_like_tv"
-                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_like_tv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_like_iv" />
 
                 <TextView
-                    android:id="@+id/item_diary_comment_tv"
+                    android:id="@+id/item_diary_like_comment_tv"
                     android:layout_width="25dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="3dp"
@@ -277,9 +220,9 @@
                     android:textAlignment="center"
                     android:textColor="@color/black"
                     android:textSize="13sp"
-                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_iv"
-                    app:layout_constraintStart_toEndOf="@id/item_diary_comment_iv"
-                    app:layout_constraintTop_toTopOf="@id/item_diary_like_iv" />
+                    app:layout_constraintBottom_toBottomOf="@id/item_diary_like_like_iv"
+                    app:layout_constraintStart_toEndOf="@id/item_diary_like_comment_iv"
+                    app:layout_constraintTop_toTopOf="@id/item_diary_like_like_iv" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>

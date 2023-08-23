@@ -1,5 +1,7 @@
 package com.example.savvy_android.myPage.service
 
+import com.example.savvy_android.diary.data.list.DiaryListResponse
+import com.example.savvy_android.myPage.data.UserDeleteResponse
 import com.example.savvy_android.myPage.data.UserDiaryResponse
 import com.example.savvy_android.myPage.data.UserPageResponse
 import com.example.savvy_android.myPage.data.UserPlannerResponse
@@ -42,4 +44,16 @@ interface MyPageService {
         @Header("Authorization") token: String,
         @Query("userId") userId: Int,
     ): Call<UserPlannerResponse>
+
+    @GET("user/delete")
+    fun userDelete(
+        @Header("Authorization") token: String,
+    ): Call<UserDeleteResponse>
+
+    @GET("user/mypage/like")
+    fun likeDiary(
+        @Header("Authorization") token: String,
+    ): Call<DiaryListResponse>
+
+
 }
