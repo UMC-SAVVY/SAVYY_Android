@@ -38,6 +38,7 @@
             android:fontFamily="@font/pretendard_medium"
             android:hint="@string/plz_enter_search"
             android:importantForAutofill="no"
+            android:maxLength="15"
             android:singleLine="true"
             android:textColor="@color/black"
             android:textColorHint="@color/icon"
