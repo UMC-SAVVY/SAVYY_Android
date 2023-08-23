@@ -11,6 +11,7 @@ import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ActivityMypageBlockBinding
 import com.example.savvy_android.init.errorCodeList
 import com.example.savvy_android.myPage.adapter.MypageBlockAdapter
+import com.example.savvy_android.myPage.data.BlockReleaseResponse
 import com.example.savvy_android.myPage.data.MyPageBlockResponse
 import com.example.savvy_android.myPage.data.MyPageBlockResult
 import com.example.savvy_android.myPage.service.BlockService
@@ -42,7 +43,7 @@ class MypageBlockActivity : AppCompatActivity() {
             finish()
         }
         // SearchNewPlace Data & Adapter
-        blockAdapter = MypageBlockAdapter(blockData)
+        blockAdapter = MypageBlockAdapter(this, blockData)
         binding.storageRecycle.adapter = blockAdapter
     }
 
@@ -54,6 +55,7 @@ class MypageBlockActivity : AppCompatActivity() {
         blockListAPI()
     }
 
+    // 차단 목록 API
     private fun blockListAPI() {
         // 서버 주소
         val serverAddress = getString(R.string.serverAddress)

@@ -1,15 +1,28 @@
 package com.example.savvy_android.myPage.adapter
 
+import android.content.Context
+import android.content.SharedPreferences
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.savvy_android.R
 import com.example.savvy_android.databinding.ItemBlockBinding
 import com.example.savvy_android.databinding.LayoutToastBinding
+import com.example.savvy_android.init.errorCodeList
+import com.example.savvy_android.myPage.data.BlockReleaseResponse
 import com.example.savvy_android.myPage.data.MyPageBlockResult
+import com.example.savvy_android.myPage.service.BlockService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MypageBlockAdapter(
+    private val context: Context,
     private var blockList: ArrayList<MyPageBlockResult>,
 ) :
     RecyclerView.Adapter<MypageBlockAdapter.MypageBlockViewHolder>() {
@@ -50,6 +63,10 @@ class MypageBlockAdapter(
 
             toast.show()
         }
+
+        holder.itemView.setOnClickListener {
+            releaseBlockAPI(blockList[position].blocked_user)
+        }
     }
 
     // 리스트의 수 count
@@ -64,5 +81,73 @@ class MypageBlockAdapter(
     fun clearList() {
         blockList.clear() // 데이터 리스트를 비움
         notifyDataSetChanged() // 어댑터에 변경 사항을 알려서 리사이클뷰를 갱신
+    }
+
+    // 차단 목록 API
+    private fun releaseBlockAPI(userId: Int) {
+        // 서버 주소
+        val sharedPreferences: SharedPreferences =
+            context.getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)!!
+        // 서버 주소
+        val serverAddress = context.getString(R.string.serverAddress)
+        val retrofit = Retrofit.Builder()
+            .baseUrl(serverAddress)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        // API interface instance 생성
+        val blockService = retrofit.create(BlockService::class.java)
+        val accessToken = sharedPreferences.getString("SERVER_TOKEN_KEY", null)!!
+
+        blockService.blockRelease(token = accessToken, userId = userId)
+            .enqueue(object : Callback<BlockReleaseResponse> {
+                override fun onResponse(
+                    call: Call<BlockReleaseResponse>,
+                    response: Response<BlockReleaseResponse>,
+                ) {
+                    if (response.isSuccessful) {
+                        val blockResponse = response.body()
+                        // 서버 응답 처리 로직 작성
+                        if (blockResponse?.isSuccess == true && blockResponse.code == 1000) {
+                            showToast("차단 해제를 성공했습니다.")
+                        } else {
+                            // 응답 에러 코드 분류
+                            blockResponse?.let {
+                                context.errorCodeList(
+                                    errorCode = it.code,
+                                    message = it.message,
+                                    type = "BLOCK",
+                                    detailType = "RELEASE",
+                                    intentData = null
+                                )
+                            }
+                            showToast("차단 해제를 실패했습니다.")
+                        }
+                    } else {
+                        Log.e(
+                            "BLOCK",
+                            "[BLOCK RELEASE] API 호출 실패 - 응답 코드: ${response.code()}"
+                        )
+                        showToast("차단 해제를 실패했습니다.")
+                    }
+                }
+
+                override fun onFailure(call: Call<BlockReleaseResponse>, t: Throwable) {
+                    // 네트워크 연결 실패 등 호출 실패 시 처리 로직
+                    Log.e("BLOCK", "[BLOCK RELEASE] API 호출 실패 - 네트워크 연결 실패: ${t.message}")
+                    showToast("차단 해제를 실패했습니다.")
+                }
+            })
+    }
+
+    // 토스트 메시지 표시 함수 추가
+    private fun showToast(message: String) {
+        val toastBinding = LayoutToastBinding.inflate(LayoutInflater.from(context))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(context)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
     }
 }
