@@ -42,7 +42,7 @@ class DiaryCommentActivity : AppCompatActivity(),
     private lateinit var binding: ActivityDiaryCommentBinding
     private lateinit var commentAdapter: CommentAdapter
     private var diaryID: Int = 0
-    private var isMine: Boolean = true // 댓글이 본인것인지 판단
+//    private var isMine: Boolean = true // 댓글이 본인것인지 판단
     private lateinit var nickname: String
     private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
 
@@ -106,135 +106,169 @@ class DiaryCommentActivity : AppCompatActivity(),
 
     // OnOptionClickListener 인터페이스의 onOptionClick 메서드 구현
     override fun onOptionClick(position: Int) {
-        if(isMine){
-            val bottomSheet = BottomSheetDialogFragment()
-            bottomSheet.setButtonClickListener(object : BottomSheetDialogFragment.OnButtonClickListener {
+        val clickedItem = commentAdapter.getItem(position)
 
-                // 수정하기
-                override fun onDialogEditClicked() {
-                    val dialog = CommentModifyDialogFragment()
-                    dialog.setButtonClickListener(object : CommentModifyDialogFragment.OnButtonClickListener {
+        if (clickedItem != null) {
+            if (clickedItem is CommentResult) {
 
-                        // 수정하기 버튼 클릭 시
-                        override fun onDialogModifyBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
-                            commentAdapter.showCommentEditText(position)
+                val isCommentMine = nickname == clickedItem.nickname
 
+                if (isCommentMine) {
+                    val bottomSheet = BottomSheetDialogFragment()
+                    bottomSheet.setButtonClickListener(object :
+                        BottomSheetDialogFragment.OnButtonClickListener {
+
+                        // 수정하기
+                        override fun onDialogEditClicked() {
+                            val dialog = CommentModifyDialogFragment()
+                            dialog.setButtonClickListener(object :
+                                CommentModifyDialogFragment.OnButtonClickListener {
+
+                                // 수정하기 버튼 클릭 시
+                                override fun onDialogModifyBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                    commentAdapter.showCommentEditText(position)
+
+                                }
+
+                                // 취소하기 버튼 클릭 시
+                                override fun onDialogCancelBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                }
+                            })
+                            dialog.show(supportFragmentManager, "CommentModifyDialog")
                         }
 
-                        // 취소하기 버튼 클릭 시
-                        override fun onDialogCancelBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
+                        // 삭제하기
+                        override fun onDialogDeleteClicked() {
+                            val dialog = CommentDeleteDialogFragment()
+                            dialog.setButtonClickListener(object :
+                                CommentDeleteDialogFragment.OnButtonClickListener {
+
+                                // 삭제하기 버튼 클릭 시
+                                override fun onDialogDeleteBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                    commentAdapter.removeCommentAtPosition(position)
+                                }
+
+                                // 취소하기 버튼 클릭 시D
+                                override fun onDialogCancelBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                }
+                            })
+                            dialog.show(supportFragmentManager, "CommentModifyDialog")
                         }
                     })
-                    dialog.show(supportFragmentManager, "CommentModifyDialog")
-                }
-
-                // 삭제하기
-                override fun onDialogDeleteClicked() {
-                    val dialog = CommentDeleteDialogFragment()
-                    dialog.setButtonClickListener(object : CommentDeleteDialogFragment.OnButtonClickListener {
-
-                        // 삭제하기 버튼 클릭 시
-                        override fun onDialogDeleteBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
-                            commentAdapter.removeCommentAtPosition(position)
-                        }
-
-                        // 취소하기 버튼 클릭 시D
-                        override fun onDialogCancelBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
+                    bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
+                } else {
+                    // 옵션 관련 (다른사람이 작성한 댓글)
+                    val bottomSheetOther = BottomSheetOtherDialogFragment()
+                    bottomSheetOther.setButtonClickListener(object :
+                        BottomSheetOtherDialogFragment.OnButtonClickListener {
+                        override fun onDialogReportClicked() {
+                            val clickedItem = commentAdapter.getItem(position)
+                            if (clickedItem is CommentResult) {
+                                val intent =
+                                    Intent(this@DiaryCommentActivity, ReportActivity::class.java)
+                                intent.putExtra(
+                                    "commentID",
+                                    clickedItem.id
+                                ) // comment_id를 intent에 추가
+                                startActivity(intent)
+                            }
                         }
                     })
-                    dialog.show(supportFragmentManager, "CommentModifyDialog")
+                    bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
                 }
-            })
-            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
+            }
         }
-
-        else{
-            // 옵션 관련 (다른사람이 작성한 댓글)
-            val bottomSheetOther = BottomSheetOtherDialogFragment()
-            bottomSheetOther.setButtonClickListener(object :
-                BottomSheetOtherDialogFragment.OnButtonClickListener {
-                override fun onDialogReportClicked() {
-                    val clickedItem = commentAdapter.getItem(position)
-                    if (clickedItem is CommentResult) {
-                        val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-                        intent.putExtra("commentID", clickedItem.id) // comment_id를 intent에 추가
-                        startActivity(intent)
-                    }
-                }
-            })
-            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
-        }
-
     }
 
     override fun onNestedOptionClick(commentPosition: Int, nestedCommentPosition: Int) {
         val commentAdapter = binding.recyclerviewComment.adapter as CommentAdapter
+        val nestedCommentItem = commentAdapter.getNestedCommentItem(commentPosition, nestedCommentPosition)
 
-        if(isMine){
-            val bottomSheet = BottomSheetDialogFragment()
-            bottomSheet.setButtonClickListener(object : BottomSheetDialogFragment.OnButtonClickListener {
-                // 수정하기
-                override fun onDialogEditClicked() {
-                    val dialog = CommentModifyDialogFragment()
-                    dialog.setButtonClickListener(object : CommentModifyDialogFragment.OnButtonClickListener {
+        if (nestedCommentItem != null) {
+            if (nestedCommentItem is NestedCommentResult) {
+                val isNestedCommentMine = nickname == nestedCommentItem.nickname
 
-                        // 수정하기 버튼 클릭 시
-                        override fun onDialogModifyBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
-                            commentAdapter.showNestedCommentEditText(commentPosition, nestedCommentPosition)
+                if (isNestedCommentMine) {
+                    val bottomSheet = BottomSheetDialogFragment()
+                    bottomSheet.setButtonClickListener(object :
+                        BottomSheetDialogFragment.OnButtonClickListener {
+                        // 수정하기
+                        override fun onDialogEditClicked() {
+                            val dialog = CommentModifyDialogFragment()
+                            dialog.setButtonClickListener(object :
+                                CommentModifyDialogFragment.OnButtonClickListener {
+
+                                // 수정하기 버튼 클릭 시
+                                override fun onDialogModifyBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                    commentAdapter.showNestedCommentEditText(
+                                        commentPosition,
+                                        nestedCommentPosition
+                                    )
+                                }
+
+                                // 취소하기 버튼 클릭 시
+                                override fun onDialogCancelBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                }
+                            })
+                            dialog.show(supportFragmentManager, "CommentModifyDialog")
                         }
 
-                        // 취소하기 버튼 클릭 시
-                        override fun onDialogCancelBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
+                        // 삭제하기
+                        override fun onDialogDeleteClicked() {
+                            val dialog = CommentDeleteDialogFragment()
+                            dialog.setButtonClickListener(object :
+                                CommentDeleteDialogFragment.OnButtonClickListener {
+                                // 삭제하기 버튼 클릭 시
+                                override fun onDialogDeleteBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                    commentAdapter.removeNestedComment(
+                                        commentPosition,
+                                        nestedCommentPosition
+                                    )
+                                }
+
+                                // 취소하기 버튼 클릭 시
+                                override fun onDialogCancelBtnClicked() {
+                                    dialog.dismiss() // 다이얼로그 닫기
+                                }
+                            })
+                            dialog.show(supportFragmentManager, "CommentModifyDialog")
                         }
                     })
-                    dialog.show(supportFragmentManager, "CommentModifyDialog")
-                }
-
-                // 삭제하기
-                override fun onDialogDeleteClicked() {
-                    val dialog = CommentDeleteDialogFragment()
-                    dialog.setButtonClickListener(object : CommentDeleteDialogFragment.OnButtonClickListener {
-                        // 삭제하기 버튼 클릭 시
-                        override fun onDialogDeleteBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
-                            commentAdapter.removeNestedComment(commentPosition, nestedCommentPosition)
-                        }
-
-                        // 취소하기 버튼 클릭 시
-                        override fun onDialogCancelBtnClicked() {
-                            dialog.dismiss() // 다이얼로그 닫기
-                        }
-                    })
-                    dialog.show(supportFragmentManager, "CommentModifyDialog")
-                }
-            })
-            bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
-        }
-        else{
-            // 옵션 관련 (다른사람이 작성한 댓글)
-            val bottomSheetOther = BottomSheetOtherDialogFragment()
-            bottomSheetOther.setButtonClickListener(object :
-                BottomSheetOtherDialogFragment.OnButtonClickListener {
-                override fun onDialogReportClicked() {
-                    val nestedCommentItem = commentAdapter.getNestedCommentItem(commentPosition, nestedCommentPosition)
-                    if (nestedCommentItem is NestedCommentResult) {
-                        val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
-                        intent.putExtra("nestedCommentID", nestedCommentItem.id) // id를 intent에 추가
-                        startActivity(intent)
-                    }
+                    bottomSheet.show(supportFragmentManager, "BottomSheetDialogFragment")
+                } else {
+                    // 옵션 관련 (다른사람이 작성한 댓글)
+                    val bottomSheetOther = BottomSheetOtherDialogFragment()
+                    bottomSheetOther.setButtonClickListener(object :
+                        BottomSheetOtherDialogFragment.OnButtonClickListener {
+                        override fun onDialogReportClicked() {
+                            val nestedCommentItem = commentAdapter.getNestedCommentItem(
+                                commentPosition,
+                                nestedCommentPosition
+                            )
+                            if (nestedCommentItem is NestedCommentResult) {
+                                val intent =
+                                    Intent(this@DiaryCommentActivity, ReportActivity::class.java)
+                                intent.putExtra(
+                                    "nestedCommentID",
+                                    nestedCommentItem.id
+                                ) // id를 intent에 추가
+                                startActivity(intent)
+                            }
 //                    val intent = Intent(this@DiaryCommentActivity, ReportActivity::class.java)
 //                    startActivity(intent)
+                        }
+                    })
+                    bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
                 }
-            })
-            bottomSheetOther.show(supportFragmentManager, "BottomSheetOtherDialogFragment")
+            }
         }
-
     }
 
     private fun btnStateBackground(able: Boolean, button: AppCompatButton) {
@@ -276,8 +310,8 @@ class DiaryCommentActivity : AppCompatActivity(),
                         commentAdapter.clearItems() // 댓글 목록 초기화
                         commentAdapter.addAllItems(commentCheckResult) // 새로운 댓글 목록 추가
 
-                        if(!commentCheckResult.isNullOrEmpty())
-                            isMine = nickname == commentCheckResult[0].nickname
+//                        if(!commentCheckResult.isNullOrEmpty())
+//                            isMine = nickname == commentCheckResult[0].nickname
 
                         Log.d("test", "diaryID: $diaryID")
 

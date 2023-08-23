@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -87,11 +88,11 @@ class PlanModifyActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 val textLength = s?.length ?: 0
 
-                //한글자라도 입력하면 '완료'버튼의 색이 바뀜
+                // 한글자라도 입력하면 '완료' 버튼의 색이 바뀜
                 if (textLength > 0) {
                     binding.modifyCompletionBtn.setTextColor(Color.parseColor("#FF5487"))
                 } else {
-                    binding.titleEdit.setTextColor(Color.parseColor("#5F5F5F"))
+                    binding.modifyCompletionBtn.setTextColor(Color.parseColor("#5F5F5F"))
                 }
             }
         })
@@ -133,6 +134,8 @@ class PlanModifyActivity : AppCompatActivity() {
                     }
                 })
                 dialog.show(supportFragmentManager, "modifySaveDialog")
+            }else{
+                showToast("제목을 입력해주세요")
             }
         }
         planDetailAPI(planID, binding)
@@ -263,5 +266,18 @@ class PlanModifyActivity : AppCompatActivity() {
             memoText = updatedMemoText ?: ""
         }
     }
+
+    // 토스트 메시지
+    private fun showToast(message: String) {
+        val toastBinding =
+            LayoutToastBinding.inflate(LayoutInflater.from(this@PlanModifyActivity))
+        toastBinding.toastMessage.text = message
+        val toast = Toast(this@PlanModifyActivity)
+        toast.view = toastBinding.root
+        toast.setGravity(Gravity.TOP, 0, 145)  //toast 위치 설정
+        toast.duration = Toast.LENGTH_SHORT
+        toast.show()
+    }
+
 
 }

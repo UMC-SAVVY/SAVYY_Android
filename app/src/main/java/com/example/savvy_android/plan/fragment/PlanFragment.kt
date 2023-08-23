@@ -89,6 +89,7 @@ class PlanFragment : Fragment() {
                 binding.planRecycle,
                 nickname,
                 requireActivity().supportFragmentManager,
+                true,
                 true
             )
         binding.planRecycle.adapter = planListAdapter

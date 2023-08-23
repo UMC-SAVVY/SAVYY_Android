@@ -40,6 +40,7 @@ class PlanDetailActivity : AppCompatActivity() {
     private lateinit var viewDateAdapter: DetailDateAdapter
     private lateinit var sharedPreferences: SharedPreferences // sharedPreferences 변수 정의
     private var isMine: Boolean = true // 여행계획서가 본인것인지 판단
+    private var visibleOption : Boolean = true // 연결 페이지 구분 (true: option visible<수정 및 삭제 가능>, false: option gone<수정 및 삭제 불가능>)
     private lateinit var nickname: String
     private var planID: Int = 0
 
@@ -55,6 +56,13 @@ class PlanDetailActivity : AppCompatActivity() {
         sharedPreferences = getSharedPreferences("SAVVY_SHARED_PREFS", Context.MODE_PRIVATE)
         nickname = sharedPreferences.getString("USER_NICKNAME", null)!!
 
+        // 여행계획서 리스트에서 접근 / 다이어리에서 접근에 따라 option버튼 처리
+        visibleOption = intent.getBooleanExtra("visibleOption", false)
+        if (visibleOption) { // 여행 계획서 리스트에서 연결한 경우 (수정 및 삭제 가능)
+            binding.optionBtn.visibility = View.VISIBLE
+        } else { // 다이어리에서 연결한 경우 (수정 및 삭제 불가능)
+            binding.optionBtn.visibility = View.GONE
+        }
 
         planID = intent.getIntExtra("planID", 0)
 
